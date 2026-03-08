@@ -4,7 +4,6 @@ import random
 import sys
 import os
 
-# Memastikan jalur impor benar jika dijalankan dari root 'backend'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from src.config import (
@@ -13,44 +12,46 @@ from src.config import (
 )
 from src.acquisition.cortex_client import CortexClient
 
+SYLLABLE_MAP = {
+    "Makan": ("MA", "KAN"),
+    "Minum": ("MI", "NUM"),
+    "Berak": ("BE", "RAK"),
+    "Pipis": ("PI", "PIS"),
+    "Mandi": ("MAN", "DI"),
+    "Bosan": ("BO", "SAN"),
+    "Lelah": ("LE", "LAH"),
+    "Sakit": ("SA", "KIT"),
+    "Tidur": ("TI", "DUR"),
+    "Sayang": ("SA", "YANG")
+}
+
 class ExperimentRunner:
     def __init__(self):
-        # 1. Inisialisasi Pygame (Visual & Audio)
         pygame.init()
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
         pygame.display.set_caption("Neurandiar BCI - Data Acquisition")
-        self.font_large = pygame.font.SysFont("arial", 72, bold=True)
-        self.font_small = pygame.font.SysFont("arial", 36)
         
-        # Load Audio (Pastikan file ini ada di folder assets/)
+        self.font_large = pygame.font.SysFont("arial", 70, bold=True) 
+        self.font_medium = pygame.font.SysFont("arial", 48, bold=True)
+        self.font_small = pygame.font.SysFont("arial", 30)
+        self.font_tracker = pygame.font.SysFont("arial", 20)
+        
         try:
             self.sound_bip = pygame.mixer.Sound(os.path.join("assets", "bip.wav"))
             self.sound_double_bip = pygame.mixer.Sound(os.path.join("assets", "double_bip.wav"))
         except:
-            print("[!] Peringatan: File audio bip.wav atau double_bip.wav tidak ditemukan di folder assets/")
-            print("[!] Eksperimen akan berjalan tanpa suara jika diteruskan.")
+            print("[!] Peringatan: File audio tidak ditemukan di assets/")
             self.sound_bip = None
             self.sound_double_bip = None
 
-        # 2. Inisialisasi Emotiv Cortex ini perlu dihubungkan dulu ke EmotivPro Launcher 
         self.cortex = CortexClient()
-
-    def draw_text(self, text, y_offset=0, size="large"):
-        """Menampilkan teks di tengah layar"""
-        self.screen.fill(BG_COLOR)
-        font = self.font_large if size == "large" else self.font_small
-        text_surface = font.render(text, True, TEXT_COLOR) 
-        text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + y_offset))
-        self.screen.blit(text_surface, text_rect)
-        pygame.display.flip()
 
     def play_sound(self, sound_obj):
         if sound_obj:
             sound_obj.play()
 
     def wait_for_space(self):
-        """Menunggu instruksi dari operator (tombol Spasi)"""
         waiting = True
         while waiting:
             for event in pygame.event.get():
@@ -61,72 +62,99 @@ class ExperimentRunner:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
 
-    def run_trial(self, word, trial_number, phase_name):
-        """Menjalankan protokol sinkron 12-detik untuk satu kata"""
-        # Tanda Visual (t=0 s) - Menampilkan kata target
-        self.draw_text(word.upper())
+    def draw_trial_screen(self, main_text, size="large", tracker_info=None):
+        self.screen.fill(BG_COLOR)
         
-        # Jeda 1 detik agar subjek membaca kata sebelum bip pertama
+        if main_text:
+            font = self.font_large if size == "large" else self.font_small
+            text_surface = font.render(main_text, True, TEXT_COLOR) 
+            text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            self.screen.blit(text_surface, text_rect)
+        
+        if tracker_info:
+            tracker_surface = self.font_tracker.render(tracker_info, True, (100, 100, 100)) 
+            tracker_rect = tracker_surface.get_rect(bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
+            self.screen.blit(tracker_surface, tracker_rect)
+
+        pygame.display.flip()
+
+    def run_trial(self, word, trial_number, phase_name, block_number):
+        syl1, syl2 = SYLLABLE_MAP[word]
+        tracker_text = f"FASE: {phase_name.upper()}  |  BLOK: {block_number}/5  |  TRIAL: {trial_number}/100"
+
+        self.draw_trial_screen(word.upper(), tracker_info=tracker_text)
         time.sleep(1) 
 
         # --- SLOT 1 (t=0 - 5 s) ---
         self.play_sound(self.sound_bip)
-        # Inject Marker untuk Slot 1 (Value 1)
         self.cortex.inject_marker(marker_value=1, marker_label=f"{word}_slot1_{phase_name}")
+        print(f"[-] Berhasil Inject Marker Slot 1: {syl1.upper()}")
+        self.draw_trial_screen(syl1.upper(), tracker_info=tracker_text)
         time.sleep(SLOT_1_DURATION)
 
         # --- JEDA ANTAR SLOT (t=5 - 7 s) ---
-        self.draw_text("RELAX", size="small")
+        self.draw_trial_screen(None, tracker_info=tracker_text)
         time.sleep(PAUSE_DURATION)
 
         # --- SLOT 2 (t=7 - 12 s) ---
-        self.draw_text(word.upper())
         self.play_sound(self.sound_bip)
-        # Inject Marker untuk Slot 2 (Value 2)
         self.cortex.inject_marker(marker_value=2, marker_label=f"{word}_slot2_{phase_name}")
+        print(f"[-] Berhasil Inject Marker Slot 2: {syl2.upper()}")
+        self.draw_trial_screen(syl2.upper(), tracker_info=tracker_text)
         time.sleep(SLOT_2_DURATION)
 
         # Akhir Uji Coba
         self.play_sound(self.sound_double_bip)
-        self.draw_text("+", size="large") # Fixation cross
-        time.sleep(1) # Jeda singkat antar trial
+        self.draw_trial_screen(None, tracker_info=tracker_text)
+        time.sleep(1) 
 
     def start_experiment(self):
-        # Setup dan koneksi Emotiv
         self.cortex.setup()
 
-        # Menyiapkan urutan trial agar acak tapi seimbang (10 kata x 10 pengulangan)
         trials_per_phase = TRIALS_PER_SUBJECT // 2
         words_list = TARGET_WORDS * (trials_per_phase // len(TARGET_WORDS))
         
         phases = [
-            ("FASE 1: OVERT SPEECH (Diucapkan)", "overt"),
-            ("FASE 2: IMAGINED SPEECH (Dibayangkan)", "imagined")
+            ("FASE 1: OVERT SPEECH (Diucapkan)", "overt", "Instruksi: Ucapkan suku kata secara berulang-ulang dengan bersuara."),
+            ("FASE 2: IMAGINED SPEECH (Dibayangkan)", "imagined", "Instruksi: Bayangkan mengucapkan suku kata dalam pikiran TANPA menggerakkan bibir/rahang.")
         ]
 
-        for phase_title, phase_label in phases:
+        for phase_title, phase_label, phase_instruction in phases:
             random.shuffle(words_list)
             
-            self.draw_text(phase_title, y_offset=-50)
-            self.draw_text("Tekan SPASI untuk mulai...", y_offset=50, size="small")
+            self.screen.fill(BG_COLOR)
+            title_surf = self.font_medium.render(phase_title, True, TEXT_COLOR)
+            inst_surf = self.font_small.render(phase_instruction, True, (200, 200, 200))
+            start_surf = self.font_small.render("Tekan SPASI untuk mulai blok pertama...", True, (100, 255, 100))
+            
+            self.screen.blit(title_surf, title_surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 60)))
+            self.screen.blit(inst_surf, inst_surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 20)))
+            self.screen.blit(start_surf, start_surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 100)))
+            pygame.display.flip()
             self.wait_for_space()
 
             for i, word in enumerate(words_list):
-                # Mekanisme Istirahat per Blok (setiap 20 trial)
+                block_number = (i // BLOCK_SIZE) + 1
+                trial_number = i + 1
+
                 if i > 0 and i % BLOCK_SIZE == 0:
-                    self.draw_text("ISTIRAHAT SEJENAK", y_offset=-50)
-                    self.draw_text("Tekan SPASI untuk lanjut...", y_offset=50, size="small")
+                    self.screen.fill(BG_COLOR)
+                    break_surf = self.font_medium.render(f"ISTIRAHAT SEJENAK (Blok {block_number-1} Selesai)", True, TEXT_COLOR)
+                    cont_surf = self.font_small.render("Tekan SPASI untuk lanjut ke blok berikutnya...", True, TEXT_COLOR)
+                    self.screen.blit(break_surf, break_surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 40)))
+                    self.screen.blit(cont_surf, cont_surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 40)))
+                    pygame.display.flip()
                     self.wait_for_space()
 
-                # Cek event quit saat loop berjalan
                 pygame.event.pump() 
+                
+                print(f"\n[*] Menjalankan Trial {trial_number}/{trials_per_phase} (Blok {block_number}) - Kata: {word} (Fase {phase_label.capitalize()})")
+                self.run_trial(word, trial_number, phase_label, block_number)
 
-                print(f"[*] Menjalankan Trial {i+1}/{trials_per_phase} - Kata: {word} ({phase_label})")
-                self.run_trial(word, i+1, phase_label)
-
-        # Penutup
-        self.draw_text("EKSPERIMEN SELESAI. TERIMA KASIH!", y_offset=-50)
-        self.draw_text("Menyimpan data...", y_offset=50, size="small")
+        self.screen.fill(BG_COLOR)
+        end_surf = self.font_medium.render("EKSPERIMEN SELESAI. TERIMA KASIH!", True, TEXT_COLOR)
+        self.screen.blit(end_surf, end_surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)))
+        pygame.display.flip()
         time.sleep(3)
         self.cortex.close()
         pygame.quit()
