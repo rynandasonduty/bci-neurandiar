@@ -131,14 +131,14 @@ class CortexClient:
         # else:
         #     print(f"[MARKER] Marker {marker_value} ({marker_label}) berhasil disuntikkan pada {time_ms} ms")
 
-    def setup(self):
+    def setup(self, record_title="BCI_Neurandiar"):
         """Menjalankan seluruh alur inisialisasi Cortex"""
         self.connect()
         self.request_access()
         self.authorize()
         self.query_headset()
         self.create_session()
-        self.start_record() 
+        self.start_record(record_title=record_title)
 
     def close(self):
         """Menutup sesi perekaman dan koneksi Cortex secara aman"""
