@@ -86,29 +86,51 @@ class CortexClient:
         else:
             raise Exception(f"[-] Gagal Membuat Sesi: {res}")
 
+    # def start_record(self, record_title="BCI_Neurandiar"):
+    #     """Memulai penulisan data ke file Record di Emotiv"""
+    #     print(f"[*] Menyiapkan perekaman data (Record: {record_title})...")
+        
+    #     time.sleep(2) 
+        
+    #     res = self.send_request("updateSession", {
+    #         "cortexToken": self.auth_token,
+    #         "session": self.session_id,
+    #         "status": "startRecord",
+    #         "title": record_title,
+    #         "description": "Eksperimen BCI Imagined Speech",
+    #         "subjectName": "Responden",
+    #         "tags": ["bci", "eeg"]
+    #     })
+        
+    #     if 'error' in res:
+    #         print(f"\n[-] Peringatan API: {res['error']['message']}")
+    #         print("[!] KEMUNGKINAN LIMITASI AKUN GRATIS (BASIC TIER).")
+    #         print("[!] SOLUSI MANUAL: Biarkan program ini menyala.")
+    #         print("[!] Buka aplikasi Emotiv Launcher/EmotivPRO, cari sesi yang sedang aktif,")
+    #         print("[!] dan klik tombol 'RECORD' secara manual di aplikasi tersebut.")
+    #         print("[!] Setelah itu, kembali ke layar hitam dan tekan SPASI untuk mulai.\n")
+    #     else:
+    #         print(f"[+] Perekaman otomatis berhasil dimulai! Data sedang disimpan...")
+
     def start_record(self, record_title="BCI_Neurandiar"):
-        """Memulai penulisan data ke file Record di Emotiv"""
+        """Memulai penulisan data ke file Record di Emotiv dengan parameter minimal"""
         print(f"[*] Menyiapkan perekaman data (Record: {record_title})...")
         
+        # Jeda 2 detik agar sesi benar-benar stabil
         time.sleep(2) 
         
+        # HANYA mengirimkan parameter yang diwajibkan (tanpa description, tags, dll)
         res = self.send_request("updateSession", {
             "cortexToken": self.auth_token,
             "session": self.session_id,
             "status": "startRecord",
-            "title": record_title,
-            "description": "Eksperimen BCI Imagined Speech",
-            "subjectName": "Responden",
-            "tags": ["bci", "eeg"]
+            "title": record_title
         })
         
         if 'error' in res:
             print(f"\n[-] Peringatan API: {res['error']['message']}")
-            print("[!] KEMUNGKINAN LIMITASI AKUN GRATIS (BASIC TIER).")
-            print("[!] SOLUSI MANUAL: Biarkan program ini menyala.")
-            print("[!] Buka aplikasi Emotiv Launcher/EmotivPRO, cari sesi yang sedang aktif,")
-            print("[!] dan klik tombol 'RECORD' secara manual di aplikasi tersebut.")
-            print("[!] Setelah itu, kembali ke layar hitam dan tekan SPASI untuk mulai.\n")
+            print("[!] JIKA ERROR BERUBAH MENJADI 'LICENSE REQUIRED' atau semacamnya,")
+            print("[!] ITU BUKTI VALID BAHWA KODE KITA SUDAH BENAR, NAMUN DIBLOKIR PAYWALL LISENSI GRATIS.")
         else:
             print(f"[+] Perekaman otomatis berhasil dimulai! Data sedang disimpan...")
 

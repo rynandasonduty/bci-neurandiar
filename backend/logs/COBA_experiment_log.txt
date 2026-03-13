@@ -1,0 +1,24 @@
+[00:40:01] Sistem dimulai untuk subjek: COBA
+[00:40:07] === MEMULAI FASE 1: OVERT SPEECH ===
+[00:40:35] Menjalankan Trial 1/100 (Blok 1) - Kata: Pipis (Fase Overt)
+[00:40:36] Berhasil Inject Marker Slot 1: PI
+[00:40:43] Berhasil Inject Marker Slot 2: PIS
+[00:40:49] Menjalankan Trial 2/100 (Blok 1) - Kata: Makan (Fase Overt)
+[00:40:50] Berhasil Inject Marker Slot 1: MA
+[00:40:50] >>> JEDA DARURAT DIAKTIFKAN <<<
+[00:41:00] >>> MELANJUTKAN EKSPERIMEN <<<
+[00:41:02] Berhasil Inject Marker Slot 2: KAN
+[00:41:08] Menjalankan Trial 3/100 (Blok 1) - Kata: Makan (Fase Overt)
+[00:41:09] Berhasil Inject Marker Slot 1: MA
+[00:41:10] >>> JEDA DARURAT DIAKTIFKAN <<<
+[00:41:12] >>> MELANJUTKAN EKSPERIMEN <<<
+[00:41:16] Berhasil Inject Marker Slot 2: KAN
+[00:41:22] Menjalankan Trial 4/100 (Blok 1) - Kata: Pipis (Fase Overt)
+[00:41:22] >>> JEDA DARURAT DIAKTIFKAN <<<
+[00:41:26] >>> MELANJUTKAN EKSPERIMEN <<<
+[00:41:26] Berhasil Inject Marker Slot 1: PI
+[00:41:33] Berhasil Inject Marker Slot 2: PIS
+[00:41:39] Menjalankan Trial 5/100 (Blok 1) - Kata: Makan (Fase Overt)
+[00:41:40] Berhasil Inject Marker Slot 1: MA
+[00:41:47] Berhasil Inject Marker Slot 2: KAN
+[00:41:51] Eksperimen dihentikan paksa (ESC).

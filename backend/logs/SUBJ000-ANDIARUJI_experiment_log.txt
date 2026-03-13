@@ -1,0 +1,28 @@
+[00:07:57] Sistem dimulai untuk subjek: SUBJ000-ANDIARUJI
+[00:08:02] === MEMULAI FASE 1: OVERT SPEECH (Diucapkan) ===
+[00:08:22] Menjalankan Trial 1/100 (Blok 1) - Kata: Makan (Fase Overt)
+[00:08:23] Berhasil Inject Marker Slot 1: MA
+[00:08:30] Berhasil Inject Marker Slot 2: KAN
+[00:08:36] Menjalankan Trial 2/100 (Blok 1) - Kata: Lelah (Fase Overt)
+[00:08:37] Berhasil Inject Marker Slot 1: LE
+[00:08:44] Berhasil Inject Marker Slot 2: LAH
+[00:08:50] Menjalankan Trial 3/100 (Blok 1) - Kata: Tidur (Fase Overt)
+[00:08:51] Berhasil Inject Marker Slot 1: TI
+[00:08:58] Berhasil Inject Marker Slot 2: DUR
+[00:09:04] Menjalankan Trial 4/100 (Blok 1) - Kata: Berak (Fase Overt)
+[00:09:05] Berhasil Inject Marker Slot 1: BE
+[00:09:12] Berhasil Inject Marker Slot 2: RAK
+[00:09:18] Menjalankan Trial 5/100 (Blok 1) - Kata: Sakit (Fase Overt)
+[00:09:19] Berhasil Inject Marker Slot 1: SA
+[00:09:26] Berhasil Inject Marker Slot 2: KIT
+[00:09:32] Menjalankan Trial 6/100 (Blok 1) - Kata: Pipis (Fase Overt)
+[00:09:33] Berhasil Inject Marker Slot 1: PI
+[00:09:40] Berhasil Inject Marker Slot 2: PIS
+[00:09:47] Menjalankan Trial 7/100 (Blok 1) - Kata: Makan (Fase Overt)
+[00:09:48] Berhasil Inject Marker Slot 1: MA
+[00:09:55] Berhasil Inject Marker Slot 2: KAN
+[00:10:01] Menjalankan Trial 8/100 (Blok 1) - Kata: Bosan (Fase Overt)
+[00:10:02] Berhasil Inject Marker Slot 1: BO
+[00:10:09] Berhasil Inject Marker Slot 2: SAN
+[00:10:15] Menjalankan Trial 9/100 (Blok 1) - Kata: Minum (Fase Overt)
+[00:10:16] Berhasil Inject Marker Slot 1: MI
