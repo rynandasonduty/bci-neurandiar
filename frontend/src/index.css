@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+body {
+  background-color: #0f172a; /* Warna latar belakang biru gelap (slate-900) */
+  color: white;
+  font-family: 'Inter', sans-serif;
+}
