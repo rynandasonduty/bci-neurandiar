@@ -7,7 +7,7 @@ import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from tensorflow.keras.models import load_model
 from eegnet_model import EEGNetClassifier # Mengimpor class untuk mendapatkan struktur jika perlu
-from word_assembler import WORD_CLASSES, REVERSE_WORD_CLASSES
+from logreg_model import WORD_CLASSES, REVERSE_WORD_CLASSES
 
 # Konfigurasi Path
 PROCESSED_DIR = "../../dataset/processed"
