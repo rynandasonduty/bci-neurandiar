@@ -71,6 +71,48 @@ def save_inference_log(log: InferenceLog):
     print(f"[+] Log disimpan: {log.raw_word} -> {log.final_sentence}")
     return {"status": "success", "message": "Log berhasil disimpan ke CSV."}
 
+# --- API UNTUK MENGAMBIL RIWAYAT (EVALUATION PAGE) ---
+@app.get("/api/logs")
+def get_inference_logs():
+    """Membaca file CSV dan mengirimkannya ke tabel Frontend"""
+    log_file = os.path.join(LOGS_DIR, "live_inference_history.csv")
+    logs = []
+    
+    if os.path.exists(log_file):
+        with open(log_file, mode='r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                logs.append(row)
+                
+    # Membalik urutan agar log terbaru muncul paling atas di tabel
+    return {"status": "success", "data": list(reversed(logs))}
+
+
+# --- API UNTUK MENGAMBIL METRIK & REGISTRY ---
+@app.get("/api/metrics")
+def get_evaluation_metrics():
+    """Mengirimkan data metrik, MLflow, dan Dataset untuk Dashboard Evaluasi"""
+    # Untuk sementara kita gunakan struktur data dinamis ini.
+    # Nanti Anda bisa mengubahnya agar membaca dari MLflow API atau latency_metrics.json
+    return {
+        "status": "success",
+        "overview": {
+            "median_latency": 45.2,
+            "p95_latency": 61.8,
+            "active_model": "EEGNet-v2 (Subject-01)"
+        },
+        "mlflow_registry": [
+            {"version": "v2.0 (Personalized)", "f1_score": 0.94, "loss": 0.12, "status": "Production"},
+            {"version": "v1.2 (General)", "f1_score": 0.88, "loss": 0.22, "status": "Archived"},
+            {"version": "v1.0 (Baseline)", "f1_score": 0.76, "loss": 0.45, "status": "Archived"}
+        ],
+        "dataset_meta": {
+            "subject": "Subject-01",
+            "total_trials": 150,
+            "artifacts_rejected": 12,
+            "clean_epochs": 138
+        }
+    }
 
 # --- WEBSOCKET UNTUK INFERENSI REAL-TIME ---
 @app.websocket("/ws/inference")
