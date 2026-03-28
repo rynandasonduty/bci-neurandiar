@@ -1,6 +1,8 @@
 import os
 import sys
 import time
+import math
+import random
 import asyncio
 import pickle
 import numpy as np
@@ -131,6 +133,55 @@ async def live_inference_endpoint(websocket: WebSocket):
         print("[-] Klien Terputus.")
     except Exception as e:
         print(f"[X] Error WebSocket: {e}")
+
+# --- WEBSOCKET UNTUK TELEMETRI HARDWARE (MONITOR PAGE) ---
+@app.websocket("/ws/telemetry")
+async def hardware_telemetry_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    print("[+] Klien Terhubung ke Stream Telemetry Hardware.")
+    
+    channels = ["AF3", "F7", "F3", "FC5", "T7", "P7", "O1", "O2", "P8", "T8", "FC6", "F4", "F8", "AF4"]
+    
+    try:
+        while True:
+            t = time.time()
+            # 1. Simulasi Oscilloscope (Kombinasi gelombang Sinus dan Noise agar realistis)
+            eeg_data = {
+                ch: round(math.sin(t * (i+1)) * 30 + random.uniform(-15, 15), 2) 
+                for i, ch in enumerate(channels)
+            }
+            
+            # 2. Simulasi Kualitas Kontak (CQ) - Berbobot agar lebih sering 'Good' (Hijau)
+            cq_data = {
+                ch: random.choices(["Good", "Fair", "Poor"], weights=[85, 10, 5])[0] 
+                for ch in channels
+            }
+            
+            # 3. Simulasi Bandpower (Alpha, Beta, dll) & Mental State
+            telemetry_payload = {
+                "eeg": eeg_data,
+                "cq": cq_data,
+                "bandpower": {
+                    "Theta": round(random.uniform(10, 30), 1),
+                    "Alpha": round(random.uniform(20, 60), 1),
+                    "Beta": round(random.uniform(15, 40), 1),
+                    "Gamma": round(random.uniform(5, 20), 1)
+                },
+                "mental_state": {
+                    "Stress": round(random.uniform(20, 35), 1),
+                    "Fatigue": round(random.uniform(10, 25), 1),
+                    "Focus": round(random.uniform(70, 95), 1),
+                    "Relaxation": round(random.uniform(60, 85), 1)
+                }
+            }
+            
+            await websocket.send_json(telemetry_payload)
+            await asyncio.sleep(0.1)  # Refresh Rate: 10 FPS (100ms) agar UI web tidak hang
+            
+    except WebSocketDisconnect:
+        print("[-] Klien Telemetry Terputus.")
+    except Exception as e:
+        print(f"[X] Error Telemetry WebSocket: {e}")
 
 if __name__ == "__main__":
     import uvicorn
