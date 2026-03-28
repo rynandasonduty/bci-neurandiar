@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+backend/mlruns/
+backend/dataset/logs/
