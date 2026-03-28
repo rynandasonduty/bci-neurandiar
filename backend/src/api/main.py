@@ -87,13 +87,15 @@ def get_inference_logs():
     # Membalik urutan agar log terbaru muncul paling atas di tabel
     return {"status": "success", "data": list(reversed(logs))}
 
-
 # --- API UNTUK MENGAMBIL METRIK & REGISTRY ---
 @app.get("/api/metrics")
 def get_evaluation_metrics():
-    """Mengirimkan data metrik, MLflow, dan Dataset untuk Dashboard Evaluasi"""
-    # Untuk sementara kita gunakan struktur data dinamis ini.
-    # Nanti Anda bisa mengubahnya agar membaca dari MLflow API atau latency_metrics.json
+    """Mengirimkan semua data untuk Dashboard Evaluasi secara utuh"""
+    
+    # CATATAN UNTUK NANTI: 
+    # Di masa depan, ubah dictionary di bawah ini dengan fungsi Python yang 
+    # membaca file `mlruns.db`, log Optuna, dan file history Keras Anda.
+    
     return {
         "status": "success",
         "overview": {
@@ -106,12 +108,22 @@ def get_evaluation_metrics():
             {"version": "v1.2 (General)", "f1_score": 0.88, "loss": 0.22, "status": "Archived"},
             {"version": "v1.0 (Baseline)", "f1_score": 0.76, "loss": 0.45, "status": "Archived"}
         ],
-        "dataset_meta": {
-            "subject": "Subject-01",
-            "total_trials": 150,
-            "artifacts_rejected": 12,
-            "clean_epochs": 138
-        }
+        "dataset_meta": [
+            {"id": 1, "subject": "Subject-01", "trials": 120, "rejected": 8, "cleanEpochs": 1456},
+            {"id": 2, "subject": "Subject-02", "trials": 115, "rejected": 12, "cleanEpochs": 1324}
+        ],
+        "raw_logs_preview": "Trial 1: MAKAN - Marker 1 [t=0ms, quality=good]\nTrial 2: TIDUR - Marker 2 [t=2500ms, quality=good]\nTrial 3: MINUM - Marker 3 [t=5100ms, quality=fair]\n[Menunggu Sesi Eksperimen Asli...]",
+        "optuna_trials": [
+            {"trial": 1, "dropout": 0.25, "f1Filters": 8, "valAcc": 0.812},
+            {"trial": 2, "dropout": 0.30, "f1Filters": 16, "valAcc": 0.834},
+            {"trial": 3, "dropout": 0.35, "f1Filters": 32, "valAcc": 0.851}
+        ],
+        "training_curves": [
+            {"epoch": 1, "loss": 0.95, "acc": 0.45, "valLoss": 0.92, "valAcc": 0.48},
+            {"epoch": 5, "loss": 0.68, "acc": 0.65, "valLoss": 0.71, "valAcc": 0.62},
+            {"epoch": 10, "loss": 0.45, "acc": 0.78, "valLoss": 0.52, "valAcc": 0.74},
+            {"epoch": 20, "loss": 0.22, "acc": 0.91, "valLoss": 0.28, "valAcc": 0.88}
+        ]
     }
 
 # --- WEBSOCKET UNTUK INFERENSI REAL-TIME ---
