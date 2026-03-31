@@ -1,0 +1,15 @@
+[08:18:04] Sistem dimulai untuk subjek: DRYRUN
+[08:18:05] Peringatan: File audio bip.wav/double_bip.wav tidak ditemukan di assets/
+[08:18:05] [*] Membangun aliran LSL Marker...
+[08:18:05] [+] LSL Marker Outlet Siap!
+[08:18:05] [*] Memulai Protokol Eksperimen...
+[08:18:05] === MEMULAI FASE 1: OVERT SPEECH ===
+[08:18:19] Menjalankan Trial 1/100 (Blok 1) - Kata: Sakit
+[08:18:21] Inject Marker Slot 1: SA (ID: 15)
+[08:18:29] Inject Marker Slot 2: KIT (ID: 16)
+[08:18:35] Menjalankan Trial 2/100 (Blok 1) - Kata: Bosan
+[08:18:37] Inject Marker Slot 1: BO (ID: 11)
+[08:18:44] Inject Marker Slot 2: SAN (ID: 12)
+[08:18:50] Menjalankan Trial 3/100 (Blok 1) - Kata: Berak
+[08:18:52] Inject Marker Slot 1: BE (ID: 5)
+[08:18:59] Inject Marker Slot 2: RAK (ID: 6)
