@@ -42,6 +42,6 @@
           "echo 'Hello Andiar' && git init"
         ]
       }
-    ] 
+    ]
   }
 }
