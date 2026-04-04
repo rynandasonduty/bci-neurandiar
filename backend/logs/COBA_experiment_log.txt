@@ -22,3 +22,43 @@
 [00:41:40] Berhasil Inject Marker Slot 1: MA
 [00:41:47] Berhasil Inject Marker Slot 2: KAN
 [00:41:51] Eksperimen dihentikan paksa (ESC).
+[10:57:54] Sistem dimulai untuk subjek: coba
+[10:57:56] [+] Audio berhasi dimuat.
+[10:57:56] [*] Membangun aliran LSL Marker...
+[10:57:56] [+] LSL Marker Outlet Siap!
+[10:57:56] [*] Memulai Protokol Eksperimen...
+[10:57:56] === MEMULAI FASE 1: OVERT SPEECH ===
+[10:58:48] Menjalankan Trial 1/100 (Blok 1) - Kata: Lelah
+[10:58:49] Inject Marker Slot 1: LE (ID: 13)
+[10:58:56] Inject Marker Slot 2: LAH (ID: 14)
+[10:59:02] Menjalankan Trial 2/100 (Blok 1) - Kata: Minum
+[10:59:04] Inject Marker Slot 1: MI (ID: 3)
+[10:59:11] Inject Marker Slot 2: NUM (ID: 4)
+[10:59:17] Menjalankan Trial 3/100 (Blok 1) - Kata: Berak
+[10:59:18] Inject Marker Slot 1: BE (ID: 5)
+[10:59:25] Inject Marker Slot 2: RAK (ID: 6)
+[10:59:31] Menjalankan Trial 4/100 (Blok 1) - Kata: Sayang
+[10:59:33] Inject Marker Slot 1: SA (ID: 15)
+[10:59:40] Inject Marker Slot 2: YANG (ID: 19)
+[10:59:46] Menjalankan Trial 5/100 (Blok 1) - Kata: Mandi
+[10:59:47] Inject Marker Slot 1: MAN (ID: 9)
+[10:59:54] Inject Marker Slot 2: DI (ID: 10)
+[11:00:00] Menjalankan Trial 6/100 (Blok 1) - Kata: Mandi
+[11:00:02] Inject Marker Slot 1: MAN (ID: 9)
+[11:00:09] Inject Marker Slot 2: DI (ID: 10)
+[11:00:15] Menjalankan Trial 7/100 (Blok 1) - Kata: Pipis
+[11:00:16] Inject Marker Slot 1: PI (ID: 7)
+[11:00:23] Inject Marker Slot 2: PIS (ID: 8)
+[11:00:29] Menjalankan Trial 8/100 (Blok 1) - Kata: Mandi
+[11:00:31] Inject Marker Slot 1: MAN (ID: 9)
+[11:00:38] Inject Marker Slot 2: DI (ID: 10)
+[11:00:44] Menjalankan Trial 9/100 (Blok 1) - Kata: Tidur
+[11:00:45] Inject Marker Slot 1: TI (ID: 17)
+[11:00:52] Inject Marker Slot 2: DUR (ID: 18)
+[11:00:58] Menjalankan Trial 10/100 (Blok 1) - Kata: Pipis
+[11:01:00] Inject Marker Slot 1: PI (ID: 7)
+[11:01:07] Inject Marker Slot 2: PIS (ID: 8)
+[11:01:13] Menjalankan Trial 11/100 (Blok 1) - Kata: Makan
+[11:01:15] Inject Marker Slot 1: MA (ID: 1)
+[11:01:22] Inject Marker Slot 2: KAN (ID: 2)
+[11:01:22] Eksperimen dihentikan paksa (ESC).

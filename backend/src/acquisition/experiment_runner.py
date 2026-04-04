@@ -6,11 +6,9 @@ import os
 import logging
 from pylsl import StreamInfo, StreamOutlet
 
-# --- KONFIGURASI PATH ABSOLUT ---
-# Memastikan script selalu menemukan folder 'assets' di mana pun ia dijalankan
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(BASE_DIR)
-
 # Menggunakan parameter fallback jika tidak ada di src.config
 try:
     from src.config import (

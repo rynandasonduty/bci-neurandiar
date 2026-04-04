@@ -1,0 +1,47 @@
+{
+  "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v11/terminal-keeper.json",
+  "theme": "tribe",
+  "active": "default",
+  "activateOnStartup": true,
+  "keepExistingTerminals": false,
+  "sessions": {
+    "default": [
+      {
+        "name": "Frontend",
+        "autoExecuteCommands": true,
+        "icon": "vm",
+        "color": "terminal.ansiGreen",
+        "commands": [
+          "echo 'Hello Andiar' && cd frontend && npm install && npm audit fix"
+        ]
+      },
+      {
+        "name": "Backend",
+        "autoExecuteCommands": true,
+        "icon": "database",
+        "color": "terminal.ansiGreen",
+        "commands": [
+          "echo 'Hello Andiar' && cd backend && venv\\Scripts\\activate && pip install -r requirements.txt && cd src/api"
+        ]
+      },
+      {
+        "name": "Machine",
+        "autoExecuteCommands": true,
+        "icon": "server",
+        "color": "terminal.ansiGreen",
+        "commands": [
+          "echo 'Hello Andiar' && cd backend && venv\\Scripts\\activate && pip install -r requirements.txt && cd src/acquisition"
+        ]
+      },
+      {
+        "name": "Git",
+        "autoExecuteCommands": true,
+        "icon": "github",
+        "color": "terminal.ansiGreen",
+        "commands": [
+          "echo 'Hello Andiar' && git init"
+        ]
+      }
+    ] 
+  }
+}
