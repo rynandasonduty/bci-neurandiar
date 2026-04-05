@@ -21,7 +21,7 @@ WORD_TO_SYLLABLES = {
 }
 
 class DatasetBuilder:
-    def __init__(self, raw_data_dir="../../dataset", output_dir="../../dataset/processed"):
+    def __init__(self, raw_data_dir="../../dataset/checked", output_dir="../../dataset/processed"):
         self.raw_data_dir = raw_data_dir
         self.output_dir = output_dir
         
