@@ -19,8 +19,8 @@ class SignalProcessor:
         
         # 14 Saluran (Channels) Emotiv EPOC X sesuai standar 10-20
         self.eeg_channels = [
-            "AF3", "F7", "F3", "FC5", "T7", "P7", "O1", 
-            "O2", "P8", "T8", "FC6", "F4", "F8", "AF4"
+            "EEG.AF3", "EEG.F7", "EEG.F3", "EEG.FC5", "EEG.T7", "EEG.P7", "EEG.O1", 
+            "EEG.O2", "EEG.P8", "EEG.T8", "EEG.FC6", "EEG.F4", "EEG.F8", "EEG.AF4"
         ]
 
     def _butter_bandpass(self):

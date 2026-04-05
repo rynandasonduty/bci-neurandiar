@@ -20,14 +20,39 @@ class DataQualityChecker:
         print("="*60)
         
         try:
-            df = pd.read_csv(self.csv_filepath)
+            # 1. Cari baris yang mengandung nama kolom (Header) secara otomatis
+            header_idx = 0
+            with open(self.csv_filepath, 'r') as f:
+                for i, line in enumerate(f):
+                    if 'EEG.AF3' in line or 'AF3' in line:
+                        header_idx = i
+                        break
+            
+            # 2. Baca CSV mulai dari baris header tersebut
+            df = pd.read_csv(self.csv_filepath, header=header_idx, low_memory=False)
+            
+            # 3. Hapus baris "Units" (misal: 'uV', 'Hz') di baris pertama data jika ada
+            try:
+                float(df.iloc[0][self.processor.eeg_channels[0]])
+            except (ValueError, TypeError):
+                df = df.iloc[1:].reset_index(drop=True)
+                
+            # 4. Paksa konversi kolom EEG menjadi angka (mengatasi error Mixed Types)
+            for col in self.processor.eeg_channels:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+                
+            # Paksa konversi kolom Marker menjadi angka
+            marker_col = 'MarkerValueInt' if 'MarkerValueInt' in df.columns else 'Marker'
+            if marker_col in df.columns:
+                df[marker_col] = pd.to_numeric(df[marker_col], errors='coerce').fillna(0)
+
         except Exception as e:
             print(f"[-] GAGAL MEMBACA CSV: File corrupt atau tidak valid. ({e})")
             return
 
         score = 100 # Nilai awal
         eeg_cols = self.processor.eeg_channels
-        
+              
         # ==========================================
         # 1. UJI MISSING VALUES (Kekosongan Data)
         # ==========================================
@@ -99,7 +124,9 @@ class DataQualityChecker:
         # 4. UJI LONJAKAN EKSTREM (Extreme Spikes)
         # ==========================================
         print("\n[4] Uji Lonjakan Sinyal Ekstrem (> ±200 µV)...")
-        extreme_spikes = np.sum(np.abs(eeg_data) > 200)
+        # Kurangi DC Offset rata-rata terlebih dahulu agar sinyal berada di titik 0
+        eeg_centered = eeg_data - np.mean(eeg_data, axis=0)
+        extreme_spikes = np.sum(np.abs(eeg_centered) > 200)
         spike_ratio = (extreme_spikes / eeg_data.size) * 100
         
         print(f"    -> Rasio Lonjakan Ekstrem: {spike_ratio:.3f}% dari total data.")
