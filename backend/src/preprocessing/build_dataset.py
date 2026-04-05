@@ -63,17 +63,15 @@ class DatasetBuilder:
         y_labels = [] 
         
         for i, idx in enumerate(marker_indices):
-            marker_value = df.iloc[idx][marker_col]
-            trial_index = i // 2 
-            if trial_index >= len(word_sequence): break
-                
-            current_word = word_sequence[trial_index]
-            syl1, syl2 = WORD_TO_SYLLABLES[current_word]
+            marker_value = int(df.iloc[idx][marker_col])
             
-            target_syllable = syl1 if marker_value == 1 else syl2 if marker_value == 2 else None
-            if not target_syllable: continue
+            # Validasi: Pastikan marker adalah ID Suku Kata (1 sampai 19)
+            if marker_value < 1 or marker_value > 19: 
+                continue
                 
-            label_int = SYLLABLE_CLASSES[target_syllable]
+            # Keras/TensorFlow membutuhkan label dimulai dari 0 (0 sampai 18)
+            # Karena LSL Marker kita mengirim 1-19, kita kurangi 1.
+            label_int = marker_value - 1
             
             # Potong slot 5 detik
             slot_data = filtered_eeg[idx : idx + (5 * self.processor.fs)]
