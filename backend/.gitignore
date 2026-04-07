@@ -5,4 +5,4 @@ venv/
 env/
 .env
 backend/mlruns/
-backend/dataset/logs/
+dataset/ 

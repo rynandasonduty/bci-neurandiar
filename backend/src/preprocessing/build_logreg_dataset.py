@@ -1,10 +1,15 @@
 import os
+import sys
+import pandas as pd
 import glob
 import pickle
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
 from signal_processor import SignalProcessor
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models')))
+
 
 # Pemetaan 10 Kata Target ke Kelas Integer (0-9)
 WORD_CLASSES = {
@@ -87,8 +92,31 @@ class LogRegDatasetBuilder:
                 scaler = pickle.load(f)
                 
             word_sequence = self.parse_log_for_word_sequence(log_path)
-            df = pd.read_csv(csv_files[0])
             
+            # --- MULAI SMART CSV LOADER ---
+            header_idx = 0
+            with open(csv_files[0], 'r') as f:
+                for i, line in enumerate(f):
+                    if 'EEG.AF3' in line or 'AF3' in line:
+                        header_idx = i
+                        break
+            
+            df = pd.read_csv(csv_files[0], header=header_idx, low_memory=False)
+            
+            try:
+                float(df.iloc[0][self.processor.eeg_channels[0]])
+            except (ValueError, TypeError):
+                df = df.iloc[1:].reset_index(drop=True)
+                
+            for col in self.processor.eeg_channels:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+            # --- SELESAI SMART CSV LOADER ---
+            
+            marker_col = 'MarkerValueInt' if 'MarkerValueInt' in df.columns else 'Marker'
+            df[marker_col] = pd.to_numeric(df[marker_col], errors='coerce').fillna(0)
+            
+            filtered_eeg = self.processor.apply_filter(df[self.processor.eeg_channels].values)
+                        
             marker_col = 'MarkerValueInt' if 'MarkerValueInt' in df.columns else 'Marker'
             filtered_eeg = self.processor.apply_filter(df[self.processor.eeg_channels].values)
             

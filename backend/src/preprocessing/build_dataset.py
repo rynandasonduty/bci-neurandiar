@@ -21,7 +21,7 @@ WORD_TO_SYLLABLES = {
 }
 
 class DatasetBuilder:
-    def __init__(self, raw_data_dir="../../dataset/checked", output_dir="../../dataset/processed"):
+    def __init__(self, raw_data_dir="../../dataset", output_dir="../../dataset/processed"):
         self.raw_data_dir = raw_data_dir
         self.output_dir = output_dir
         
@@ -46,12 +46,37 @@ class DatasetBuilder:
         print(f"[*] Memproses data subjek: {subject_id}")
         
         word_sequence = self.parse_log_for_word_sequence(log_filepath)
-        df = pd.read_csv(csv_filepath)
+        
+        # --- MULAI SMART CSV LOADER ---
+        # 1. Cari baris yang mengandung nama kolom (Header) secara otomatis
+        header_idx = 0
+        with open(csv_filepath, 'r') as f:
+            for i, line in enumerate(f):
+                if 'EEG.AF3' in line or 'AF3' in line:
+                    header_idx = i
+                    break
+        
+        # 2. Baca CSV mulai dari baris header
+        df = pd.read_csv(csv_filepath, header=header_idx, low_memory=False)
+        
+        # 3. Hapus baris "Units" (misal: 'uV', 'Hz') di baris pertama data jika ada
+        try:
+            float(df.iloc[0][self.processor.eeg_channels[0]])
+        except (ValueError, TypeError):
+            df = df.iloc[1:].reset_index(drop=True)
+            
+        # 4. Paksa konversi kolom EEG menjadi angka
+        for col in self.processor.eeg_channels:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        # --- SELESAI SMART CSV LOADER ---
         
         marker_col = 'MarkerValueInt' if 'MarkerValueInt' in df.columns else 'Marker'
         if marker_col not in df.columns:
             print(f"[X] Kolom marker tidak ditemukan di {csv_filepath}")
             return [], []
+
+        # Paksa konversi kolom Marker menjadi angka
+        df[marker_col] = pd.to_numeric(df[marker_col], errors='coerce').fillna(0)
 
         # Terapkan Band-Pass Filter (Sinyal masih dalam skala Mikrovolt)
         eeg_data = df[self.processor.eeg_channels].values
@@ -61,7 +86,7 @@ class DatasetBuilder:
         
         X_clean_windows = [] 
         y_labels = [] 
-        
+               
         for i, idx in enumerate(marker_indices):
             marker_value = int(df.iloc[idx][marker_col])
             

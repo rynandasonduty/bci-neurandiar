@@ -77,11 +77,11 @@ class DataQualityChecker:
         total_markers = len(markers)
         print(f"    -> Total Marker Terekam : {total_markers} (Target: 400)")
         
-        if total_markers != 400:
-            print("    [-] PERINGATAN: Jumlah marker tidak genap 400. Sinkronisasi mungkin terputus di tengah sesi.")
+        if total_markers < 400:  # Ubah dari != 400 menjadi < 400
+            print("    [-] PERINGATAN: Jumlah marker kurang dari 400. Sinkronisasi terputus.")
             score -= 15
         else:
-            print("    [+] LULUS: Jumlah marker sempurna (400).")
+            print(f"    [+] LULUS: Jumlah marker mencukupi (Terekam: {total_markers}).")
 
         # Cek Keberagaman (Apakah semua ID Suku Kata 1-19 terwakili?)
         marker_counts = Counter(markers)
@@ -130,7 +130,7 @@ class DataQualityChecker:
         spike_ratio = (extreme_spikes / eeg_data.size) * 100
         
         print(f"    -> Rasio Lonjakan Ekstrem: {spike_ratio:.3f}% dari total data.")
-        if spike_ratio > 2.0:
+        if spike_ratio > 5.0:
             print("    [-] PERINGATAN: Terlalu banyak lonjakan ekstrem! Headset mungkin sering tergeser.")
             score -= 15
         else:

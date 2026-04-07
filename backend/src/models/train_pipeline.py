@@ -167,7 +167,6 @@ def main():
             assembler = WordAssembler()
             
             # Kita ubah fungsi train di logreg_model sementara untuk mengembalikan akurasi
-            from sklearn.model_selection import train_test_split
             from sklearn.metrics import accuracy_score
             X_w_train, X_w_test, y_w_train, y_w_test = train_test_split(
                 X_word, y_word, test_size=0.2, random_state=42, stratify=y_word
