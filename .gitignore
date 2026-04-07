@@ -1,1 +1,47 @@
+# ==========================================
+# 1. PYTHON & VIRTUAL ENVIRONMENT
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# ==========================================
+# 2. DATASETS & MACHINE LEARNING MODELS
+# (SUPER PENTING: Dilarang keras mem-push data otak & model ke Git!)
+# ==========================================
+backend/dataset/
+*.csv
+*.edf
+*.npy
+*.h5
+*.pkl
+
+# ==========================================
+# 3. MLOPS TRACKING (MLFLOW & OPTUNA)
+# ==========================================
+backend/src/models/mlruns/
+backend/src/models/mlruns.db
+mlruns/
+*.db
+
+# ==========================================
+# 4. FRONTEND (NEXT.JS)
+# ==========================================
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env*.local
+
+# ==========================================
+# 5. IDE & OS FILES
+# ==========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
 emotiv/

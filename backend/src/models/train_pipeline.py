@@ -1,8 +1,11 @@
 import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from eegnet_model import EEGNetClassifier
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'preprocessing')))
+import numpy as np
 
 # Import MLOps Tools
 import optuna

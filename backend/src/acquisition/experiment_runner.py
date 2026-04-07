@@ -44,7 +44,7 @@ SYLLABLE_IDS = {
 }
 
 def setup_logger(subject_id):
-    log_dir = os.path.join(BASE_DIR, "logs")
+    log_dir = os.path.join(BASE_DIR, "dataset", "logs") 
     os.makedirs(log_dir, exist_ok=True)
     log_filename = os.path.join(log_dir, f"{subject_id}_experiment_log.txt")
     

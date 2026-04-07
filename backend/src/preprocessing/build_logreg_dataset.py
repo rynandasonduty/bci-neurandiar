@@ -116,10 +116,7 @@ class LogRegDatasetBuilder:
             df[marker_col] = pd.to_numeric(df[marker_col], errors='coerce').fillna(0)
             
             filtered_eeg = self.processor.apply_filter(df[self.processor.eeg_channels].values)
-                        
-            marker_col = 'MarkerValueInt' if 'MarkerValueInt' in df.columns else 'Marker'
-            filtered_eeg = self.processor.apply_filter(df[self.processor.eeg_channels].values)
-            
+                                   
             # Kita proses secara berpasangan (Slot 1 dan Slot 2) untuk 1 Trial Kata
             marker_indices = df.index[df[marker_col] > 0].tolist()
             
