@@ -1,6 +1,0 @@
-[08:46:22] Sistem dimulai untuk subjek: cobakoneksikelsl
-[08:46:24] [+] Audio berhasi dimuat.
-[08:46:24] [*] Membangun aliran LSL Marker...
-[08:46:24] [+] LSL Marker Outlet Siap!
-[08:46:24] [*] Memulai Protokol Eksperimen...
-[08:46:24] === MEMULAI FASE 1: OVERT SPEECH ===
