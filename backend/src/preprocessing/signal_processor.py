@@ -5,11 +5,10 @@ from scipy.signal import butter, filtfilt
 class SignalProcessor:
     def __init__(self, fs=256, lowcut=0.5, highcut=50.0, order=4, artifact_threshold=100.0):
         """
-        Inisialisasi parameter prapemrosesan sesuai Metodologi Bab 3.
-        - fs: Sampling rate Emotiv EPOC X (256 Hz)
-        - lowcut & highcut: Rentang Band-Pass Filter (0.5 - 50.0 Hz)
-        - order: Orde filter Butterworth (Orde ke-4)
-        - artifact_threshold: Batas amplitudo artefak EOG/EMG (±100 µV)
+        - fs: Sampling rate Emotiv EPOC X (256 Hz) - ini ada opsi dituruin ke 146 hz
+        - lowcut & highcut: Rentang Band-Pass Filter (0.5 - 40.0 Hz) - ini seharusnya normalnya di indonesia 0,5 - 50 hz - ini perlu diskusi dengan pak izzat dahulu, lowcut bisa dinaikan ke 1 hz saja, sesuai dokumentasi harusnya lowcut nya di 0.16 hz dan hi cut di 43 hz
+        - order: Orde filter Butterworth (Orde ke-4), bisa pake orde 5
+        - artifact_threshold: Batas amplitudo artefak EOG/EMG (±150 µV) - ini bisa opsinya diturunin ke 100 mv yak
         """
         self.fs = fs
         self.lowcut = lowcut
@@ -75,8 +74,7 @@ class SignalProcessor:
             if not self.reject_artifacts(window_data):
                 windows.append(window_data)
             else:
-                # Jika Anda ingin melihat log data yang dibuang, aktifkan print di bawah:
-                # print(f"[-] Artefak terdeteksi pada jendela {i+1}. Jendela dibuang.")
+                print(f"[-] Artefak terdeteksi pada jendela {i+1}. Jendela dibuang.")
                 pass
                 
         return windows
