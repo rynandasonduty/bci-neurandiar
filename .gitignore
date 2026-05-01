@@ -10,9 +10,10 @@ env/
 
 # ==========================================
 # 2. DATASETS & MACHINE LEARNING MODELS
-# (SUPER PENTING: Dilarang keras mem-push data otak & model ke Git!)
 # ==========================================
 backend/dataset/
+backend/logs/
+backend/models
 *.csv
 *.edf
 *.npy

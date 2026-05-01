@@ -4,22 +4,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from eegnet_model import EEGNetClassifier
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'preprocessing')))
-import numpy as np
-
-# Import MLOps Tools
 import optuna
 import mlflow
 import mlflow.tensorflow
 
-# Konfigurasi Path
-PROCESSED_DIR = "../../dataset/processed"
-MODEL_DIR = "../../dataset/models"
+# Menghubungkan ke Mesin Direktori di config.py
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config import setup_experiment, MLFLOW_DB_PATH
 
-def load_and_prepare_data():
-    print("[*] Memuat dataset tensor...")
-    X = np.load(os.path.join(PROCESSED_DIR, "X_features.npy"))
-    y = np.load(os.path.join(PROCESSED_DIR, "y_labels.npy"))
+def load_and_prepare_data(processed_dir):
+    print(f"[*] Memuat dataset tensor dari: {processed_dir}")
+    X = np.load(os.path.join(processed_dir, "X_features.npy"))
+    y = np.load(os.path.join(processed_dir, "y_labels.npy"))
     
     # Transposisi dari (Samples, Time, Channels) menjadi (Samples, Channels, Time)
     X = np.transpose(X, (0, 2, 1))
@@ -43,153 +39,100 @@ def plot_history(history, save_path):
     plt.savefig(save_path)
     plt.close()
 
-def main():
-    os.makedirs(MODEL_DIR, exist_ok=True)
+def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500):
+    """
+    Fungsi master untuk melatih EEGNet berdasarkan eksperimen tertentu.
+    """
+    print("\n" + "="*50)
+    print(f" MEMULAI PIPELINE PELATIHAN UNTUK EKSPERIMEN: {exp_id} ")
+    print("="*50)
     
-    # 1. Siapkan Data
-    X, y = load_and_prepare_data()
+    # 1. Panggil Mesin Pembangun Direktori
+    paths = setup_experiment(exp_id)
+    processed_dir = paths["processed_data"]
+    weights_dir = paths["weights"]
+    reports_dir = paths["reports"]
+    
+    # 2. Siapkan Data
+    try:
+        X, y = load_and_prepare_data(processed_dir)
+    except FileNotFoundError:
+        print(f"[X] Data tidak ditemukan di {processed_dir}. Jalankan build_dataset terlebih dahulu.")
+        return
+        
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # =======================================================
-    # FASE MLOPS 1: OPTUNA HYPERPARAMETER TUNING
-    # =======================================================
-    print("\n" + "="*50)
-    print(" MEMULAI OPTUNA HYPERPARAMETER TUNING ")
-    print("="*50)
-
-    # Konfigurasi MLflow Experiment
-    mlflow.set_tracking_uri("sqlite:///mlruns.db") # Menggunakan SQLite ringan untuk log
-    mlflow.set_experiment("EEGNet_Tuning")
+    # 3. Konfigurasi MLflow Experiment
+    mlflow.set_tracking_uri(MLFLOW_DB_PATH) 
+    mlflow.set_experiment(f"BCI_{exp_id}")
 
     def objective(trial):
-        """Fungsi objektif yang akan dicoba berulang kali oleh Optuna"""
-        
-        # Optuna akan menebak kombinasi parameter ini
         dropout_rate = trial.suggest_float("dropout_rate", 0.3, 0.7, step=0.1)
-        f1 = trial.suggest_categorical("F1", [4, 8, 16]) # Jumlah filter temporal
-        d = trial.suggest_int("D", 2, 4)                 # Kedalaman filter spasial
+        f1 = trial.suggest_categorical("F1", [4, 8, 16]) 
+        d = trial.suggest_int("D", 2, 4)                 
         batch_size = trial.suggest_categorical("batch_size", [32, 64])
         
         with mlflow.start_run(nested=True):
-            # Log parameter ke MLflow
             mlflow.log_params(trial.params)
             
-            # Bangun arsitektur dengan parameter tebakan Optuna
-            # F2 selalu di-set F1 * D sesuai anjuran jurnal asli
             eegnet = EEGNetClassifier(
-                nb_classes=19, channels=14, samples=256,
+                nb_classes=19, channels=14, samples=X_train.shape[2],
                 dropout_rate=dropout_rate, F1=f1, D=d, F2=f1*d
             )
             
-            # Kita batasi epochs menjadi 100 saat tuning agar tidak terlalu lama
+            # Epochs lebih kecil saat tuning untuk menghemat waktu
             history = eegnet.train(
                 X_train, y_train, X_val, y_val, 
                 epochs=100, batch_size=batch_size
             )
             
-            # Ambil akurasi validasi terbaik dari pelatihan ini
             best_val_acc = max(history.history['val_accuracy'])
-            
-            # Log metrik ke MLflow
             mlflow.log_metric("best_val_accuracy", best_val_acc)
-            
             return best_val_acc
 
-    # Buat study Optuna dan cari nilai maksimal (maximize)
-    study = optuna.create_study(direction="maximize", study_name="EEGNet_Optimization")
-    
-    # Jalankan 10 percobaan (trials). Bisa dinaikkan ke 30-50 nanti jika Anda ada waktu luang.
-    print("[*] Optuna akan melakukan 10 kali percobaan iterasi arsitektur...")
-    study.optimize(objective, n_trials=10)
+    # 4. Optuna Hyperparameter Tuning
+    print(f"[*] Melakukan {n_trials} percobaan iterasi arsitektur...")
+    study = optuna.create_study(direction="maximize", study_name=f"EEGNet_Opt_{exp_id}")
+    study.optimize(objective, n_trials=n_trials)
 
     print("\n[+] TUNING SELESAI!")
     print(f"    Akurasi Terbaik: {study.best_value * 100:.2f}%")
     print(f"    Parameter Terbaik: {study.best_params}")
 
-    # =======================================================
-    # FASE MLOPS 2: PELATIHAN MODEL TERBAIK & MODEL REGISTRY
-    # =======================================================
-    print("\n" + "="*50)
-    print(" MELATIH MODEL FINAL DENGAN PARAMETER TERBAIK ")
-    print("="*50)
-    
+    # 5. Pelatihan Model Terbaik (Production Run)
     best_params = study.best_params
     f1 = best_params["F1"]
     d = best_params["D"]
     
-    # Memulai MLflow run utama untuk Production
-    with mlflow.start_run(run_name="Production_EEGNet"):
+    with mlflow.start_run(run_name=f"Production_EEGNet_{exp_id}"):
         mlflow.log_params(best_params)
         
         final_model = EEGNetClassifier(
-            nb_classes=19, channels=14, samples=256,
+            nb_classes=19, channels=14, samples=X_train.shape[2],
             dropout_rate=best_params["dropout_rate"], 
             F1=f1, D=d, F2=f1*d
         )
         
-        # Pelatihan penuh dengan 500 epochs (Early Stopping tetap aktif)
         history = final_model.train(
             X_train, y_train, X_val, y_val, 
-            epochs=500, batch_size=best_params["batch_size"]
+            epochs=max_epochs, batch_size=best_params["batch_size"]
         )
         
-        # Menyimpan model H5 secara lokal
-        model_path = os.path.join(MODEL_DIR, "eegnet_trained.h5")
+        # Simpan model spesifik untuk eksperimen ini
+        model_path = os.path.join(weights_dir, f"eegnet_trained_{exp_id}.h5")
         final_model.save_model(model_path)
         
-        # Menyimpan model ke dalam MLflow Model Registry
-        mlflow.tensorflow.log_model(final_model.model, "eegnet_model_registry")
+        mlflow.tensorflow.log_model(final_model.model, f"eegnet_registry_{exp_id}")
         mlflow.log_metric("final_val_accuracy", max(history.history['val_accuracy']))
         
-        # Simpan dan log grafik
-        plot_path = os.path.join(MODEL_DIR, "training_history.png")
+        plot_path = os.path.join(reports_dir, f"training_history_{exp_id}.png")
         plot_history(history, plot_path)
         mlflow.log_artifact(plot_path)
         
-        # =======================================================
-        # FASE MLOPS 3: PELATIHAN LOGISTIC REGRESSION (WORD ASSEMBLER)
-        # =======================================================
-        print("\n" + "="*50)
-        print(" MEMBANGUN DATASET & MELATIH REGRESI LOGISTIK ")
-        print("="*50)
-        
-        # 1. Jalankan pembangun dataset Regresi Logistik
-        from build_logreg_dataset import LogRegDatasetBuilder
-        try:
-            logreg_builder = LogRegDatasetBuilder()
-            logreg_builder.build_dataset()
-            
-            # 2. Muat dataset 38-dimensi yang baru saja dibuat
-            X_word = np.load(os.path.join(PROCESSED_DIR, "X_word_features.npy"))
-            y_word = np.load(os.path.join(PROCESSED_DIR, "y_word_labels.npy"))
-            
-            # 3. Latih Model Regresi Logistik
-            from logreg_model import WordAssembler
-            assembler = WordAssembler()
-            
-            # Kita ubah fungsi train di logreg_model sementara untuk mengembalikan akurasi
-            from sklearn.metrics import accuracy_score
-            X_w_train, X_w_test, y_w_train, y_w_test = train_test_split(
-                X_word, y_word, test_size=0.2, random_state=42, stratify=y_word
-            )
-            assembler.model.fit(X_w_train, y_w_train)
-            assembler.save_model()
-            
-            # Evaluasi LogReg
-            y_w_pred = assembler.model.predict(X_w_test)
-            logreg_acc = accuracy_score(y_w_test, y_w_pred)
-            
-            # Log akurasi tingkat Kata (Titik Akhir Utama Skripsi Anda!)
-            mlflow.log_metric("final_word_accuracy", logreg_acc)
-            print(f"[+] Akurasi Tingkat KATA (Word Assembler): {logreg_acc * 100:.2f}%")
-            
-        except Exception as e:
-            print(f"[-] Gagal melatih Regresi Logistik: {e}")
-    
-    print(f"\n[SUCCESS] Model final dilatih dan disimpan di: {model_path}")
-    print("[INFO] Ketik 'mlflow ui --backend-store-uri sqlite:///mlruns.db' di terminal untuk melihat dashboard pelacakan.")
+        print(f"\n[SUCCESS] Model final dilatih dan disimpan di: {model_path}")
 
 if __name__ == "__main__":
-    main()
+    # Ini akan dieksekusi jika file dijalankan secara mandiri untuk testing
+    run_training_pipeline(exp_id="E0_Baseline", n_trials=3, max_epochs=50)

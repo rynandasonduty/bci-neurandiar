@@ -1,9 +1,14 @@
 import numpy as np
 import os
+import sys
 import pickle
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
+
+# Menghubungkan ke Mesin Direktori di config.py
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config import setup_experiment
 
 # Pemetaan 10 Kata Target ke Kelas Integer (0-9)
 WORD_CLASSES = {
@@ -15,13 +20,24 @@ WORD_CLASSES = {
 REVERSE_WORD_CLASSES = {v: k for k, v in WORD_CLASSES.items()}
 
 class WordAssembler:
-    def __init__(self, model_dir="../../dataset/models"):
-        self.model_dir = model_dir
-        self.model_path = os.path.join(self.model_dir, "logistic_regression_assembler.pkl")
-        
+    def __init__(self, exp_id=None):
+        """
+        Inisialisasi Word Assembler.
+        Jika exp_id diberikan, ia akan otomatis menyimpan/memuat dari folder eksperimen tersebut.
+        Jika None, ia akan menggunakan mode Simulasi/Dry-Run di folder default.
+        """
+        if exp_id:
+            paths = setup_experiment(exp_id)
+            self.model_dir = paths["weights"]
+            self.model_path = os.path.join(self.model_dir, f"logreg_assembler_{exp_id}.pkl")
+        else:
+            # Mode Default/Simulasi (Mencegah error jika dipanggil tanpa konteks eksperimen)
+            self.model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'weights', 'E_Sim'))
+            self.model_path = os.path.join(self.model_dir, "logreg_assembler_sim.pkl")
+            os.makedirs(self.model_dir, exist_ok=True)
+            
         # Inisialisasi model Regresi Logistik
         self.model = LogisticRegression(max_iter=1000, random_state=42)
-        os.makedirs(self.model_dir, exist_ok=True)
 
     def train(self, X_probs, y_words):
         """
@@ -29,7 +45,7 @@ class WordAssembler:
         - X_probs: Matriks (Jumlah Sampel, 38) -> 19 probabilitas Slot 1 + 19 probabilitas Slot 2
         - y_words: Array (Jumlah Sampel,) -> Label integer 0-9 untuk 10 kata target
         """
-        print("[*] Melatih Model Regresi Logistik (Word Assembler)...")
+        print(f"[*] Melatih Model Regresi Logistik (Word Assembler)...")
         
         # Membagi data untuk evaluasi internal model (80% Latih, 20% Uji)
         X_train, X_test, y_train, y_test = train_test_split(
@@ -46,6 +62,8 @@ class WordAssembler:
         print(f"[+] Akurasi Word Assembler: {acc * 100:.2f}%\n")
         print("Laporan Klasifikasi (Confusion Matrix Metrics):")
         print(classification_report(y_test, y_pred, target_names=list(WORD_CLASSES.keys())))
+        
+        return acc # Kembalikan akurasi agar bisa dicatat oleh MLflow nantinya
 
     def save_model(self):
         """Membekukan dan menyimpan model ke dalam file .pkl"""
@@ -60,7 +78,7 @@ class WordAssembler:
             
         with open(self.model_path, 'rb') as f:
             self.model = pickle.load(f)
-        print(f"[+] Model Word Assembler berhasil dimuat.")
+        print(f"[+] Model Word Assembler berhasil dimuat dari: {self.model_path}")
 
     def assemble_word(self, prob_slot1, prob_slot2):
         """
@@ -90,14 +108,12 @@ if __name__ == "__main__":
     print(" SIMULASI PELATIHAN WORD ASSEMBLER ")
     print("="*50)
 
+    # Inisialisasi tanpa exp_id akan otomatis masuk mode simulasi
     assembler = WordAssembler()
 
-    # 1. Membuat Dummy Data (Seolah-olah ini adalah probabilitas dari EEGNet)
+    # 1. Membuat Dummy Data
     print("[*] Membuat 1000 data probabilitas simulasi...")
-    # 1000 sampel percobaan x 38 nilai probabilitas
     X_dummy_probs = np.random.rand(1000, 38) 
-    
-    # 1000 label kata target acak (0 sampai 9)
     y_dummy_words = np.random.randint(0, 10, 1000)
 
     # 2. Melatih Regresi Logistik
@@ -109,13 +125,10 @@ if __name__ == "__main__":
     print(" UJI COBA INFERENSI (REAL-TIME SIMULATION) ")
     print("="*50)
     
-    # Seandainya EEGNet mengeluarkan probabilitas untuk Slot 1 ("MA")
     dummy_p1 = np.random.rand(19)
-    
-    # Seandainya EEGNet mengeluarkan probabilitas untuk Slot 2 ("KAN")
     dummy_p2 = np.random.rand(19)
 
+    # Memuat model (Simulasi)
+    assembler.load_model()
     predicted = assembler.assemble_word(dummy_p1, dummy_p2)
-    print(f"[+] Input Probabilitas Slot 1 (Shape): {dummy_p1.shape}")
-    print(f"[+] Input Probabilitas Slot 2 (Shape): {dummy_p2.shape}")
     print(f"[+] HASIL DEKODE KATA AKHIR: {predicted}")

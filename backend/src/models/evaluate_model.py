@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import pickle
 import numpy as np
@@ -6,26 +7,22 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from tensorflow.keras.models import load_model
-from eegnet_model import EEGNetClassifier # Mengimpor class untuk mendapatkan struktur jika perlu
-from logreg_model import WORD_CLASSES, REVERSE_WORD_CLASSES
 
-# Konfigurasi Path
-PROCESSED_DIR = "../../dataset/processed"
-MODEL_DIR = "../../dataset/models"
-EVAL_DIR = "../../dataset/evaluation"
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config import setup_experiment
+from eegnet_model import EEGNetClassifier 
 
-# Daftar suku kata (Index 0-18)
 SYLLABLE_NAMES = [
     "MA", "KAN", "MI", "NUM", "BE", "RAK", "PI", "PIS", "MAN", "DI", 
     "BO", "SAN", "LE", "LAH", "SA", "KIT", "TI", "DUR", "YANG"
 ]
-WORD_NAMES = list(WORD_CLASSES.keys())
 
-def ensure_dirs():
-    os.makedirs(EVAL_DIR, exist_ok=True)
+WORD_NAMES = [
+    "MAKAN", "MINUM", "BERAK", "PIPIS", "MANDI", 
+    "BOSAN", "LELAH", "SAKIT", "TIDUR", "SAYANG"
+]
 
-def plot_confusion_matrix(y_true, y_pred, classes, title, filename):
-    """Fungsi helper untuk menggambar dan menyimpan Confusion Matrix"""
+def plot_confusion_matrix(y_true, y_pred, classes, title, filepath):
     cm = confusion_matrix(y_true, y_pred)
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
@@ -34,113 +31,94 @@ def plot_confusion_matrix(y_true, y_pred, classes, title, filename):
     plt.ylabel('Label Asli (True)')
     plt.xlabel('Tebakan Sistem (Predicted)')
     plt.tight_layout()
-    plt.savefig(os.path.join(EVAL_DIR, filename))
+    plt.savefig(filepath)
     plt.close()
-    print(f"[+] {title} disimpan di: {filename}")
+    print(f"[+] {title} disimpan di: {filepath}")
 
-def evaluate_system():
-    ensure_dirs()
-    print("="*50)
-    print(" MEMULAI EVALUASI SISTEM BCI (AKURASI & LATENSI) ")
+def evaluate_system(exp_id="E0_Baseline"):
+    print("\n" + "="*50)
+    print(f" MEMULAI EVALUASI SISTEM BCI (REAL DATA) UNTUK: {exp_id} ")
     print("="*50)
 
-    # 1. Muat Model yang Sudah Dilatih
+    paths = setup_experiment(exp_id)
+    weights_dir = paths["weights"]
+    reports_dir = paths["reports"]
+    processed_dir = paths["processed_data"]
+
+    # 1. MUAT MODEL
     print("[*] Memuat Model EEGNet dan Word Assembler...")
     try:
-        eegnet = load_model(os.path.join(MODEL_DIR, "eegnet_trained.h5"))
-        with open(os.path.join(MODEL_DIR, "logistic_regression_assembler.pkl"), 'rb') as f:
+        eegnet_path = os.path.join(weights_dir, f"eegnet_trained_{exp_id}.h5")
+        eegnet = load_model(eegnet_path)
+        
+        logreg_path = os.path.join(weights_dir, f"logreg_assembler_{exp_id}.pkl")
+        with open(logreg_path, 'rb') as f:
             word_assembler = pickle.load(f)
     except Exception as e:
-        print(f"[X] Gagal memuat model. Pastikan train_pipeline dan word_assembler sudah dijalankan. Error: {e}")
+        print(f"[X] Gagal memuat model untuk '{exp_id}'. Error: {e}")
         return
 
-    # 2. Simulasi Data Uji (Karena data asli belum ada, kita gunakan dummy yang terstruktur)
-    # Dalam skenario nyata, Anda akan meload X_test.npy dan y_test.npy
-    print("[*] Menyiapkan 1000 data simulasi untuk Uji Kinerja...")
-    num_samples = 1000
-    # Input tensor untuk EEGNet: (Samples, 14 Channels, 256 Time, 1 Depth)
-    X_test_eeg = np.random.randn(num_samples, 14, 256, 1)
-    y_test_syllables = np.random.randint(0, 19, num_samples)
+    # 2. MUAT DATA SUNGGUHAN DARI HASIL PREPROCESSING
+    print("[*] Memuat data asli subjek dari direktori eksperimen...")
+    try:
+        # Data Suku Kata untuk Evaluasi EEGNet
+        X_eeg = np.load(os.path.join(processed_dir, "X_features.npy"))
+        y_syl = np.load(os.path.join(processed_dir, "y_labels.npy"))
+        # Transposisi (Samples, Channels, Time, Depth)
+        X_eeg = np.transpose(X_eeg, (0, 2, 1))
+        X_eeg = np.expand_dims(X_eeg, axis=3)
+
+        # Data Kata Utuh untuk Evaluasi Logistic Regression
+        X_word = np.load(os.path.join(processed_dir, "X_word_features.npy"))
+        y_word = np.load(os.path.join(processed_dir, "y_word_labels.npy"))
+    except Exception as e:
+        print(f"[X] Gagal memuat data .npy. Pastikan build_dataset dijalankan. Error: {e}")
+        return
 
     # ---------------------------------------------------------
-    # EVALUASI TAHAP 1: EEGNET (AKURASI SUKU KATA & LATENSI)
+    # EVALUASI TAHAP 1: EEGNET (AKURASI SUKU KATA)
     # ---------------------------------------------------------
     print("\n--- EVALUASI TAHAP 1: SUKU KATA (EEGNET) ---")
     
-    inference_times_eeg = []
-    y_pred_syllables = []
-
-    # Kita uji satu per satu untuk mengukur latensi persis seperti saat live-streaming
-    for i in range(num_samples):
-        sample = np.expand_dims(X_test_eeg[i], axis=0) # Ambil 1 epoch (1 detik)
-        
-        start_time = time.perf_counter()
-        prob = eegnet.predict(sample, verbose=0)
-        end_time = time.perf_counter()
-        
-        inference_times_eeg.append((end_time - start_time) * 1000) # Konversi ke milidetik
-        y_pred_syllables.append(np.argmax(prob))
-
-    # Kalkulasi Metrik Suku Kata
-    acc_syllable = accuracy_score(y_test_syllables, y_pred_syllables)
-    median_lat_eeg = np.median(inference_times_eeg)
-    p95_lat_eeg = np.percentile(inference_times_eeg, 95)
-
-    print(f"[+] Akurasi Suku Kata    : {acc_syllable * 100:.2f}%")
-    print(f"[+] Median Latensi       : {median_lat_eeg:.2f} ms")
-    print(f"[+] 95th Percentile Lat  : {p95_lat_eeg:.2f} ms")
+    start_time = time.perf_counter()
+    prob_syl = eegnet.predict(X_eeg, verbose=0)
+    end_time = time.perf_counter()
     
-    plot_confusion_matrix(y_test_syllables, y_pred_syllables, SYLLABLE_NAMES, 
-                          "Confusion Matrix Suku Kata", "cm_syllables.png")
+    y_pred_syl = np.argmax(prob_syl, axis=1)
+    acc_syllable = accuracy_score(y_syl, y_pred_syl)
+    avg_lat_eeg = ((end_time - start_time) / len(X_eeg)) * 1000
+
+    print(f"[+] Total Sampel Suku Kata : {len(X_eeg)}")
+    print(f"[+] Akurasi Suku Kata      : {acc_syllable * 100:.2f}%")
+    print(f"[+] Rata-rata Latensi/Item : {avg_lat_eeg:.2f} ms")
+    
+    cm_syl_path = os.path.join(reports_dir, f"cm_syllables_{exp_id}.png")
+    plot_confusion_matrix(y_syl, y_pred_syl, SYLLABLE_NAMES, 
+                          f"Confusion Matrix Suku Kata ({exp_id})", cm_syl_path)
 
     # ---------------------------------------------------------
-    # EVALUASI TAHAP 2: WORD ASSEMBLER (AKURASI KATA & LATENSI TOTAL)
+    # EVALUASI TAHAP 2: WORD ASSEMBLER (AKURASI KATA)
     # ---------------------------------------------------------
-    print("\n--- EVALUASI TAHAP 2: KATA UTUH (SISTEM END-TO-END) ---")
+    print("\n--- EVALUASI TAHAP 2: KATA UTUH (LOGISTIC REGRESSION) ---")
     
-    # Membuat simulasi pasangan kata: 500 Kata Utuh (1 Kata = 2 Suku Kata)
-    num_words = 500
-    y_test_words = np.random.randint(0, 10, num_words)
-    
-    total_latencies = []
-    y_pred_words = []
+    start_total = time.perf_counter()
+    y_pred_word = word_assembler.predict(X_word)
+    end_total = time.perf_counter()
 
-    for i in range(num_words):
-        # Ambil 2 sampel EEG acak seolah-olah ini Slot 1 dan Slot 2
-        slot1_eeg = np.expand_dims(X_test_eeg[i], axis=0)
-        slot2_eeg = np.expand_dims(X_test_eeg[i+1], axis=0)
-        
-        # MENGHITUNG TOTAL WAKTU END-TO-END (Dari Sinyal -> Teks Kata)
-        start_total = time.perf_counter()
-        
-        # Prediksi Slot 1 & 2
-        prob1 = eegnet.predict(slot1_eeg, verbose=0)[0]
-        prob2 = eegnet.predict(slot2_eeg, verbose=0)[0]
-        
-        # Rakit Kata
-        combined_probs = np.concatenate((prob1, prob2)).reshape(1, -1)
-        pred_word_idx = word_assembler.predict(combined_probs)[0]
-        
-        end_total = time.perf_counter()
-        
-        total_latencies.append((end_total - start_total) * 1000)
-        y_pred_words.append(pred_word_idx)
+    acc_word = accuracy_score(y_word, y_pred_word)
+    avg_lat_word = ((end_total - start_total) / len(X_word)) * 1000
 
-    # Kalkulasi Metrik Kata
-    acc_word = accuracy_score(y_test_words, y_pred_words)
-    median_lat_total = np.median(total_latencies)
-    p95_lat_total = np.percentile(total_latencies, 95)
+    print(f"[+] Total Sampel Kata      : {len(X_word)}")
+    print(f"[+] Akurasi Kata Utuh      : {acc_word * 100:.2f}%")
+    print(f"[+] Rata-rata Latensi/Item : {avg_lat_word:.2f} ms")
 
-    print(f"[+] Akurasi Kata Utuh    : {acc_word * 100:.2f}%")
-    print(f"[+] Median Latensi Total : {median_lat_total:.2f} ms")
-    print(f"[+] 95th Percentile Total: {p95_lat_total:.2f} ms")
-
-    plot_confusion_matrix(y_test_words, y_pred_words, WORD_NAMES, 
-                          "Confusion Matrix Kata", "cm_words.png")
+    cm_word_path = os.path.join(reports_dir, f"cm_words_{exp_id}.png")
+    plot_confusion_matrix(y_word, y_pred_word, WORD_NAMES, 
+                          f"Confusion Matrix Kata ({exp_id})", cm_word_path)
 
     print("\n" + "="*50)
-    print(f" EVALUASI SELESAI. Semua laporan disimpan di: {EVAL_DIR}/")
+    print(f" EVALUASI SELESAI. Semua laporan disimpan di: {reports_dir}/")
     print("="*50)
 
 if __name__ == "__main__":
-    evaluate_system()
+    evaluate_system(exp_id="E0_Baseline")
