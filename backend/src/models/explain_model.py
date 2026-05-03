@@ -7,6 +7,8 @@ import shap
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
+tf.experimental.numpy.experimental_enable_numpy_behavior()
+
 # Impor dari root backend
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_experiment

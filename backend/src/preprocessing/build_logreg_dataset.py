@@ -87,26 +87,29 @@ class LogRegDatasetBuilder:
             
         windows_array = np.array(clean_windows)
         
-        # Hanya gunakan channel yang dipilih
+        # Hanya gunakan channel yang dipilih -> Bentuk: (N, 256 Time, 14 Channel)
         windows_selected = windows_array[:, :, self.channel_indices]
-        
         N, T, C = windows_selected.shape
-        windows_2d = windows_selected.reshape(-1, C)
         
-        try:
-            # Menggunakan scaler yang disuntikkan saat inisialisasi kelas
-            windows_scaled_2d = self.scaler.transform(windows_2d)
-        except Exception as e:
-            print(f"[X] Gagal Scaling: {e}. Pastikan scaler cocok dengan channel ablation.")
-            return None
-            
-        windows_scaled = windows_scaled_2d.reshape(N, T, C)
-        
-        # Transpose sebelum masuk EEGNet (Sesuai Pipeline)
-        X_input = np.transpose(windows_scaled, (0, 2, 1))
+        # [PERBAIKAN KRITIS]: Transpose ke format EEGNet (N, 14 Channel, 256 Time, 1)
+        X_input = np.transpose(windows_selected, (0, 2, 1))
         X_input = np.expand_dims(X_input, axis=3)
         
-        probs = self.eegnet.predict(X_input, verbose=0) 
+        # Ratakan (Flatten) untuk StandardScaler -> (N, 3584)
+        X_input_flatten = X_input.reshape(N, -1)
+        
+        try:
+            # Gunakan Scaler Induk
+            X_scaled_flatten = self.scaler.transform(X_input_flatten)
+        except Exception as e:
+            print(f"[X] Gagal Scaling: {e}")
+            return None
+            
+        # Kembalikan ke bentuk 4D untuk EEGNet
+        X_scaled = X_scaled_flatten.reshape(N, C, T, 1)
+        
+        # Prediksi
+        probs = self.eegnet.predict(X_scaled, verbose=0) 
         averaged_prob = np.mean(probs, axis=0)
         return averaged_prob
 
