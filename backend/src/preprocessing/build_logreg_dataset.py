@@ -11,6 +11,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_experiment
 from preprocessing.signal_processor import SignalProcessor
 
+# [PERBAIKAN] Impor fungsi split
+from utils.data_utils import three_way_split
+
 WORD_CLASSES = {
     "MAKAN": 0, "MINUM": 1, "BERAK": 2, "PIPIS": 3, "MANDI": 4,
     "BOSAN": 5, "LELAH": 6, "SAKIT": 7, "TIDUR": 8, "SAYANG": 9
@@ -26,7 +29,6 @@ class LogRegDatasetBuilder:
         self.paths = setup_experiment(exp_id)
         self.raw_data_dir = self.paths["raw_data"]
         self.output_dir = self.paths["processed_data"]
-        self.scaler_dir = self.paths["scalers"]
         self.weights_dir = self.paths["weights"]
         
         # 2. Parameter Eksperimen
@@ -46,13 +48,19 @@ class LogRegDatasetBuilder:
             self.selected_channels = [ch for ch in channels_to_use if ch in self.all_channels]
         self.channel_indices = [self.all_channels.index(ch) for ch in self.selected_channels]
 
-        # 5. Load EEGNet Model SPESIFIK untuk Eksperimen ini
+        # 5. Load Model dan Scaler TERPUSAT untuk Eksperimen ini
         model_path = os.path.join(self.weights_dir, f"eegnet_trained_{exp_id}.h5")
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(f"[!] {model_path} tidak ditemukan. Latih EEGNet untuk {exp_id} terlebih dahulu!")
+        scaler_path = os.path.join(self.weights_dir, f"scaler_{exp_id}.pkl")
+        
+        if not os.path.exists(model_path) or not os.path.exists(scaler_path):
+            raise FileNotFoundError(f"[!] Model atau Scaler tidak ditemukan. Latih EEGNet untuk {exp_id} terlebih dahulu!")
             
         print(f"[*] Memuat model EEGNet: {model_path}")
         self.eegnet = load_model(model_path)
+        
+        print(f"[*] Memuat Scaler Induk: {scaler_path}")
+        with open(scaler_path, 'rb') as f:
+            self.scaler = pickle.load(f)
 
     def parse_log_for_word_sequence(self, log_filepath):
         sequence = []
@@ -61,13 +69,19 @@ class LogRegDatasetBuilder:
                 if "Menjalankan Trial" in line and "Kata:" in line:
                     try:
                         word = line.split("Kata: ")[1].split("(")[0].strip().upper()
-                        phase = "overt" if "overt" in line.lower() else "imagined"
+                        if "overt" in line.lower():
+                            phase = "overt"
+                        elif "imagined" in line.lower():
+                            phase = "imagined"
+                        else:
+                            phase = "unknown"
                         sequence.append({"word": word, "phase": phase})
                     except Exception:
                         pass
         return sequence
 
-    def extract_probabilities(self, clean_windows, scaler):
+    def extract_probabilities(self, clean_windows):
+        """Mengekstrak probabilitas suku kata menggunakan model dan scaler induk."""
         if len(clean_windows) == 0:
             return None
             
@@ -80,13 +94,15 @@ class LogRegDatasetBuilder:
         windows_2d = windows_selected.reshape(-1, C)
         
         try:
-            windows_scaled_2d = scaler.transform(windows_2d)
+            # Menggunakan scaler yang disuntikkan saat inisialisasi kelas
+            windows_scaled_2d = self.scaler.transform(windows_2d)
         except Exception as e:
             print(f"[X] Gagal Scaling: {e}. Pastikan scaler cocok dengan channel ablation.")
             return None
             
         windows_scaled = windows_scaled_2d.reshape(N, T, C)
         
+        # Transpose sebelum masuk EEGNet (Sesuai Pipeline)
         X_input = np.transpose(windows_scaled, (0, 2, 1))
         X_input = np.expand_dims(X_input, axis=3)
         
@@ -110,11 +126,6 @@ class LogRegDatasetBuilder:
             
             csv_files = glob.glob(os.path.join(self.raw_data_dir, f"{subject_id}*.csv"))
             if not csv_files: continue
-            
-            scaler_path = os.path.join(self.scaler_dir, f"{subject_id}_scaler.pkl")
-            if not os.path.exists(scaler_path): continue
-            with open(scaler_path, 'rb') as f:
-                scaler = pickle.load(f)
                 
             trial_sequence = self.parse_log_for_word_sequence(log_path)
             
@@ -139,17 +150,32 @@ class LogRegDatasetBuilder:
             filtered_eeg = self.processor.apply_filter(df[self.all_channels].values)
             marker_indices = df.index[df[marker_col] > 0].tolist()
             
-            # Asumsi: Setiap 2 marker adalah Slot 1 dan Slot 2
             valid_trials = 0
-            for i in range(0, len(marker_indices)-1, 2):
+            i = 0
+            trial_counter = 0
+            
+            while i < len(marker_indices) - 1:
                 idx_slot1 = marker_indices[i]
-                idx_slot2 = marker_indices[i+1]
+                marker_val1 = int(df.iloc[idx_slot1][marker_col])
                 
-                trial_index = i // 2
-                if trial_index >= len(trial_sequence): break
+                if marker_val1 < 1 or marker_val1 > 19:
+                    i += 1
+                    continue
                     
-                target_word = trial_sequence[trial_index]["word"]
-                trial_phase = trial_sequence[trial_index]["phase"]
+                idx_slot2 = marker_indices[i+1]
+                marker_val2 = int(df.iloc[idx_slot2][marker_col])
+                
+                if marker_val2 < 1 or marker_val2 > 19:
+                    i += 1 
+                    continue
+                
+                if trial_counter >= len(trial_sequence): break
+                    
+                target_word = trial_sequence[trial_counter]["word"]
+                trial_phase = trial_sequence[trial_counter]["phase"]
+                
+                i += 2 
+                trial_counter += 1
                 
                 if target_word not in WORD_CLASSES: continue
                 if self.phase_filter != "all" and trial_phase != self.phase_filter: continue
@@ -164,8 +190,8 @@ class LogRegDatasetBuilder:
                     clean_win1 = self.processor.windowing_slot(data_slot1)
                     clean_win2 = self.processor.windowing_slot(data_slot2)
                 
-                p1 = self.extract_probabilities(clean_win1, scaler)
-                p2 = self.extract_probabilities(clean_win2, scaler)
+                p1 = self.extract_probabilities(clean_win1)
+                p2 = self.extract_probabilities(clean_win2)
                 
                 if p1 is not None and p2 is not None:
                     phi_features = np.concatenate((p1, p2))
@@ -179,12 +205,21 @@ class LogRegDatasetBuilder:
             print("[!] Peringatan: Tidak ada data kata yang berhasil diekstrak.")
             return
 
+        # [PERBAIKAN KRITIS #1] Lakukan 3-way split dan simpan secara terpisah
         X_tensor = np.array(X_word_features)
         y_tensor = np.array(y_word_labels)
+
+        # Split word dataset agar ada test set yang valid untuk evaluate_model.py
+        X_w_train, X_w_val, X_w_test, y_w_train, y_w_val, y_w_test = three_way_split(X_tensor, y_tensor)
+
+        np.save(os.path.join(self.output_dir, "X_word_features.npy"), X_w_train) # Menyimpan Train set ke nama lama agar kompatibel
+        np.save(os.path.join(self.output_dir, "y_word_labels.npy"), y_w_train)
+        np.save(os.path.join(self.output_dir, "X_word_val.npy"), X_w_val)
+        np.save(os.path.join(self.output_dir, "y_word_val.npy"), y_w_val)
+        np.save(os.path.join(self.output_dir, "X_word_test.npy"), X_w_test)
+        np.save(os.path.join(self.output_dir, "y_word_test.npy"), y_w_test)
         
-        np.save(os.path.join(self.output_dir, "X_word_features.npy"), X_tensor)
-        np.save(os.path.join(self.output_dir, "y_word_labels.npy"), y_tensor)
-        print(f"[SUCCESS] Dataset Regresi Logistik disimpan di: {self.output_dir}")
+        print(f"[SUCCESS] Dataset LogReg disimpan: {len(X_w_train)} train | {len(X_w_val)} val | {len(X_w_test)} test")
 
 if __name__ == "__main__":
     builder = LogRegDatasetBuilder(exp_id="E0_Test")

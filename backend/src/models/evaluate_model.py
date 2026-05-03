@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_experiment
-from eegnet_model import EEGNetClassifier 
+from models.eegnet_model import EEGNetClassifier 
 
 SYLLABLE_NAMES = [
     "MA", "KAN", "MI", "NUM", "BE", "RAK", "PI", "PIS", "MAN", "DI", 
@@ -37,7 +37,7 @@ def plot_confusion_matrix(y_true, y_pred, classes, title, filepath):
 
 def evaluate_system(exp_id="E0_Baseline"):
     print("\n" + "="*50)
-    print(f" MEMULAI EVALUASI SISTEM BCI (REAL DATA) UNTUK: {exp_id} ")
+    print(f" MEMULAI EVALUASI SISTEM BCI (TEST DATA) UNTUK: {exp_id} ")
     print("="*50)
 
     paths = setup_experiment(exp_id)
@@ -58,21 +58,18 @@ def evaluate_system(exp_id="E0_Baseline"):
         print(f"[X] Gagal memuat model untuk '{exp_id}'. Error: {e}")
         return
 
-    # 2. MUAT DATA SUNGGUHAN DARI HASIL PREPROCESSING
-    print("[*] Memuat data asli subjek dari direktori eksperimen...")
+    # 2. MUAT TEST DATA
+    print("[*] Memuat data TEST dari direktori eksperimen...")
     try:
-        # Data Suku Kata untuk Evaluasi EEGNet
-        X_eeg = np.load(os.path.join(processed_dir, "X_features.npy"))
-        y_syl = np.load(os.path.join(processed_dir, "y_labels.npy"))
-        # Transposisi (Samples, Channels, Time, Depth)
-        X_eeg = np.transpose(X_eeg, (0, 2, 1))
-        X_eeg = np.expand_dims(X_eeg, axis=3)
+        # Data Suku Kata untuk Evaluasi EEGNet (Sudah dalam bentuk yang benar dari train_pipeline.py)
+        X_eeg = np.load(os.path.join(processed_dir, "X_test.npy"))
+        y_syl = np.load(os.path.join(processed_dir, "y_test.npy"))
 
         # Data Kata Utuh untuk Evaluasi Logistic Regression
-        X_word = np.load(os.path.join(processed_dir, "X_word_features.npy"))
-        y_word = np.load(os.path.join(processed_dir, "y_word_labels.npy"))
+        X_word = np.load(os.path.join(processed_dir, "X_word_test.npy"))
+        y_word = np.load(os.path.join(processed_dir, "y_word_test.npy"))
     except Exception as e:
-        print(f"[X] Gagal memuat data .npy. Pastikan build_dataset dijalankan. Error: {e}")
+        print(f"[X] Gagal memuat data test. Pastikan train_pipeline dan build_logreg_dataset dijalankan. Error: {e}")
         return
 
     # ---------------------------------------------------------

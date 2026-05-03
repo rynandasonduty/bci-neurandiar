@@ -2,7 +2,6 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 from eegnet_model import EEGNetClassifier
 import optuna
 import mlflow
@@ -11,6 +10,9 @@ import mlflow.tensorflow
 # Menghubungkan ke Mesin Direktori di config.py
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_experiment, MLFLOW_DB_PATH
+
+# [PERBAIKAN] Impor utilitas pemecah data dan scaler anti-leakage
+from utils.data_utils import three_way_split, fit_and_apply_scaler
 
 def load_and_prepare_data(processed_dir):
     print(f"[*] Memuat dataset tensor dari: {processed_dir}")
@@ -53,16 +55,24 @@ def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500):
     weights_dir = paths["weights"]
     reports_dir = paths["reports"]
     
-    # 2. Siapkan Data
+    # 2. Siapkan Data Mentah
     try:
         X, y = load_and_prepare_data(processed_dir)
     except FileNotFoundError:
         print(f"[X] Data tidak ditemukan di {processed_dir}. Jalankan build_dataset terlebih dahulu.")
         return
         
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+    # [PERBAIKAN KRITIS] Gunakan 3-way split untuk membuat arena pengujian yang adil
+    X_train, X_val, X_test, y_train, y_val, y_test = three_way_split(X, y, val_ratio=0.15, test_ratio=0.15)
+
+    # [PERBAIKAN KRITIS] Fit scaler hanya pada training, lalu transform ketiganya
+    scaler_path = os.path.join(weights_dir, f"scaler_{exp_id}.pkl")
+    X_train, X_val, X_test, scaler = fit_and_apply_scaler(X_train, X_val, X_test, save_path=scaler_path)
+    
+    # [PERBAIKAN KRITIS] Simpan Test Set ke disk agar evaluate_model.py mengevaluasi data yang belum pernah dilihat
+    np.save(os.path.join(processed_dir, "X_test.npy"), X_test)
+    np.save(os.path.join(processed_dir, "y_test.npy"), y_test)
+    print(f"[*] Test set dan Scaler berhasil diamankan ke disk.")
 
     # 3. Konfigurasi MLflow Experiment
     mlflow.set_tracking_uri(MLFLOW_DB_PATH) 
@@ -78,14 +88,16 @@ def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500):
             mlflow.log_params(trial.params)
             
             eegnet = EEGNetClassifier(
-                nb_classes=19, channels=14, samples=X_train.shape[2],
+                nb_classes=19, channels=X_train.shape[1], samples=X_train.shape[2],
                 dropout_rate=dropout_rate, F1=f1, D=d, F2=f1*d
             )
             
-            # Epochs lebih kecil saat tuning untuk menghemat waktu
+            # [PERBAIKAN BEST PRACTICE] Gunakan 20% dari max_epochs untuk Optuna agar distribusi konvergensi setara
+            opt_epochs = max(20, int(max_epochs * 0.2))
+            
             history = eegnet.train(
                 X_train, y_train, X_val, y_val, 
-                epochs=100, batch_size=batch_size
+                epochs=opt_epochs, batch_size=batch_size
             )
             
             best_val_acc = max(history.history['val_accuracy'])
@@ -110,7 +122,7 @@ def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500):
         mlflow.log_params(best_params)
         
         final_model = EEGNetClassifier(
-            nb_classes=19, channels=14, samples=X_train.shape[2],
+            nb_classes=19, channels=X_train.shape[1], samples=X_train.shape[2],
             dropout_rate=best_params["dropout_rate"], 
             F1=f1, D=d, F2=f1*d
         )
@@ -134,5 +146,4 @@ def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500):
         print(f"\n[SUCCESS] Model final dilatih dan disimpan di: {model_path}")
 
 if __name__ == "__main__":
-    # Ini akan dieksekusi jika file dijalankan secara mandiri untuk testing
     run_training_pipeline(exp_id="E0_Baseline", n_trials=3, max_epochs=50)

@@ -4,7 +4,6 @@ import sys
 import pickle
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.model_selection import train_test_split
 
 # Menghubungkan ke Mesin Direktori di config.py
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -39,31 +38,26 @@ class WordAssembler:
         # Inisialisasi model Regresi Logistik
         self.model = LogisticRegression(max_iter=1000, random_state=42)
 
-    def train(self, X_probs, y_words):
+    def train(self, X_train, y_train):
         """
         Melatih Regresi Logistik.
-        - X_probs: Matriks (Jumlah Sampel, 38) -> 19 probabilitas Slot 1 + 19 probabilitas Slot 2
-        - y_words: Array (Jumlah Sampel,) -> Label integer 0-9 untuk 10 kata target
+        - X_train: Matriks (Jumlah Sampel, 38) -> 19 probabilitas Slot 1 + 19 probabilitas Slot 2
+        - y_train: Array (Jumlah Sampel,) -> Label integer 0-9 untuk 10 kata target
         """
         print(f"[*] Melatih Model Regresi Logistik (Word Assembler)...")
         
-        # Membagi data untuk evaluasi internal model (80% Latih, 20% Uji)
-        X_train, X_test, y_train, y_test = train_test_split(
-            X_probs, y_words, test_size=0.2, random_state=42, stratify=y_words
-        )
-
-        # Proses melatih mesin
+        # [PERBAIKAN KRITIS] Split internal dihapus. 
+        # Model kini langsung di-fit pada seluruh data pelatihan murni.
         self.model.fit(X_train, y_train)
 
-        print("[*] Mengevaluasi Model Perakit Kata...")
-        y_pred = self.model.predict(X_test)
-        acc = accuracy_score(y_test, y_pred)
+        # Evaluasi internal (Hanya sebagai sanity check pada data latih)
+        # Evaluasi validasi dan test yang sesungguhnya dilakukan oleh evaluate_model.py
+        y_pred_train = self.model.predict(X_train)
+        acc_train = accuracy_score(y_train, y_pred_train)
         
-        print(f"[+] Akurasi Word Assembler: {acc * 100:.2f}%\n")
-        print("Laporan Klasifikasi (Confusion Matrix Metrics):")
-        print(classification_report(y_test, y_pred, target_names=list(WORD_CLASSES.keys())))
+        print(f"[+] Akurasi Word Assembler pada Training Set: {acc_train * 100:.2f}%\n")
         
-        return acc # Kembalikan akurasi agar bisa dicatat oleh MLflow nantinya
+        return acc_train
 
     def save_model(self):
         """Membekukan dan menyimpan model ke dalam file .pkl"""
@@ -111,7 +105,7 @@ if __name__ == "__main__":
     # Inisialisasi tanpa exp_id akan otomatis masuk mode simulasi
     assembler = WordAssembler()
 
-    # 1. Membuat Dummy Data
+    # 1. Membuat Dummy Data (Data Training)
     print("[*] Membuat 1000 data probabilitas simulasi...")
     X_dummy_probs = np.random.rand(1000, 38) 
     y_dummy_words = np.random.randint(0, 10, 1000)

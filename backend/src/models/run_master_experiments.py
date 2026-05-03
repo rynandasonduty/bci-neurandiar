@@ -2,7 +2,6 @@ import os
 import sys
 import time
 
-# Pastikan kita bisa memanggil file dari direktori lain
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from preprocessing.build_dataset import DatasetBuilder
@@ -90,7 +89,7 @@ if __name__ == "__main__":
     
     print("MEMULAI ORKESTRASI EKSPERIMEN...")
 
-    # --- 0. EXPERIMENT BASELINE (WAJIB JALAN PERTAMA) ---
+    # # --- 0. EXPERIMENT BASELINE (WAJIB JALAN PERTAMA) ---
     execute_experiment(
         exp_id="E0_Baseline",
         processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
@@ -101,58 +100,58 @@ if __name__ == "__main__":
         max_epochs=300
     )
 
-    # --- 1. EXPERIMENT ICA (MEMBERSIHKAN ARTEFAK MATA) ---
-    execute_experiment(
-        exp_id="E1_ICA_Filtering",
-        processor_params={"band": "broadband", "apply_ica": True, "target_fs": 256},
-        crop_time=None
-    )
+    # # --- 1. EXPERIMENT ICA (MEMBERSIHKAN ARTEFAK MATA) ---
+    # execute_experiment(
+    #     exp_id="E1_ICA_Filtering",
+    #     processor_params={"band": "broadband", "apply_ica": True, "target_fs": 256},
+    #     crop_time=None
+    # )
 
-    # --- 2. EXPERIMENT RESAMPLING (UPSAMPLING KE 512 Hz) ---
-    execute_experiment(
-        exp_id="E2_Resampling_512Hz",
-        processor_params={"band": "broadband", "apply_ica": False, "target_fs": 512},
-        crop_time=None
-    )
+    # # --- 2. EXPERIMENT RESAMPLING (UPSAMPLING KE 512 Hz) ---
+    # execute_experiment(
+    #     exp_id="E2_Resampling_512Hz",
+    #     processor_params={"band": "broadband", "apply_ica": False, "target_fs": 512},
+    #     crop_time=None
+    # )
 
-    # --- 3. EXPERIMENT ERP CROPPING (N400: FASE SEMANTIK 200-600ms) ---
-    execute_experiment(
-        exp_id="E3_ERP_N400",
-        processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
-        crop_time=(200, 600) 
-    )
+    # # --- 3. EXPERIMENT ERP CROPPING (N400: FASE SEMANTIK 200-600ms) ---
+    # execute_experiment(
+    #     exp_id="E3_ERP_N400",
+    #     processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
+    #     crop_time=(200, 600) 
+    # )
 
-    # --- 4. EXPERIMENT CHANNEL ABLATION (AREA BAHASA: BROCA & WERNICKE) ---
-    execute_experiment(
-        exp_id="E4_Channel_Language",
-        processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
-        channels_to_use=["EEG.F7", "EEG.F3", "EEG.FC5", "EEG.T7", "EEG.P7"],
-        crop_time=None
-    )
+    # # --- 4. EXPERIMENT CHANNEL ABLATION (AREA BAHASA: BROCA & WERNICKE) ---
+    # execute_experiment(
+    #     exp_id="E4_Channel_Language",
+    #     processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
+    #     channels_to_use=["EEG.F7", "EEG.F3", "EEG.FC5", "EEG.T7", "EEG.P7"],
+    #     crop_time=None
+    # )
 
-    # --- 5. EXPERIMENT AUGMENTASI (NOISE INJECTION & JITTERING) ---
-    execute_experiment(
-        exp_id="E5_Data_Augmentation",
-        processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
-        use_augmentation=True,
-        augmentation_params={"add_noise": True, "noise_factor": 0.05, "apply_jitter": True, "jitter_ms": 10},
-        crop_time=None
-    )
+    # # --- 5. EXPERIMENT AUGMENTASI (NOISE INJECTION & JITTERING) ---
+    # execute_experiment(
+    #     exp_id="E5_Data_Augmentation",
+    #     processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
+    #     use_augmentation=True,
+    #     augmentation_params={"add_noise": True, "noise_factor": 0.05, "apply_jitter": True, "jitter_ms": 10},
+    #     crop_time=None
+    # )
 
-    # --- 6. EXPERIMENT CROSS-MODALITY (HANYA MENGGUNAKAN DATA IMAGINED) ---
-    # Membandingkan hasilnya dengan E0_Baseline (yang menggabungkan overt+imagined)
-    execute_experiment(
-        exp_id="E6_CrossModality_ImaginedOnly",
-        processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
-        phase_filter="imagined",
-        crop_time=None
-    )
+    # # --- 6. EXPERIMENT CROSS-MODALITY (HANYA MENGGUNAKAN DATA IMAGINED) ---
+    # # Membandingkan hasilnya dengan E0_Baseline (yang menggabungkan overt+imagined)
+    # execute_experiment(
+    #     exp_id="E6_CrossModality_ImaginedOnly",
+    #     processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
+    #     phase_filter="imagined",
+    #     crop_time=None
+    # )
 
     # --- 7. EXPERIMENT PITA FREKUENSI (ISOLASI GELOMBANG ALPHA) ---
-    execute_experiment(
-        exp_id="E7_Band_Alpha",
-        processor_params={"band": "alpha", "apply_ica": False, "target_fs": 256},
-        crop_time=None
-    )
+    # execute_experiment(
+    #     exp_id="E7_Band_Alpha",
+    #     processor_params={"band": "alpha", "apply_ica": False, "target_fs": 256},
+    #     crop_time=None
+    # )
     
     print("\n🎉 SEMUA ANTREAN EKSPERIMEN TELAH SELESAI DIEKSEKUSI!")

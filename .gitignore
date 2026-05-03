@@ -12,6 +12,7 @@ env/
 # 2. DATASETS & MACHINE LEARNING MODELS
 # ==========================================
 backend/dataset/
+backend/reports/
 backend/logs/
 backend/models
 *.csv

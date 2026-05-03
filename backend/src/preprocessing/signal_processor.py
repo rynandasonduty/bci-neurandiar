@@ -33,6 +33,7 @@ class SignalProcessor:
         
         # Parameter Eksperimen
         self.apply_ica = apply_ica
+        # FIX: Semua ukuran pemotongan dan pergeseran akan bergantung pada target_fs
         self.target_fs = target_fs if target_fs is not None else fs
         
         self.eeg_channels = [
@@ -59,14 +60,20 @@ class SignalProcessor:
         if self.apply_ica:
             ica = FastICA(n_components=14, random_state=42, max_iter=800)
             sources = ica.fit_transform(filtered_data)
+            
+            # FIX: Evaluasi neurofisiologis artefak menggunakan Kurtosis
             for i in range(sources.shape[1]):
-                if np.max(np.abs(sources[:, i])) > 5.0: 
+                component_kurt = kurtosis(sources[:, i])
+                # Jika kurtosis tinggi (> 3.0), itu adalah distribusi non-Gaussian (berkemungkinan besar mata/otot)
+                if component_kurt > 3.0: 
                     sources[:, i] = 0
+                    
             filtered_data = ica.inverse_transform(sources)
             
         return filtered_data
 
     def reject_artifacts(self, epoch_data):
+        # Method ini digunakan SEBELUM Resampling
         max_amplitude = np.max(np.abs(epoch_data))
         if max_amplitude > self.artifact_threshold:
             return True
@@ -74,6 +81,7 @@ class SignalProcessor:
 
     def windowing_slot(self, slot_data):
         windows = []
+        # Ukuran window saat ini masih berdasarkan self.fs (sebelum resample)
         window_size = self.fs * 1  
         
         expected_length = 5 * self.fs
@@ -86,6 +94,10 @@ class SignalProcessor:
             window_data = slot_data[start_idx:end_idx]
             
             if not self.reject_artifacts(window_data):
+                # FIX: Aplikasikan Resampling JIKA target_fs berbeda
+                if self.target_fs != self.fs:
+                    target_length = self.target_fs * 1  # Untuk durasi 1 detik
+                    window_data = resample(window_data, target_length, axis=0)
                 windows.append(window_data)
                 
         return windows
@@ -129,12 +141,12 @@ class SignalProcessor:
             
         window_data = slot_data[start_idx:end_idx]
         
-        if self.target_fs != self.fs:
-            duration_sec = (end_ms - start_ms) / 1000.0
-            target_length = int(duration_sec * self.target_fs)
-            window_data = resample(window_data, target_length, axis=0)
-            
         if not self.reject_artifacts(window_data):
+            # FIX: Aplikasikan Resampling JIKA target_fs berbeda
+            if self.target_fs != self.fs:
+                duration_sec = (end_ms - start_ms) / 1000.0
+                target_length = int(duration_sec * self.target_fs)
+                window_data = resample(window_data, target_length, axis=0)
             return [window_data]
         else:
             return []
@@ -144,17 +156,19 @@ class SignalProcessor:
         augmented_data = window_data.copy()
         
         if apply_jitter:
-            jitter_samples = int((jitter_ms / 1000.0) * self.fs)
-            direction = np.random.choice([-1, 1]) 
-            shift = direction * jitter_samples
-            
-            if shift > 0: 
-                augmented_data[shift:, :] = augmented_data[:-shift, :]
-                augmented_data[:shift, :] = 0 
-            elif shift < 0: 
-                shift = abs(shift)
-                augmented_data[:-shift, :] = augmented_data[shift:, :]
-                augmented_data[-shift:, :] = 0
+            # FIX: Mencegah temporal leakage, pergeseran jittering harus bergantung pada target_fs
+            jitter_samples = int((jitter_ms / 1000.0) * self.target_fs)
+            if jitter_samples > 0:
+                direction = np.random.choice([-1, 1]) 
+                shift = direction * jitter_samples
+                
+                if shift > 0: 
+                    augmented_data[shift:, :] = augmented_data[:-shift, :]
+                    augmented_data[:shift, :] = 0 
+                elif shift < 0: 
+                    shift = abs(shift)
+                    augmented_data[:-shift, :] = augmented_data[shift:, :]
+                    augmented_data[-shift:, :] = 0
 
         if add_noise:
             noise = np.random.normal(0, noise_factor * np.std(augmented_data), augmented_data.shape)
