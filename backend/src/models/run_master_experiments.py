@@ -58,7 +58,8 @@ def execute_experiment(exp_id, processor_params=None, crop_time=None,
         
         # Load X_word dan y_word
         import numpy as np
-        paths = builder.paths # Pinjam kamus path
+        from config import setup_experiment         # <--- Tambahkan baris ini
+        paths = setup_experiment(exp_id)            # <--- Ganti builder.paths menjadi ini
         X_w = np.load(os.path.join(paths["processed_data"], "X_word_features.npy"))
         y_w = np.load(os.path.join(paths["processed_data"], "y_word_labels.npy"))
         
