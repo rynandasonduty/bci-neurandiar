@@ -74,7 +74,7 @@ def execute_e8_classical_grid():
                 if use_augmentation:
                     from preprocessing.signal_processor import SignalProcessor
                     aug_params = recipe.get("augmentation_params", {})
-                    proc = SignalProcessor(target_fs=recipe.get("target_fs", 256))
+                    proc = SignalProcessor(target_fs=recipe.get("processor_params", {}).get("target_fs", 256))
                     aug_list = []
                     for sample in X_train_3d:               
                         s2d = np.squeeze(sample).T       

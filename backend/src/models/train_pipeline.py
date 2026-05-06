@@ -70,7 +70,7 @@ def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500,
     scaler_path = os.path.join(weights_dir, f"scaler_{exp_id}.pkl")
     X_train, X_val, X_test, scaler = fit_and_apply_scaler(X_train, X_val, X_test, save_path=scaler_path)
     
-# [PERBAIKAN SEDANG] Eksekusi Augmentasi HANYA pada X_train setelah Scaling
+    # [PERBAIKAN SEDANG] Eksekusi Augmentasi HANYA pada X_train setelah Scaling
     if use_augmentation and augmentation_params:
         from preprocessing.signal_processor import SignalProcessor
         proc = SignalProcessor(target_fs=target_fs)

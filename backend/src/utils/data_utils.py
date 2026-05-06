@@ -71,5 +71,9 @@ def fit_and_apply_scaler(X_train, X_val, X_test, save_path=None):
         parent_dir = os.path.dirname(os.path.abspath(save_path))
         if parent_dir:  # Sabuk pengaman tambahan
             os.makedirs(parent_dir, exist_ok=True)
+        
+        # [PERBAIKAN KRITIS] Tulis scaler ke dalam disk
+        with open(save_path, 'wb') as f:
+            pickle.dump(scaler, f)
             
     return X_train_scaled, X_val_scaled, X_test_scaled, scaler

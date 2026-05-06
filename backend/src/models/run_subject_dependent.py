@@ -117,8 +117,8 @@ def execute_grid_subject_dependent(max_epochs=150):
             if use_augmentation:
                 from preprocessing.signal_processor import SignalProcessor
                 aug_params = recipe.get("augmentation_params", {})
-                proc = SignalProcessor(target_fs=recipe.get("target_fs", 256))
-            
+                proc = SignalProcessor(target_fs=recipe.get("processor_params", {}).get("target_fs", 256))  
+                          
                 aug_list = []
                 # Asumsi X_train berbentuk (N, 14, 256, 1) atau sejenisnya
                 # Sesuaikan np.squeeze(sample) agar menjadi (Time, Channels) untuk proc
