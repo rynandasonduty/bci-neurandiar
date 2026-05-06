@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import stats, signal
 
-# [PERBAIKAN AUDIT] Menghapus 'dfa' dan 'puck' dari global konfigurasi
 FEATURE_GROUPS = ['time', 'hjorth', 'barlow', 'band_ratio', 'all']
 
 class EEGFeatureExtractor:

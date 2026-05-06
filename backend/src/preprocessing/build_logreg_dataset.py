@@ -64,20 +64,27 @@ class LogRegDatasetBuilder:
 
     def parse_log_for_word_sequence(self, log_filepath):
         sequence = []
+        # 'Ingatan' sistem untuk melacak fase blok saat ini
+        current_phase = "unknown" 
+        
         with open(log_filepath, 'r') as file:
             for line in file:
+                line_lower = line.lower()
+                
+                # 1. Update Ingatan Fase jika menemukan kata kunci di header/log
+                if "overt" in line_lower:
+                    current_phase = "overt"
+                elif "imagined" in line_lower:
+                    current_phase = "imagined"
+                
+                # 2. Catat trial dan tempelkan fase yang sedang aktif di ingatan
                 if "Menjalankan Trial" in line and "Kata:" in line:
                     try:
                         word = line.split("Kata: ")[1].split("(")[0].strip().upper()
-                        if "overt" in line.lower():
-                            phase = "overt"
-                        elif "imagined" in line.lower():
-                            phase = "imagined"
-                        else:
-                            phase = "unknown"
-                        sequence.append({"word": word, "phase": phase})
+                        sequence.append({"word": word, "phase": current_phase})
                     except Exception:
                         pass
+                        
         return sequence
 
     def extract_probabilities(self, clean_windows):

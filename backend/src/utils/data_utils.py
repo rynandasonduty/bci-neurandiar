@@ -11,27 +11,35 @@ from sklearn.preprocessing import StandardScaler
 
 RANDOM_STATE = 42
 
-def three_way_split(X, y, val_ratio=0.15, test_ratio=0.15):
+def three_way_split(X, y, test_size=0.15, val_size=0.15, random_state=42):
     """
-    Membagi data menjadi 3 kantong: Train (70%), Validation (15%), dan Test (15%).
-    Menggunakan stratify untuk menjaga keseimbangan kelas suku kata.
+    Memecah data menjadi Train, Validation, dan Test secara aman (Anti-Leakage).
+    Dilengkapi Fallback jika stratifikasi gagal akibat data imbalanced.
     """
-    # Split pertama: Pisahkan Test set (15% dari total)
-    X_temp, X_test, y_temp, y_test = train_test_split(
-        X, y, test_size=test_ratio, random_state=RANDOM_STATE, stratify=y
-    )
+    test_ratio = test_size
+    val_relative_ratio = val_size / (1.0 - test_ratio)
     
-    # Hitung proporsi validation terhadap sisa data (X_temp)
-    # Jika test_ratio = 0.15, sisa data (temp) adalah 0.85. 
-    # Maka 0.15 / 0.85 = 0.17647...
-    val_of_temp = val_ratio / (1.0 - test_ratio)
-    
-    # Split kedua: Pisahkan Train dan Validation
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_temp, y_temp, test_size=val_of_temp, 
-        random_state=RANDOM_STATE, stratify=y_temp
-    )
-    
+    try:
+        # Percobaan 1: Stratified Split (Pembagian Proporsional - Best Practice)
+        X_temp, X_test, y_temp, y_test = train_test_split(
+            X, y, test_size=test_ratio, random_state=random_state, stratify=y
+        )
+        
+        X_train, X_val, y_train, y_val = train_test_split(
+            X_temp, y_temp, test_size=val_relative_ratio, random_state=random_state, stratify=y_temp
+        )
+        
+    except ValueError:
+        # Percobaan 2: Fallback ke Random Split biasa jika ada kelas yang cuma berjumlah 1
+        print("      [!] Peringatan: Data terlalu imbalanced untuk stratifikasi. Menggunakan Random Split.")
+        X_temp, X_test, y_temp, y_test = train_test_split(
+            X, y, test_size=test_ratio, random_state=random_state, stratify=None
+        )
+        
+        X_train, X_val, y_train, y_val = train_test_split(
+            X_temp, y_temp, test_size=val_relative_ratio, random_state=random_state, stratify=None
+        )
+
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 def fit_and_apply_scaler(X_train, X_val, X_test, save_path=None):
