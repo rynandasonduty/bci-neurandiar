@@ -113,6 +113,29 @@ def execute_grid_subject_dependent(max_epochs=150):
             scaler_path = os.path.join(weights_dir, f"scaler_{exp_name}_{subject_id}.pkl")
             X_train, X_val, X_test, scaler = fit_and_apply_scaler(X_train, X_val, X_test, save_path=scaler_path)
             
+            use_augmentation = recipe.get("use_augmentation", False)
+            if use_augmentation:
+                from preprocessing.signal_processor import SignalProcessor
+                aug_params = recipe.get("augmentation_params", {})
+                proc = SignalProcessor(target_fs=recipe.get("target_fs", 256))
+            
+                aug_list = []
+                # Asumsi X_train berbentuk (N, 14, 256, 1) atau sejenisnya
+                # Sesuaikan np.squeeze(sample) agar menjadi (Time, Channels) untuk proc
+                for sample in X_train:               
+                    s2d = np.squeeze(sample).T       
+                    aug = proc.apply_augmentation(s2d, **aug_params)
+                    aug_list.append(np.expand_dims(aug.T, -1))
+                    
+                X_aug = np.array(aug_list)
+                X_train = np.concatenate([X_train, X_aug], axis=0)
+                y_train = np.concatenate([y_train, y_train], axis=0)
+                
+                # Acak ulang (shuffle) agar data asli dan augmentasi bercampur
+                shuffle_idx = np.random.permutation(len(y_train))
+                X_train, y_train = X_train[shuffle_idx], y_train[shuffle_idx]
+                print(f"      [+] E5 Augmentasi berhasil: Total X_train menjadi {len(X_train)} sampel")
+            
             np.save(os.path.join(weights_dir, f"Xtest_{exp_name}_{subject_id}.npy"), X_test)
             np.save(os.path.join(weights_dir, f"ytest_{exp_name}_{subject_id}.npy"), y_test)
             

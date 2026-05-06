@@ -41,7 +41,8 @@ def plot_history(history, save_path):
     plt.savefig(save_path)
     plt.close()
 
-def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500):
+def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500, 
+                          use_augmentation=False, augmentation_params=None, target_fs=256):
     """
     Fungsi master untuk melatih EEGNet berdasarkan eksperimen tertentu.
     """
@@ -68,6 +69,25 @@ def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500):
     # [PERBAIKAN KRITIS] Fit scaler hanya pada training, lalu transform ketiganya
     scaler_path = os.path.join(weights_dir, f"scaler_{exp_id}.pkl")
     X_train, X_val, X_test, scaler = fit_and_apply_scaler(X_train, X_val, X_test, save_path=scaler_path)
+    
+# [PERBAIKAN SEDANG] Eksekusi Augmentasi HANYA pada X_train setelah Scaling
+    if use_augmentation and augmentation_params:
+        from preprocessing.signal_processor import SignalProcessor
+        proc = SignalProcessor(target_fs=target_fs)
+        
+        aug_list = []
+        for sample in X_train:               
+            s2d = np.squeeze(sample).T       
+            aug = proc.apply_augmentation(s2d, **augmentation_params)
+            aug_list.append(np.expand_dims(aug.T, -1))
+            
+        X_aug = np.array(aug_list)
+        X_train = np.concatenate([X_train, X_aug], axis=0)
+        y_train = np.concatenate([y_train, y_train], axis=0)
+        
+        shuffle_idx = np.random.permutation(len(y_train))
+        X_train, y_train = X_train[shuffle_idx], y_train[shuffle_idx]
+        print(f"[*] E5 Augmentasi berhasil: Total X_train menjadi {len(X_train)} sampel")
     
     # [PERBAIKAN KRITIS] Simpan Test Set ke disk agar evaluate_model.py mengevaluasi data yang belum pernah dilihat
     np.save(os.path.join(processed_dir, "X_test.npy"), X_test)

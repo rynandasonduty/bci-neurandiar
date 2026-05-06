@@ -63,7 +63,8 @@ def run_explainability(exp_id="E0_Baseline"):
             shap_mean = np.mean(shap_abs, axis=tuple([i for i in range(shap_abs.ndim) if i not in [1, 2]]))
         
         # Pastikan orientasi matrix benar: 14 baris (Channel), 256 kolom (Waktu)
-        if shap_mean.shape[0] != 14:
+        n_channels = X.shape[1] 
+        if shap_mean.shape[0] != n_channels:
             shap_mean = shap_mean.T
 
         plt.figure(figsize=(12, 6))
