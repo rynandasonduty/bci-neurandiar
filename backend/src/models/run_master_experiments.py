@@ -102,7 +102,7 @@ if __name__ == "__main__":
     
     print("MEMULAI ORKESTRASI EKSPERIMEN...")
 
-    # # # # --- 0. EXPERIMENT BASELINE (WAJIB JALAN PERTAMA) ---
+    # # # # # --- 0. EXPERIMENT BASELINE (WAJIB JALAN PERTAMA) ---
     execute_experiment(
         exp_id="E0_Baseline",
         processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
@@ -113,28 +113,28 @@ if __name__ == "__main__":
         max_epochs=300
     )
 
-    # # # # --- 1. EXPERIMENT ICA (MEMBERSIHKAN ARTEFAK MATA) ---
+    # # # # # --- 1. EXPERIMENT ICA (MEMBERSIHKAN ARTEFAK MATA) ---
     execute_experiment(
         exp_id="E1_ICA_Filtering",
         processor_params={"band": "broadband", "apply_ica": True, "target_fs": 256},
         crop_time=None
     )
 
-    # # # # --- 2. EXPERIMENT RESAMPLING (UPSAMPLING KE 512 Hz) ---
+    # # # # # --- 2. EXPERIMENT RESAMPLING (UPSAMPLING KE 512 Hz) ---
     execute_experiment(
         exp_id="E2_Resampling_512Hz",
         processor_params={"band": "broadband", "apply_ica": False, "target_fs": 512},
         crop_time=None
     )
 
-    # # # # --- 3. EXPERIMENT ERP CROPPING (N400: FASE SEMANTIK 200-600ms) ---
+    # # # # # --- 3. EXPERIMENT ERP CROPPING (N400: FASE SEMANTIK 200-600ms) ---
     execute_experiment(
         exp_id="E3_ERP_N400",
         processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
         crop_time=(200, 600) 
     )
 
-    # # # # --- 4. EXPERIMENT CHANNEL ABLATION (AREA BAHASA: BROCA & WERNICKE) ---
+    # # # # # --- 4. EXPERIMENT CHANNEL ABLATION (AREA BAHASA: BROCA & WERNICKE) ---
     execute_experiment(
         exp_id="E4_Channel_Language",
         processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
@@ -151,8 +151,8 @@ if __name__ == "__main__":
         crop_time=None
     )
 
-    # # # # --- 6. EXPERIMENT CROSS-MODALITY (HANYA MENGGUNAKAN DATA IMAGINED) ---
-    # # # Membandingkan hasilnya dengan E0_Baseline (yang menggabungkan overt+imagined)
+    # # # # # --- 6. EXPERIMENT CROSS-MODALITY (HANYA MENGGUNAKAN DATA IMAGINED) ---
+    # # # # Membandingkan hasilnya dengan E0_Baseline (yang menggabungkan overt+imagined)
     execute_experiment(
         exp_id="E6_CrossModality_ImaginedOnly",
         processor_params={"band": "broadband", "apply_ica": False, "target_fs": 256},
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         crop_time=None
     )
 
-    # # --- 7. EXPERIMENT PITA FREKUENSI (ISOLASI GELOMBANG ALPHA) ---
+    # # # --- 7. EXPERIMENT PITA FREKUENSI (ISOLASI GELOMBANG ALPHA) ---
     execute_experiment(
         exp_id="E7_Band_Alpha",
         processor_params={"band": "alpha", "apply_ica": False, "target_fs": 256},

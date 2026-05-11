@@ -62,6 +62,14 @@ def execute_e8_classical_grid():
             
             for subject_id in subject_ids:
                 
+                # =======================================================
+                # [PERBAIKAN 1] SISTEM AUTO-RESUME (SKIP MODEL YANG SUDAH ADA)
+                model_path = os.path.join(weights_dir, f"SVM_{feat_group}_{exp_name}_{subject_id}.pkl")
+                if os.path.exists(model_path):
+                    print(f"      [SKIP] Model {feat_group} untuk {subject_id} sudah ada. Melanjutkan...")
+                    continue
+                # =======================================================
+
                 # 1. Load data 3D Mentah
                 X_3d, y = load_3d_data(exp_name, subject_id, raw_dir, recipe)
                 if X_3d is None: continue
@@ -99,6 +107,13 @@ def execute_e8_classical_grid():
                 X_val = extractor.transform(np.squeeze(X_val_3d, axis=-1), groups=groups)
                 X_test = extractor.transform(np.squeeze(X_test_3d, axis=-1), groups=groups)
                 
+                # =======================================================
+                # [PERBAIKAN 2] PEMBERSIH NaN & Infinity akibat ICA
+                X_train = np.nan_to_num(X_train, nan=0.0, posinf=0.0, neginf=0.0)
+                X_val = np.nan_to_num(X_val, nan=0.0, posinf=0.0, neginf=0.0)
+                X_test = np.nan_to_num(X_test, nan=0.0, posinf=0.0, neginf=0.0)
+                # =======================================================
+
                 # 5. SCALING FITUR 2D
                 scaler_path = os.path.join(weights_dir, f"scaler_SVM_{feat_group}_{exp_name}_{subject_id}.pkl")
                 X_train, X_val, X_test, scaler = fit_and_apply_scaler(X_train, X_val, X_test, save_path=scaler_path)
@@ -122,7 +137,7 @@ def execute_e8_classical_grid():
                     mlflow.log_metric("best_val_accuracy", val_acc)
                     
                     # Simpan bobot (.pkl)
-                    model_path = os.path.join(weights_dir, f"SVM_{feat_group}_{exp_name}_{subject_id}.pkl")
+                    # model_path sudah didefinisikan di awal loop (Sistem Auto-Resume)
                     model.save_model(model_path)
                     
                     print(f"      👉 Subjek: {subject_id} | Val Acc: {val_acc*100:.2f}%")
