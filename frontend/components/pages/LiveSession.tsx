@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { API_URL, WS_URL } from "@/lib/api"
 import {
   Zap,
   Square,
@@ -268,7 +269,7 @@ function ResultDisplay({
                 <Trash2 className="w-3.5 h-3.5" /> Clear All
               </Button>
               <Button size="sm" variant="outline" disabled={isSaved} onClick={onSaveLog} className={`flex-1 gap-1.5 text-xs transition-colors ${isSaved ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'text-emerald-600 border-emerald-200 hover:bg-emerald-50'}`}>
-                <Database className="w-3.5 h-3.5" /> {isSaved ? 'Tersimpan' : 'Save to History'}
+                <Database className="w-3.5 h-3.5" /> {isSaved ? 'Saved' : 'Save to History'}
               </Button>
             </div>
           </>
@@ -288,7 +289,7 @@ export default function LiveSessionPage() {
   const [intentState, setIntentState] = useState<IntentState>("idle")
   
   const [rawDecodedWord, setRawDecodedWord] = useState<string>("---")
-  const [refinedSentence, setRefinedSentence] = useState<string>("Menunggu sinyal otak...")
+  const [refinedSentence, setRefinedSentence] = useState<string>("Awaiting brain signal...")
   const [aiConfidence, setAiConfidence] = useState<number>(0)
   const [isRunning, setIsRunning] = useState(false)
   
@@ -299,11 +300,11 @@ export default function LiveSessionPage() {
   const ws = useRef<WebSocket | null>(null)
 
   useEffect(() => {
-    ws.current = new WebSocket('ws://127.0.0.1:8000/ws/inference')
+    ws.current = new WebSocket(`${WS_URL}/ws/inference`)
 
     ws.current.onopen = () => {
       setIsConnected(true)
-      setStatusMsg('Terhubung ke BCI Engine')
+      setStatusMsg('Connected to BCI Engine')
     }
 
     ws.current.onmessage = (event) => {
@@ -315,7 +316,7 @@ export default function LiveSessionPage() {
         setIntentState("decoding")
       } 
       else if (data.status === 'success') {
-        setStatusMsg('Dekode Selesai!')
+        setStatusMsg('Decoding Complete!')
         setActiveStep(5) 
         setIntentState("done")
         setIsRunning(false)
@@ -329,7 +330,7 @@ export default function LiveSessionPage() {
 
     ws.current.onclose = () => {
       setIsConnected(false)
-      setStatusMsg('Koneksi Terputus')
+      setStatusMsg('Connection Lost')
       setActiveStep(0)
       setIntentState("idle")
       setIsRunning(false)
@@ -346,7 +347,7 @@ export default function LiveSessionPage() {
       setActiveStep(0)
       setIntentState("spike_detected")
       setRawDecodedWord('...')
-      setRefinedSentence('Menganalisis...')
+      setRefinedSentence('Analysing...')
       setAiConfidence(0)
       
       ws.current.send(`START_DECODE|${activeSubject}`)
@@ -360,7 +361,7 @@ export default function LiveSessionPage() {
     setActiveStep(0)
     setIntentState("idle")
     setIsRunning(false)
-    setStatusMsg('Sesi Dihentikan Darurat')
+    setStatusMsg('Emergency Stop Activated')
   }
 
   const handleDeleteLastWord = () => {
@@ -381,7 +382,7 @@ export default function LiveSessionPage() {
 
   const handleSaveToHistory = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/logs', {
+      const response = await fetch(`${API_URL}/api/logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -393,7 +394,7 @@ export default function LiveSessionPage() {
       });
       if (response.ok) {
         setIsSaved(true);
-        setStatusMsg("Berhasil Disimpan ke History!");
+        setStatusMsg("Saved to History Successfully!");
       }
     } catch (error) {
       console.error("Gagal menyimpan log:", error);

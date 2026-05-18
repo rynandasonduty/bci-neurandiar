@@ -10,15 +10,15 @@ class CortexClient:
         self.auth_token = None
         self.session_id = None
         self.headset_id = None
-        self.req_id = 1  # ID increment untuk JSON RPC
+        self.req_id = 1  # Monotonically increasing JSON-RPC request ID
 
     def connect(self):
-        print("[*] Menghubungkan ke Emotiv Cortex API...")
+        print("[INFO] Connecting to Emotiv Cortex API...")
         self.ws = create_connection(CORTEX_URL, sslopt={"cert_reqs": ssl.CERT_NONE})
-        print("[+] Terhubung ke WebSocket Emotiv!")
+        print("[INFO] WebSocket connection to Emotiv established.")
 
     def send_request(self, method, params=None):
-        """Fungsi helper untuk mengirim dan menerima JSON RPC ke Cortex"""
+        """Send a JSON-RPC request to the Cortex API and return the parsed response."""
         payload = {
             "jsonrpc": "2.0",
             "method": method,
@@ -27,54 +27,56 @@ class CortexClient:
         }
         self.req_id += 1
         self.ws.send(json.dumps(payload))
-        
+
         result = json.loads(self.ws.recv())
         return result
 
     def request_access(self):
-        print("[*] Meminta Hak Akses (Request Access)...")
+        print("[INFO] Requesting Cortex API access...")
         res = self.send_request("requestAccess", {
             "clientId": CLIENT_ID,
             "clientSecret": CLIENT_SECRET
         })
         if res.get('result', {}).get('accessGranted') == False:
-            print("\n[!] PERHATIAN: Silakan buka aplikasi Emotiv Launcher")
-            print("[!] Klik tombol 'Approve' pada permintaan akses Neurandiar BCI.\n")
+            print("\n[ACTION REQUIRED] Open the Emotiv Launcher application.")
+            print("[ACTION REQUIRED] Approve the Neurandiar BCI access request in the Launcher.\n")
             time.sleep(5)
 
     def authorize(self):
-        print("[*] Melakukan Otorisasi...")
+        print("[INFO] Authorising Cortex API session...")
         res = self.send_request("authorize", {
             "clientId": CLIENT_ID,
             "clientSecret": CLIENT_SECRET,
-            "debit": 1  
+            "debit": 1
         })
-        
+
         if 'error' in res:
             res = self.send_request("authorize", {
                 "clientId": CLIENT_ID,
                 "clientSecret": CLIENT_SECRET,
                 "debit": 0
             })
-        
+
         self.auth_token = res.get('result', {}).get('cortexToken')
         if self.auth_token:
-            print("[+] Otorisasi Berhasil!")
+            print("[INFO] Authorisation successful.")
         else:
-            raise Exception(f"[-] Otorisasi Gagal: {res}")
+            raise Exception(f"[ERROR] Authorisation failed: {res}")
 
     def query_headset(self):
-        print("[*] Mencari Headset Emotiv EPOC X...")
+        print("[INFO] Querying for Emotiv EPOC X headset...")
         res = self.send_request("queryHeadsets")
         for headset in res.get('result', []):
             if headset['status'] in ['connected', 'discovered']:
                 self.headset_id = headset['id']
-                print(f"[+] Headset Ditemukan: {self.headset_id} ({headset['status']})")
+                print(f"[INFO] Headset found: {self.headset_id} ({headset['status']})")
                 return True
-        raise Exception("[-] Headset tidak ditemukan. Pastikan headset menyala dan terhubung via Dongle/Bluetooth!")
+        raise Exception(
+            "[ERROR] No headset detected. Ensure the headset is powered on and connected via Dongle or Bluetooth."
+        )
 
     def create_session(self):
-        print("[*] Membuat Sesi Eksperimen...")
+        print("[INFO] Creating Cortex experiment session...")
         res = self.send_request("createSession", {
             "cortexToken": self.auth_token,
             "headset": self.headset_id,
@@ -82,60 +84,58 @@ class CortexClient:
         })
         self.session_id = res.get('result', {}).get('id')
         if self.session_id:
-            print(f"[+] Sesi Berhasil Dibuat: {self.session_id}")
+            print(f"[INFO] Session created: {self.session_id}")
         else:
-            raise Exception(f"[-] Gagal Membuat Sesi: {res}")
+            raise Exception(f"[ERROR] Failed to create session: {res}")
 
     # def start_record(self, record_title="BCI_Neurandiar"):
-    #     """Memulai penulisan data ke file Record di Emotiv"""
-    #     print(f"[*] Menyiapkan perekaman data (Record: {record_title})...")
-        
-    #     time.sleep(2) 
-        
+    #     """Initiate data recording to an Emotiv Record file (full parameter set)."""
+    #     print(f"[INFO] Preparing data recording (Record: {record_title})...")
+    #
+    #     time.sleep(2)
+    #
     #     res = self.send_request("updateSession", {
     #         "cortexToken": self.auth_token,
     #         "session": self.session_id,
     #         "status": "startRecord",
     #         "title": record_title,
-    #         "description": "Eksperimen BCI Imagined Speech",
-    #         "subjectName": "Responden",
+    #         "description": "BCI Imagined Speech Experiment",
+    #         "subjectName": "Participant",
     #         "tags": ["bci", "eeg"]
     #     })
-        
+    #
     #     if 'error' in res:
-    #         print(f"\n[-] Peringatan API: {res['error']['message']}")
-    #         print("[!] KEMUNGKINAN LIMITASI AKUN GRATIS (BASIC TIER).")
-    #         print("[!] SOLUSI MANUAL: Biarkan program ini menyala.")
-    #         print("[!] Buka aplikasi Emotiv Launcher/EmotivPRO, cari sesi yang sedang aktif,")
-    #         print("[!] dan klik tombol 'RECORD' secara manual di aplikasi tersebut.")
-    #         print("[!] Setelah itu, kembali ke layar hitam dan tekan SPASI untuk mulai.\n")
+    #         print(f"\n[WARNING] API error: {res['error']['message']}")
+    #         print("[NOTE] This may indicate a free-tier (Basic) account restriction.")
+    #         print("[WORKAROUND] Leave this process running.")
+    #         print("[WORKAROUND] In Emotiv Launcher or EmotivPRO, locate the active session")
+    #         print("[WORKAROUND] and click RECORD manually. Then return here and press SPACE.")
     #     else:
-    #         print(f"[+] Perekaman otomatis berhasil dimulai! Data sedang disimpan...")
+    #         print("[INFO] Automatic recording started. Data is being saved.")
 
     def start_record(self, record_title="BCI_Neurandiar"):
-        """Memulai penulisan data ke file Record di Emotiv dengan parameter minimal"""
-        print(f"[*] Menyiapkan perekaman data (Record: {record_title})...")
-        
-        # Jeda 2 detik agar sesi benar-benar stabil
-        time.sleep(2) 
-        
-        # HANYA mengirimkan parameter yang diwajibkan (tanpa description, tags, dll)
+        """Initiate data recording using the minimal required parameter set."""
+        print(f"[INFO] Preparing data recording (Record: {record_title})...")
+
+        # Brief delay to ensure the session is fully active before sending updateSession
+        time.sleep(2)
+
         res = self.send_request("updateSession", {
             "cortexToken": self.auth_token,
             "session": self.session_id,
             "status": "startRecord",
             "title": record_title
         })
-        
+
         if 'error' in res:
-            print(f"\n[-] Peringatan API: {res['error']['message']}")
-            print("[!] JIKA ERROR BERUBAH MENJADI 'LICENSE REQUIRED' atau semacamnya,")
-            print("[!] ITU BUKTI VALID BAHWA KODE KITA SUDAH BENAR, NAMUN DIBLOKIR PAYWALL LISENSI GRATIS.")
+            print(f"\n[WARNING] API error: {res['error']['message']}")
+            print("[NOTE] A 'LICENSE REQUIRED' error confirms the request is correctly formed")
+            print("[NOTE] but is blocked by the free-tier paywall. Manual recording is required.")
         else:
-            print(f"[+] Perekaman otomatis berhasil dimulai! Data sedang disimpan...")
+            print("[INFO] Automatic recording started. Data is being saved.")
 
     def inject_marker(self, marker_value, marker_label="event"):
-        """Menyuntikkan marker (integer) ke aliran data EEG tepat saat stimulus (BIP) dimainkan."""
+        """Inject an integer marker into the EEG data stream at stimulus onset."""
         if not self.session_id:
             return
 
@@ -147,14 +147,14 @@ class CortexClient:
             "value": marker_value,
             "time": time_ms
         })
-        
+
         if 'error' in res:
-            print(f"[-] Gagal Inject Marker {marker_value}: {res['error']['message']}")
+            print(f"[ERROR] Failed to inject marker {marker_value}: {res['error']['message']}")
         # else:
-        #     print(f"[MARKER] Marker {marker_value} ({marker_label}) berhasil disuntikkan pada {time_ms} ms")
+        #     print(f"[MARKER] Marker {marker_value} ({marker_label}) injected at {time_ms} ms")
 
     def setup(self, record_title="BCI_Neurandiar"):
-        """Menjalankan seluruh alur inisialisasi Cortex"""
+        """Execute the full Cortex initialisation sequence."""
         self.connect()
         self.request_access()
         self.authorize()
@@ -163,9 +163,9 @@ class CortexClient:
         self.start_record(record_title=record_title)
 
     def close(self):
-        """Menutup sesi perekaman dan koneksi Cortex secara aman"""
+        """Stop the recording and cleanly close the Cortex session and WebSocket."""
         if self.session_id and self.auth_token:
-            print(f"\n[*] Menghentikan perekaman dan menyimpan data ke file...")
+            print("\n[INFO] Stopping recording and closing Cortex session...")
             self.send_request("updateSession", {
                 "cortexToken": self.auth_token,
                 "session": self.session_id,
@@ -178,4 +178,4 @@ class CortexClient:
             })
         if self.ws:
             self.ws.close()
-            print("[+] Koneksi Cortex ditutup.")
+            print("[INFO] Cortex WebSocket connection closed.")

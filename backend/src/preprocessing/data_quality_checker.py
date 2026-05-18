@@ -10,218 +10,205 @@ class DataQualityChecker:
     def __init__(self, csv_filepath):
         self.csv_filepath = csv_filepath
         self.processor = SignalProcessor()
-        
+
         if not os.path.exists(csv_filepath):
-            raise FileNotFoundError(f"[!] File tidak ditemukan: {csv_filepath}")
+            raise FileNotFoundError(f"File not found: {csv_filepath}")
 
     def run_qc(self):
-        print("\n" + "="*60)
-        print(f" 🕵️ INSPEKSI MUTU DATA: {os.path.basename(self.csv_filepath)} ")
-        print("="*60)
-        
+        print("\n" + "=" * 60)
+        print(f" DATA QUALITY INSPECTION: {os.path.basename(self.csv_filepath)} ")
+        print("=" * 60)
+
         try:
-            # 1. Cari baris yang mengandung nama kolom (Header) secara otomatis
+            # Locate the CSV header row containing EEG channel names
             header_idx = 0
             with open(self.csv_filepath, 'r') as f:
                 for i, line in enumerate(f):
                     if 'EEG.AF3' in line or 'AF3' in line:
                         header_idx = i
                         break
-            
-            # 2. Baca CSV mulai dari baris header tersebut
+
             df = pd.read_csv(self.csv_filepath, header=header_idx, low_memory=False)
-            
-            # 3. Hapus baris "Units" (misal: 'uV', 'Hz') di baris pertama data jika ada
+
+            # Drop the EmotivPRO units row ('uV', 'Hz') if present
             try:
                 float(df.iloc[0][self.processor.eeg_channels[0]])
             except (ValueError, TypeError):
                 df = df.iloc[1:].reset_index(drop=True)
-                
-            # 4. Paksa konversi kolom EEG menjadi angka (mengatasi error Mixed Types)
+
             for col in self.processor.eeg_channels:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
-                
-            # Paksa konversi kolom Marker menjadi angka
+
             marker_col = 'MarkerValueInt' if 'MarkerValueInt' in df.columns else 'Marker'
             if marker_col in df.columns:
                 df[marker_col] = pd.to_numeric(df[marker_col], errors='coerce').fillna(0)
 
         except Exception as e:
-            print(f"[-] GAGAL MEMBACA CSV: File corrupt atau tidak valid. ({e})")
+            print(f"[ERROR] Failed to read CSV — file may be corrupt or invalid. ({e})")
             return
 
-        score = 100 # Nilai awal
+        score = 100
         eeg_cols = self.processor.eeg_channels
-              
+
         # ==========================================
-        # 1. UJI MISSING VALUES (Kekosongan Data)
+        # 1. MISSING VALUES
         # ==========================================
-        print("\n[1] Uji Missing Values (Data Hilang / NaN)...")
+        print("\n[1] Missing Values (NaN detection)...")
         missing_count = df[eeg_cols].isnull().sum().sum()
         if missing_count > 0:
-            print(f"    [-] BAHAYA: Ditemukan {missing_count} titik data kosong (NaN)!")
+            print(f"    [FAIL] {missing_count} missing data points detected.")
             score -= 20
         else:
-            print("    [+] LULUS: Tidak ada data yang bolong akibat koneksi terputus.")
+            print("    [PASS] No missing values detected.")
 
         # ==========================================
-        # 2. UJI INTEGRITAS & KONSISTENSI MARKER
+        # 2. MARKER INTEGRITY AND CLASS COVERAGE
         # ==========================================
-        print("\n[2] Uji Integritas & Keberagaman Marker...")
+        print("\n[2] Marker Integrity and Class Coverage...")
         marker_col = 'MarkerValueInt' if 'MarkerValueInt' in df.columns else 'Marker'
         if marker_col not in df.columns:
-            print("    [-] GAGAL: Kolom LSL Marker tidak ditemukan!")
+            print("    [FAIL] LSL Marker column not found.")
             return
-            
+
         markers = df[df[marker_col] > 0][marker_col].astype(int).tolist()
         total_markers = len(markers)
-        print(f"    -> Total Marker Terekam : {total_markers} (Target: 400)")
-        
-        if total_markers < 400:  # Ubah dari != 400 menjadi < 400
-            print("    [-] PERINGATAN: Jumlah marker kurang dari 400. Sinkronisasi terputus.")
+        print(f"    -> Total markers recorded: {total_markers}  (target: 400)")
+
+        if total_markers < 400:
+            print("    [WARNING] Fewer than 400 markers. Possible synchronisation dropout.")
             score -= 15
         else:
-            print(f"    [+] LULUS: Jumlah marker mencukupi (Terekam: {total_markers}).")
+            print(f"    [PASS] Sufficient markers recorded ({total_markers}).")
 
-        # Cek Keberagaman (Apakah semua ID Suku Kata 1-19 terwakili?)
         marker_counts = Counter(markers)
         missing_markers = [i for i in range(1, 20) if i not in marker_counts]
         if missing_markers:
-            print(f"    [-] BAHAYA: Marker ID {missing_markers} tidak pernah muncul! Keberagaman kelas rusak.")
+            print(f"    [FAIL] Syllable class IDs {missing_markers} are absent. Class coverage is incomplete.")
             score -= 20
         else:
-            print("    [+] LULUS: Seluruh 19 kelas suku kata (ID 1-19) terekam secara konsisten.")
+            print("    [PASS] All 19 syllable class IDs (1–19) are present.")
 
         # ==========================================
-        # 3. UJI KESEHATAN SENSOR (Flatline & Outlier)
+        # 3. SENSOR HEALTH (FLATLINE AND OUTLIER)
         # ==========================================
-        print("\n[3] Uji Kesehatan 14 Sensor EEG (Flatline & Noise Outlier)...")
+        print("\n[3] Sensor Health — 14 EEG Channels (Flatline and Noise Outlier)...")
         eeg_data = df[eeg_cols].values
-        
-        # Hitung Standar Deviasi per channel untuk melihat sebaran datanya
+
         std_devs = np.std(eeg_data, axis=0)
         median_std = np.median(std_devs)
-        
+
         bad_channels = []
         noisy_channels = []
-        
+
         for i, ch in enumerate(eeg_cols):
-            if std_devs[i] < 0.1: # Flatline / Mati
+            if std_devs[i] < 0.1:
                 bad_channels.append(ch)
-            elif std_devs[i] > (median_std * 5): # Noise berlebih (Outlier dibanding channel lain)
+            elif std_devs[i] > (median_std * 5):
                 noisy_channels.append(ch)
 
         if bad_channels:
-            print(f"    [-] BAHAYA: Sensor mati terdeteksi: {bad_channels}")
+            print(f"    [FAIL] Dead sensor(s) detected: {bad_channels}")
             score -= 30
         if noisy_channels:
-            print(f"    [-] PERINGATAN: Sensor sangat bising (Outlier): {noisy_channels}. (Mungkin kurang gel/saline).")
+            print(f"    [WARNING] Excessively noisy sensor(s) (outlier vs. ensemble): {noisy_channels}")
             score -= 10
         if not bad_channels and not noisy_channels:
-            print("    [+] LULUS: Semua sensor memiliki fluktuasi sinyal yang sehat dan seimbang.")
+            print("    [PASS] All sensors show healthy signal variance.")
 
         # ==========================================
-        # 4. UJI LONJAKAN EKSTREM (Extreme Spikes)
+        # 4. EXTREME AMPLITUDE SPIKES
         # ==========================================
-        print("\n[4] Uji Lonjakan Sinyal Ekstrem (> ±200 µV)...")
-        # Kurangi DC Offset rata-rata terlebih dahulu agar sinyal berada di titik 0
+        print("\n[4] Extreme Amplitude Spikes (> +/-200 uV)...")
         eeg_centered = eeg_data - np.mean(eeg_data, axis=0)
         extreme_spikes = np.sum(np.abs(eeg_centered) > 200)
         spike_ratio = (extreme_spikes / eeg_data.size) * 100
-        
-        print(f"    -> Rasio Lonjakan Ekstrem: {spike_ratio:.3f}% dari total data.")
+
+        print(f"    -> Extreme spike ratio: {spike_ratio:.3f}% of total samples.")
         if spike_ratio > 5.0:
-            print("    [-] PERINGATAN: Terlalu banyak lonjakan ekstrem! Headset mungkin sering tergeser.")
+            print("    [WARNING] High spike ratio — headset may have been frequently displaced.")
             score -= 15
         else:
-            print("    [+] LULUS: Sinyal sangat stabil, tidak ada anomali listrik berlebih.")
+            print("    [PASS] Signal is stable with negligible extreme artefacts.")
 
         # ==========================================
-        # 5. UJI RETENSI ARTEFAK (Kualitas Data Bersih)
+        # 5. ARTIFACT REJECTION RETENTION RATE
         # ==========================================
-        print("\n[5] Uji Simulasi Filter & Pemotongan (Batas Moderat ±100 µV)...")
+        print("\n[5] Simulated Filtering and Windowing (rejection threshold: +/-100 uV)...")
         filtered_eeg = self.processor.apply_filter(eeg_data)
         marker_indices = df.index[df[marker_col] > 0].tolist()
-        
+
         total_expected_windows = 0
         total_clean_windows = 0
-        
+
         for idx in marker_indices:
-            slot_data = filtered_eeg[idx : idx + (5 * self.processor.fs)]
+            slot_data = filtered_eeg[idx: idx + (5 * self.processor.fs)]
             if len(slot_data) >= 5 * self.processor.fs:
                 total_expected_windows += 5
                 clean_windows = self.processor.windowing_slot(slot_data)
                 total_clean_windows += len(clean_windows)
-                
+
         retention_rate = (total_clean_windows / total_expected_windows) * 100 if total_expected_windows > 0 else 0
-        
-        print(f"    -> Total Jendela Diekstrak : {total_expected_windows}")
-        print(f"    -> Jendela Lulus Uji       : {total_clean_windows}")
-        print(f"    -> TINGKAT RETENSI BERSIH  : {retention_rate:.2f}%")
-        
+
+        print(f"    -> Total windows expected: {total_expected_windows}")
+        print(f"    -> Windows passing QC:     {total_clean_windows}")
+        print(f"    -> CLEAN RETENTION RATE:   {retention_rate:.2f}%")
+
         if retention_rate < 60:
             score -= 20
         elif retention_rate < 80:
             score -= 5
 
         # ==========================================
-        # 6. RAPOR KESIMPULAN (FINAL GRADING)
+        # 6. FINAL QUALITY GRADE
         # ==========================================
-        print("\n" + "="*60)
-        print(f" HASIL AKHIR KUALITAS DATA (SKOR: {score}/100) ")
-        print("="*60)
-        
+        print("\n" + "=" * 60)
+        print(f" FINAL DATA QUALITY SCORE: {score}/100 ")
+        print("=" * 60)
+
         if score >= 90:
-            print("[GRADE A] EXCELLENT! ✨")
-            print("Data ini sangat sempurna. Bebas dari noise berlebih, marker akurat, dan sangat direkomendasikan untuk melatih EEGNet!")
-            print("=> TINDAKAN: Pindahkan file ini ke folder utama 'dataset/' untuk ditraining.")
+            print("[GRADE A] EXCELLENT")
+            print("Dataset is clean, free of excessive noise, and markers are complete.")
+            print("=> ACTION: Move this file to the primary dataset directory for training.")
         elif score >= 75:
-            print("[GRADE B] GOOD! 👍")
-            print("Data memiliki sedikit artefak (misal kedipan mata), namun masih sangat layak untuk masuk ke dalam dataset.")
-            print("=> TINDAKAN: Pindahkan file ini ke folder utama 'dataset/' untuk ditraining.")
+            print("[GRADE B] GOOD")
+            print("Dataset contains minor artefacts (e.g., blink) but is suitable for training.")
+            print("=> ACTION: Move this file to the primary dataset directory for training.")
         elif score >= 50:
-            print("[GRADE C] WARNING! ⚠️")
-            print("Kualitas data meragukan. Fitur AI mungkin kesulitan belajar dari data ini.")
-            print("=> TINDAKAN: Sangat disarankan untuk MENGULANG pengambilan data jika memungkinkan.")
+            print("[GRADE C] WARNING")
+            print("Data quality is marginal. Model learning may be impaired.")
+            print("=> ACTION: Strongly consider repeating the recording session if feasible.")
         else:
-            print("[GRADE F] REJECTED! ❌")
-            print("DATA RUSAK PARAH! Terdapat sensor mati, koneksi terputus, atau noise luar biasa.")
-            print("=> TINDAKAN: JANGAN GUNAKAN FILE INI! Hapus file dan ulang perekaman.")
-            
-        print("="*60 + "\n")
+            print("[GRADE F] REJECTED")
+            print("Severely degraded data: dead sensors, synchronisation failures, or extreme noise.")
+            print("=> ACTION: Do NOT use this file. Delete it and repeat the recording session.")
+
+        print("=" * 60 + "\n")
 
 if __name__ == "__main__":
-    # Path absolut menuju folder dataset/raw
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
     TARGET_DIR = os.path.join(BASE_DIR, 'dataset', 'raw')
-    
-    # 1. Pastikan folder raw/ ada, jika belum buat otomatis
+
     if not os.path.exists(TARGET_DIR):
         os.makedirs(TARGET_DIR)
-        print(f"\n[!] Folder target baru telah dibuat: {TARGET_DIR}")
-        print("    Silakan letakkan file hasil export .csv EmotivPRO ke dalam folder 'raw' tersebut.")
-        print("    Lalu jalankan ulang skrip ini.")
+        print(f"\n[INFO] Target directory created: {TARGET_DIR}")
+        print("    Place EmotivPRO .csv export files into the 'raw' folder and re-run.")
         sys.exit()
-        
-    # 2. Cari semua file CSV di dalam folder raw/
+
     csv_files = glob.glob(os.path.join(TARGET_DIR, "*.csv"))
-    
+
     if not csv_files:
-        print(f"\n[-] GAGAL: Tidak ada file .csv yang ditemukan di dalam folder:")
-        print(f"    {TARGET_DIR}")
-        print("    Silakan letakkan file hasil export EmotivPRO ke folder tersebut terlebih dahulu.")
+        print(f"\n[ERROR] No .csv files found in: {TARGET_DIR}")
+        print("    Place EmotivPRO .csv export files into the folder and re-run.")
         sys.exit()
-        
-    # 3. Jika ada lebih dari 1 file CSV, ambil yang paling terbaru di-copy/dimodifikasi
+
+    # Analyse the most recently modified CSV file if multiple are present
     latest_csv = max(csv_files, key=os.path.getmtime)
-    
+
     if len(csv_files) > 1:
-        print(f"\n[!] Ditemukan {len(csv_files)} file CSV di folder raw/.")
-        print(f"    Menganalisis file yang paling BARU: {os.path.basename(latest_csv)}")
-        
-    # 4. Jalankan Quality Checker
+        print(f"\n[INFO] Found {len(csv_files)} CSV files. Analysing the most recent: {os.path.basename(latest_csv)}")
+
     try:
         checker = DataQualityChecker(latest_csv)
         checker.run_qc()
     except Exception as e:
-        print(f"\n[X] Terjadi kesalahan kritis saat memproses data: {e}")
+        print(f"\n[ERROR] A critical error occurred during data processing: {e}")

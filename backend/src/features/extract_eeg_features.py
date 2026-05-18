@@ -13,7 +13,7 @@ class EEGFeatureExtractor:
             'gamma': (30, 50)
         }
 
-    # 1. TIME DOMAIN ANALYSIS
+    # 1. TIME-DOMAIN STATISTICS
     def _time_domain(self, x):
         return [
             np.mean(x),
@@ -22,106 +22,111 @@ class EEGFeatureExtractor:
             stats.kurtosis(x)
         ]
 
-    # 2. HJORTH PARAMETERS
+    # 2. HJORTH PARAMETERS (Activity, Mobility, Complexity)
     def _hjorth(self, x):
         activity = np.var(x)
         dx = np.diff(x)
         ddx = np.diff(dx)
-        
+
         var_dx = np.var(dx)
         mobility = np.sqrt(var_dx / activity) if activity > 0 else 0
-        
+
         var_ddx = np.var(ddx)
         mobility_dx = np.sqrt(var_ddx / var_dx) if var_dx > 0 else 0
         complexity = mobility_dx / mobility if mobility > 0 else 0
-        
+
         return [activity, mobility, complexity]
 
-    # 3. BARLOW PARAMETERS
+    # 3. BARLOW PARAMETERS (Amplitude, Frequency)
     def _barlow(self, x):
         dx = np.diff(x)
         activity = np.var(x)
         mobility = np.var(dx) / activity if activity > 0 else 0
-        
+
         barlow_amp = np.sqrt(activity)
         barlow_freq = np.sqrt(mobility) / (2 * np.pi)
-        
+
         return [barlow_amp, barlow_freq]
 
-    # 4. FREQUENCY RATIO (Band Power Ratio)
+    # 4. FREQUENCY BAND POWER RATIOS (theta, alpha, beta, gamma)
     def _band_power_ratio(self, x):
         freqs, psd = signal.welch(x, self.fs, nperseg=min(len(x), 256))
-        
+
         powers = {}
         for band, (low, high) in self.bands.items():
             idx = np.logical_and(freqs >= low, freqs <= high)
             powers[band] = np.sum(psd[idx])
-            
+
         eps = 1e-8
         ratios = [
             powers['alpha'] / (powers['theta'] + eps),
-            powers['beta'] / (powers['alpha'] + eps), 
-            powers['gamma'] / (powers['beta'] + eps)  
+            powers['beta'] / (powers['alpha'] + eps),
+            powers['gamma'] / (powers['beta'] + eps)
         ]
         return ratios
 
-    # 5. DFA (Dipertahankan murni sebagai referensi akademis, tidak dieksekusi)
+    # 5. DETRENDED FLUCTUATION ANALYSIS (retained as academic reference; not used in E8 grid)
     def _dfa(self, x):
         x_cumsum = np.cumsum(x - np.mean(x))
-        scales = np.arange(4, min(len(x)//4, 64))
+        scales = np.arange(4, min(len(x) // 4, 64))
         fluctuations = []
-        
+
         for scale in scales:
             shape = (len(x_cumsum) // scale, scale)
             windows = x_cumsum[:shape[0] * shape[1]].reshape(shape)
-            
+
             x_ax = np.arange(scale)
             rms_list = []
             for w in windows:
                 poly = np.polyfit(x_ax, w, 1)
                 trend = np.polyval(poly, x_ax)
-                rms = np.sqrt(np.mean((w - trend)**2))
+                rms = np.sqrt(np.mean((w - trend) ** 2))
                 rms_list.append(rms)
-            
+
             fluctuations.append(np.mean(rms_list))
-            
+
         if len(scales) > 1 and len(fluctuations) > 1:
             coeffs = np.polyfit(np.log2(scales), np.log2(fluctuations), 1)
             return [coeffs[0]]
         return [0]
 
-    # 6. PUCK (Dipertahankan murni sebagai referensi akademis, tidak dieksekusi)
+    # 6. PUCK KINETIC ENERGY METRIC (retained as academic reference; not used in E8 grid)
     def _puck(self, x):
         x_t = x[:-1]
         x_t1 = x[1:]
         velocity = (x_t1 - x_t) * self.fs
-        kinetic = 0.5 * velocity**2
-        
+        kinetic = 0.5 * velocity ** 2
+
         dv = np.diff(velocity)
         pos_accel = np.sum(dv[dv > 0])
         neg_accel = np.abs(np.sum(dv[dv < 0]))
-        
+
         unbalance_ratio = pos_accel / (neg_accel + 1e-8)
         mean_kinetic = np.mean(kinetic)
         puck_score = mean_kinetic * unbalance_ratio
-        
+
         return [mean_kinetic, unbalance_ratio, puck_score]
 
     def extract_channel_features(self, x, groups=None):
-        """Input x: sinyal 1D untuk 1 channel (panjang = Time)."""
-        # [PERBAIKAN AUDIT] Hanya memanggil 4 fitur utama jika 'all' dipilih
+        """
+        Extract features from a single 1-D channel signal.
+
+        When groups is None or contains 'all', the four primary groups
+        (time, hjorth, barlow, band_ratio) are computed. DFA and PUCK
+        are excluded from the default set to maintain computational efficiency.
+        """
         if groups is None or 'all' in groups:
             groups = ['time', 'hjorth', 'barlow', 'band_ratio']
-            
+
         all_feats = {
-            'time': self._time_domain(x),        
-            'hjorth': self._hjorth(x),           
-            'barlow': self._barlow(x),           
-            'band_ratio': self._band_power_ratio(x), 
-            'dfa': self._dfa(x),                
-            'puck': self._puck(x)               
+            'time': self._time_domain(x),
+            'hjorth': self._hjorth(x),
+            'barlow': self._barlow(x),
+            'band_ratio': self._band_power_ratio(x),
+            'dfa': self._dfa(x),
+            'puck': self._puck(x)
         }
-        
+
         features = []
         for g in groups:
             if g in all_feats:
@@ -130,22 +135,29 @@ class EEGFeatureExtractor:
 
     def transform(self, X_3d, groups=None):
         """
-        Input: X_3d shape (N, Channels, Time)
+        Extract features from a batch of EEG epochs.
+
+        Args:
+            X_3d (np.ndarray): Input array of shape (N, Channels, Time).
+            groups (list or None): Feature groups to compute. None selects all primary groups.
+
+        Returns:
+            np.ndarray: Feature matrix of shape (N, num_features).
         """
-        group_names = "Semua Fitur Utama" if (groups is None or 'all' in groups) else f"Fitur {groups}"
-        print(f"[*] Mengekstrak {group_names} dari {X_3d.shape[0]} sampel data...")
-        
+        group_names = "all primary features" if (groups is None or 'all' in groups) else str(groups)
+        print(f"[INFO] Extracting {group_names} from {X_3d.shape[0]} samples...")
+
         num_samples, num_channels, _ = X_3d.shape
         X_features = []
-        
+
         for i in range(num_samples):
             sample_features = []
             for ch in range(num_channels):
-                signal_ch = X_3d[i, ch, :] 
+                signal_ch = X_3d[i, ch, :]
                 ch_feats = self.extract_channel_features(signal_ch, groups)
                 sample_features.extend(ch_feats)
             X_features.append(sample_features)
-            
+
         X_features_np = np.array(X_features)
-        print(f"[+] Ekstraksi selesai. Dimensi matriks fitur: {X_features_np.shape}")
+        print(f"[INFO] Feature extraction complete. Feature matrix shape: {X_features_np.shape}")
         return X_features_np

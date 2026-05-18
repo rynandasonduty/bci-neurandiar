@@ -3,7 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # =========================================================
-# 1. ACQUISITION & HARDWARE CONFIG (EMOTIV CORTEX)
+# 1. ACQUISITION & HARDWARE CONFIGURATION (EMOTIV CORTEX)
 # =========================================================
 load_dotenv()
 CLIENT_ID = os.getenv("EMOTIV_CLIENT_ID", "")
@@ -15,12 +15,12 @@ TARGET_WORDS = [
     "Mandi", "Bosan", "Lelah", "Sakit", "Tidur", "Sayang"
 ]
 
-SLOT_1_DURATION = 5.0    # Durasi pengulangan suku kata pertama
-PAUSE_DURATION = 2.0     # Durasi jeda untuk menetralkan keadaan mental
-SLOT_2_DURATION = 5.0    # Durasi pengulangan suku kata kedua
+SLOT_1_DURATION = 5.0    
+PAUSE_DURATION = 2.0     
+SLOT_2_DURATION = 5.0    
 
-TRIALS_PER_SUBJECT = 200 # Total uji coba (100 Terbuka, 100 Bayangan)
-BLOCK_SIZE = 20          # Jumlah uji coba per 1 blok sebelum istirahat singkat
+TRIALS_PER_SUBJECT = 200 
+BLOCK_SIZE = 20          
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -28,52 +28,51 @@ BG_COLOR = (0, 0, 0)
 TEXT_COLOR = (255, 255, 255)
 
 # =========================================================
-# 2. ROOT DIRECTORIES (Statis)
+# 2. ROOT DIRECTORY & PERMANENT PATHS
 # =========================================================
-# Mendapatkan path absolut dari direktori 'backend'
-BACKEND_DIR = Path(__file__).resolve().parent.parent
+# Absolute path to the backend root directory
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Folder Utama
+# Raw dataset storage
 DATASET_DIR = os.path.join(BACKEND_DIR, "dataset")
-MODELS_DIR = os.path.join(BACKEND_DIR, "models")
-REPORTS_DIR = os.path.join(BACKEND_DIR, "reports")
-LOGS_DIR = os.path.join(BACKEND_DIR, "logs")
-
-# Folder Raw (Tidak disentuh oleh eksperimen, jadi statis)
 RAW_DATA_DIR = os.path.join(DATASET_DIR, "raw")
 
-# Path Statis untuk MLflow Database
+# Primary artifact directories
+MODELS_DIR = os.path.join(BACKEND_DIR, "models")
+LOGS_DIR = os.path.join(BACKEND_DIR, "logs")
+
+# Static path for the MLflow tracking database
 MLFLOW_DB_PATH = f"sqlite:///{os.path.join(LOGS_DIR, 'mlflow', 'mlruns.db')}"
 
 # =========================================================
-# 3. EXPERIMENT ORCHESTRATION ENGINE (Dinamis)
+# 3. EXPERIMENT ORCHESTRATION ENGINE (GOLDEN STANDARD)
 # =========================================================
-def setup_experiment(exp_id: str) -> dict:
+def setup_experiment(exp_id: str, pilar: str = "P1_Global") -> dict:
     """
-    Membangun arsitektur sub-folder dinamis untuk eksperimen tertentu.
-    
+    Construct the canonical sub-directory structure for a given experiment and paradigm.
+
+    All model weights, scalers, and processed test-set arrays are co-located in a single
+    experiment directory to enforce the anti-leakage MLOps architecture. The directory
+    is created automatically if it does not exist.
+
     Args:
-        exp_id (str): ID Eksperimen (Contoh: 'E0_Baseline', 'E2_ICA')
-        
+        exp_id (str): Experiment identifier (e.g., 'E0_Baseline', 'E3_ERP_N400').
+        pilar (str): Paradigm label ('P1_Global', 'P2_EEGNet', or 'P3_SVM').
+
     Returns:
-        dict: Kamus berisi path absolut yang sudah dijamin keberadaannya.
+        dict: A mapping of logical path keys to guaranteed-existent absolute directory paths.
     """
-    
-    # Merakit Path Dinamis berdasarkan exp_id
+    # All artifacts are co-located at: models/weights/{paradigm}/{experiment_id}/
+    pilar_base_dir = os.path.join(MODELS_DIR, "weights", pilar, exp_id)
+
     paths = {
-        "raw_data": RAW_DATA_DIR, 
-        "processed_data": os.path.join(DATASET_DIR, "processed", exp_id),
-        "weights": os.path.join(MODELS_DIR, "weights", exp_id),
-        "scalers": os.path.join(MODELS_DIR, "scalers", exp_id),
-        "reports": os.path.join(REPORTS_DIR, exp_id)
+        "raw_data": RAW_DATA_DIR,
+        "processed_data": pilar_base_dir,
+        "weights": pilar_base_dir,
+        "scalers": pilar_base_dir,
     }
-    
-    # Menciptakan folder secara otomatis jika belum ada
-    for key, path in paths.items():
-        if key != "raw_data": 
-            os.makedirs(path, exist_ok=True)
-            
-    # Pastikan folder logs/mlflow eksis untuk pelacakan
-    os.makedirs(os.path.join(LOGS_DIR, 'mlflow'), exist_ok=True)
-            
+
+    for p in paths.values():
+        os.makedirs(p, exist_ok=True)
+
     return paths

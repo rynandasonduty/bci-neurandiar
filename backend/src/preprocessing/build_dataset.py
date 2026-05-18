@@ -4,7 +4,6 @@ import glob
 import numpy as np
 import pandas as pd
 
-# Impor dari root backend
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_experiment
 from preprocessing.signal_processor import SignalProcessor
@@ -16,75 +15,77 @@ SYLLABLE_CLASSES = {
 }
 
 class DatasetBuilder:
-    def __init__(self, exp_id="E0_Baseline", processor_params=None, 
+    def __init__(self, exp_id="E0_Baseline", processor_params=None,
                  crop_time=None, use_augmentation=False, augmentation_params=None,
                  phase_filter="all", channels_to_use="all"):
         """
-        - exp_id: Penanda eksperimen (E0_Baseline, E2_ICA, dll).
-        - processor_params: Dict untuk mengatur bandpass, ICA, target_fs di SignalProcessor.
-        - crop_time: Tuple (start_ms, end_ms). Jika None, gunakan windowing baseline 5 detik.
-        - phase_filter: 'all', 'overt', atau 'imagined' (Untuk Eksperimen 6).
-        - channels_to_use: 'all' atau list nama channel (Untuk Eksperimen 4).
+        Initialize the dataset builder for a given experiment configuration.
+
+        Args:
+            exp_id (str): Experiment identifier (e.g., 'E0_Baseline').
+            processor_params (dict): Parameters forwarded to SignalProcessor (band, apply_ica, target_fs).
+            crop_time (tuple): ERP extraction window (start_ms, end_ms), or None for 5-second baseline windowing.
+            use_augmentation (bool): Reserved flag; augmentation is deferred to the post-split training phase.
+            augmentation_params (dict): Parameters for SignalProcessor.apply_augmentation().
+            phase_filter (str): Recording phase filter: 'all', 'overt', or 'imagined'.
+            channels_to_use (str or list): Channel subset for E4 ablation, or 'all'.
         """
-        print(f"\n[*] MENGINISIALISASI DATASET BUILDER UNTUK EKSPERIMEN: {exp_id}")
-        
-        # 1. Setup Direktori Dinamis dari config.py
+        print(f"\n[INFO] Initializing DatasetBuilder for experiment: {exp_id}")
+
+        # 1. Resolve experiment directories from the Golden Standard path engine
         self.paths = setup_experiment(exp_id)
         self.raw_data_dir = self.paths["raw_data"]
         self.output_dir = self.paths["processed_data"]
-        
-        # Direktori scaler dipertahankan di config, namun tidak digunakan di sini untuk menghindari data leakage
-        
-        # 2. Parameter Eksperimen
+
+        # 2. Store experiment parameters
         self.crop_time = crop_time
-        # Parameter augmentasi disimpan namun tidak dieksekusi di sini (ditunda ke fase post-split)
+        # Augmentation parameters are stored but not executed here;
+        # they are applied post-split in the training pipeline to prevent data leakage.
         self.use_augmentation = use_augmentation
         self.augmentation_params = augmentation_params if augmentation_params else {}
         self.phase_filter = phase_filter.lower()
-        
-        # 3. Inisialisasi Signal Processor
+
+        # 3. Initialize signal processor
         if processor_params is None:
             processor_params = {}
         self.processor = SignalProcessor(**processor_params)
-        
-        # 4. Filter Channel (Eksperimen 4: Channel Ablation)
+
+        # 4. Resolve channel subset (E4: channel ablation)
         self.all_channels = self.processor.eeg_channels
         if channels_to_use == "all":
             self.selected_channels = self.all_channels
         else:
             self.selected_channels = [ch for ch in channels_to_use if ch in self.all_channels]
-            print(f"[*] Channel Ablation Aktif. Hanya menggunakan: {self.selected_channels}")
-            
-        # Simpan indeks channel yang dipilih untuk slicing nanti
+            print(f"[INFO] Channel ablation active. Using channels: {self.selected_channels}")
+
         self.channel_indices = [self.all_channels.index(ch) for ch in self.selected_channels]
 
     def parse_log_for_word_sequence(self, log_filepath):
         sequence = []
-        # 'Ingatan' sistem untuk melacak fase blok saat ini
-        current_phase = "unknown" 
-        
+        current_phase = "unknown"
+
         with open(log_filepath, 'r') as file:
             for line in file:
                 line_lower = line.lower()
-                
-                # 1. Update Ingatan Fase jika menemukan kata kunci di header/log
+
+                # Track the current recording phase from block header lines
                 if "overt" in line_lower:
                     current_phase = "overt"
                 elif "imagined" in line_lower:
                     current_phase = "imagined"
-                
-                # 2. Catat trial dan tempelkan fase yang sedang aktif di ingatan
+
+                # Record each trial entry with its associated phase label
                 if "Menjalankan Trial" in line and "Kata:" in line:
                     try:
                         word = line.split("Kata: ")[1].split("(")[0].strip().upper()
                         sequence.append({"word": word, "phase": current_phase})
                     except Exception:
                         pass
-                        
+
         return sequence
 
     def process_subject(self, subject_id, csv_filepath, log_filepath):
-        print(f"[*] Memproses data mentah subjek: {subject_id}")
+        print(f"[INFO] Processing raw EEG data for subject: {subject_id}")
         
         trial_sequence = self.parse_log_for_word_sequence(log_filepath)
         
@@ -110,97 +111,92 @@ class DatasetBuilder:
 
         df[marker_col] = pd.to_numeric(df[marker_col], errors='coerce').fillna(0)
 
-        # Proses Sinyal Dinamis (Bandpass, dll)
+        # Apply bandpass filter (and optional ICA) to the full recording
         eeg_data = df[self.all_channels].values
         filtered_eeg = self.processor.apply_filter(eeg_data)
-        
+
         marker_indices = df.index[df[marker_col] > 0].tolist()
-        
-        X_clean_windows = [] 
-        y_labels = [] 
-        
-        # FIX: Sinkronisasi marker menggunakan penghitung marker valid murni
+
+        X_clean_windows = []
+        y_labels = []
+
+        # Marker counter used for phase synchronization (two syllable markers per word trial)
         valid_marker_count = 0
-               
+
         for idx in marker_indices:
             marker_value = int(df.iloc[idx][marker_col])
-            
-            # Abaikan marker yang tidak relevan dengan suku kata target
-            if marker_value < 1 or marker_value > 19: 
+
+            # Ignore markers outside the target syllable class range (1-19)
+            if marker_value < 1 or marker_value > 19:
                 continue
-            
-            # --- EKSPERIMEN 6: CROSS-MODALITY PHASE FILTERING ---
-            # Asumsi: 1 kata terdiri dari 2 marker suku kata.
-            trial_idx = valid_marker_count // 2 
+
+            # E6 phase filter: map valid marker index to trial phase from the log
+            trial_idx = valid_marker_count // 2
             if trial_idx < len(trial_sequence):
                 trial_phase = trial_sequence[trial_idx]["phase"]
             else:
                 trial_phase = "unknown"
-                
+
             valid_marker_count += 1
-            
-            # Lewati ekstraksi jika fase tidak sesuai dengan resep eksperimen
+
+            # Skip epochs whose phase does not match the experiment's phase filter
             if self.phase_filter != "all" and trial_phase != self.phase_filter:
-                continue 
-                
+                continue
+
             label_int = marker_value - 1
             slot_data = filtered_eeg[idx : idx + (5 * self.processor.fs)]
-            
-            # --- EKSPERIMEN 3: ERP CROPPING vs BASELINE WINDOWING ---
+
+            # E3: ERP window cropping vs. E0 baseline 5-second windowing
             if self.crop_time is not None:
-                # Mode Eksperimen: Potong berdasarkan milidetik untuk N400
                 clean_windows = self.processor.extract_erp_window(
                     slot_data, start_ms=self.crop_time[0], end_ms=self.crop_time[1]
                 )
             else:
-                # Mode Baseline: Potong 5 jendela 1 detik (Data Augmentation Temporal Natural)
                 clean_windows = self.processor.windowing_slot(slot_data)
-            
+
             for window in clean_windows:
-                # --- EKSPERIMEN 4: CHANNEL ABLATION ---
+                # E4: Apply channel subset selection
                 window_selected = window[:, self.channel_indices]
-                
-                # FIX: Augmentasi (Eksperimen 5) dihapus dari fase ini untuk mencegah Data Leakage.
-                # Data diserahkan murni, augmentasi hanya akan diinjeksikan pada X_train di pipeline pelatihan.
+
+                # Augmentation (E5) is deferred to the post-split training phase
+                # to prevent data leakage from augmented samples into the test set.
                 X_clean_windows.append(window_selected)
                 y_labels.append(label_int)
-                
+
         if len(X_clean_windows) == 0:
             return [], []
-            
+
         X_subj_array = np.array(X_clean_windows)
-        
-        # FIX: Penghapusan StandardScaler dari sini.
-        # Normalisasi wajib dilakukan HANYA setelah split train/val/test di data_utils.py
+
+        # StandardScaler is intentionally excluded here;
+        # scaling must be applied post-split in data_utils.py to prevent leakage.
         return X_subj_array.tolist(), y_labels
 
     def build_full_dataset(self, return_data=False):
         all_X, all_y = [], []
         log_files = glob.glob(os.path.join(self.raw_data_dir, "logs", "*_experiment_log.txt"))
-        
+
         for log_path in log_files:
             filename = os.path.basename(log_path)
             subject_id = filename.replace("_experiment_log.txt", "")
-            
+
             csv_files = glob.glob(os.path.join(self.raw_data_dir, f"{subject_id}*.csv"))
             if not csv_files: continue
-                
+
             X_subj, y_subj = self.process_subject(subject_id, csv_files[0], log_path)
             all_X.extend(X_subj)
             all_y.extend(y_subj)
-            
+
         X_tensor = np.array(all_X)
         y_tensor = np.array(all_y)
-        
-        # Simpan tensor murni ke folder spesifik eksperimen
+
         np.save(os.path.join(self.output_dir, "X_features.npy"), X_tensor)
         np.save(os.path.join(self.output_dir, "y_labels.npy"), y_tensor)
-        print(f"[SUCCESS] {len(y_tensor)} data diekstrak. Disimpan di: {self.output_dir}")
-        
+        print(f"[INFO] {len(y_tensor)} samples extracted and saved to: {self.output_dir}")
+
         if return_data:
             return X_tensor, y_tensor
 
-# Testing blok
 if __name__ == "__main__":
     builder = DatasetBuilder(exp_id="E0_Test")
     builder.build_full_dataset()

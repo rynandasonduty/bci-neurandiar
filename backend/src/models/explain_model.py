@@ -7,84 +7,88 @@ from tensorflow.keras.models import load_model
 import shap
 import tensorflow as tf
 
-# Memaksa TensorFlow untuk berperilaku seperti Numpy agar SHAP tidak crash
+# Required for SHAP GradientExplainer compatibility with TensorFlow
 tf.experimental.numpy.experimental_enable_numpy_behavior()
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import setup_experiment
 
 def run_explainability(exp_id="E0_Baseline"):
-    print("\n" + "="*50)
-    print(f" MEMULAI ANALISIS SHAP (EXPLAINABLE AI) UNTUK: {exp_id} ")
-    print("="*50)
+    """
+    Compute and visualize SHAP feature importance for the EEGNet model of a given experiment.
+
+    Uses GradientExplainer with the scaled test set as both background reference and
+    test inputs. The resulting mean absolute SHAP values are displayed as a
+    channel-by-time heatmap.
+
+    Args:
+        exp_id (str): Experiment identifier (e.g., 'E0_Baseline').
+    """
+    print(f"[INFO] Starting SHAP explainability analysis for experiment: {exp_id}")
 
     paths = setup_experiment(exp_id)
     weights_dir = paths["weights"]
-    reports_dir = paths["reports"]
     processed_dir = paths["processed_data"]
 
-    print("[*] Memuat Model EEGNet dan Data Tensor...")
+    print("[INFO] Loading EEGNet model and test tensor...")
     model_path = os.path.join(weights_dir, f"eegnet_trained_{exp_id}.h5")
     if not os.path.exists(model_path):
-        print("[X] Model tidak ditemukan.")
+        print("[ERROR] Model file not found.")
         return
-        
+
     model = load_model(model_path)
-    
-    # [PERBAIKAN AUDIT] Menggunakan X_test.npy yang sudah di-scale
+
     data_path = os.path.join(processed_dir, "X_test.npy")
     if not os.path.exists(data_path):
-        print("[X] Data X_test.npy tidak ditemukan.")
+        print("[ERROR] X_test.npy not found.")
         return
-        
+
     X = np.load(data_path)
-    
-    # Ambil sampel (50 untuk background, 3 untuk diuji)
-    background = X[:50]
-    test_samples = X[50:53]
-    
-    print("[*] Menyiapkan Background Data untuk Explainer...")
+
+    # Use first 50 samples as SHAP background reference; next 50 as test inputs.
+    # A minimum of 50 test samples is required for reliable mean |SHAP| estimates.
+    n_background = min(50, len(X) // 2)
+    n_test       = min(50, len(X) - n_background)
+    background   = X[:n_background]
+    test_samples = X[n_background : n_background + n_test]
+    print(f"[INFO] SHAP configuration — background: {n_background} samples, test: {n_test} samples.")
+
+    print("[INFO] Initializing SHAP GradientExplainer...")
     explainer = shap.GradientExplainer(model, background)
-    
-    print("[*] Menjalankan Algoritma SHAP (GradientExplainer)...")
+
+    print("[INFO] Computing SHAP values...")
     try:
         shap_values = explainer.shap_values(test_samples)
-        
-        print("[*] Membuat Visualisasi Heatmap...")
-        shap_array = np.array(shap_values) 
-        
-        # [PERBAIKAN KRITIS] Merata-rata dimensi agar menjadi 2D (Channel x Time)
+
+        shap_array = np.array(shap_values)
+
+        # Reduce to 2D (Channels x Time) by averaging over class and sample dimensions
         if isinstance(shap_values, list):
-            # Bentuk: (19 kelas, 3 sampel, 14 channel, 256 time, 1 depth)
-            shap_mean = np.mean(np.abs(shap_array), axis=(0, 1, 4)) 
+            # Shape: (19 classes, 3 samples, 14 channels, T timesteps, 1 depth)
+            shap_mean = np.mean(np.abs(shap_array), axis=(0, 1, 4))
         else:
             shap_abs = np.abs(shap_array)
-            # Ratakan semua axis kecuali Channel (axis=1) dan Time (axis=2)
             shap_mean = np.mean(shap_abs, axis=tuple([i for i in range(shap_abs.ndim) if i not in [1, 2]]))
-        
-        # Pastikan orientasi matrix benar: 14 baris (Channel), 256 kolom (Waktu)
-        n_channels = X.shape[1] 
+
+        # Ensure orientation: rows = channels, columns = time
+        n_channels = X.shape[1]
         if shap_mean.shape[0] != n_channels:
             shap_mean = shap_mean.T
 
         plt.figure(figsize=(12, 6))
         sns.heatmap(shap_mean, cmap="viridis", cbar_kws={'label': 'Mean |SHAP value|'})
-        plt.title(f"SHAP Feature Importance (Channels x Time) - {exp_id}")
+        plt.title(f"SHAP Feature Importance (Channels x Time) — {exp_id}")
         plt.ylabel("EEG Channels")
         plt.xlabel("Time Samples")
-        
-        out_file = os.path.join(reports_dir, f"shap_heatmap_{exp_id}.png")
-        plt.tight_layout()
-        plt.savefig(out_file)
-        plt.close()
-        print(f"[+] Visualisasi SHAP berhasil disimpan di: {out_file}")
-        
-    except Exception as e:
-        print(f"[!] Gagal mengeksekusi kalkulasi SHAP: {e}")
 
-    print("\n" + "="*50)
-    print(f" ANALISIS SHAP SELESAI. Cek folder: {reports_dir}/")
-    print("="*50)
+        plt.tight_layout()
+        plt.show()
+        plt.close()
+
+    except Exception as e:
+        print(f"[ERROR] SHAP computation failed: {e}")
+
+    print(f"[INFO] SHAP analysis complete for experiment: {exp_id}")
 
 if __name__ == "__main__":
     run_explainability()

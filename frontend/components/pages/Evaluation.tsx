@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Download, TrendingUp, Brain, Sparkles } from "lucide-react"
+import { API_URL } from "@/lib/api"
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart as RechartsLineChart, Line, Legend,
 } from "recharts"
@@ -63,24 +64,24 @@ export default function EvaluationPage() {
 
   // --- FETCH DATA DARI BACKEND FASTAPI ---
   useEffect(() => {
-    // 1. Ambil Data Tabel Log Live
-    fetch("http://127.0.0.1:8000/api/logs")
+    // 1. Fetch live inference log table
+    fetch(`${API_URL}/api/logs`)
       .then(res => res.json())
       .then(data => {
         if (data.status === "success") {
           const formattedLogs = data.data.map((log: any, index: number) => ({
             id: index,
-            timestamp: log["Timestamp"],
-            rawWord: log["Raw Word"],
-            refined: log["Refined Sentence"],
-            confidence: parseFloat(log["Confidence"]),
+            timestamp: log["timestamp"],
+            rawWord: log["raw_word"],
+            refined: log["final_sentence"],
+            confidence: parseFloat(log["confidence"]),
           }))
           setInferenceLogs(formattedLogs)
         }
-      }).catch(err => console.error(err))
+      }).catch(err => console.error("[Evaluation] Logs fetch error:", err))
 
-    // 2. Ambil SEMUA Data Metrik, Registry, & Evaluasi
-    fetch("http://127.0.0.1:8000/api/metrics")
+    // 2. Fetch all metrics, registry, and evaluation data
+    fetch(`${API_URL}/api/metrics`)
       .then(res => res.json())
       .then(data => {
         if (data.status === "success") {
@@ -91,7 +92,7 @@ export default function EvaluationPage() {
           setOptunaTrials(data.optuna_trials)
           setTrainingCurves(data.training_curves)
         }
-      }).catch(err => console.error(err))
+      }).catch(err => console.error("[Evaluation] Metrics fetch error:", err))
   }, [])
 
   return (

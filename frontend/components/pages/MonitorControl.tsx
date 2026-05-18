@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select"
 import { LineChart, Line, ResponsiveContainer, YAxis, BarChart, Bar, XAxis, CartesianGrid, Tooltip } from "recharts"
 import { Zap, AlertCircle, Settings, Battery, Wifi, TrendingDown } from "lucide-react"
+import { WS_URL } from "@/lib/api"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES & CONSTANTS
@@ -259,7 +260,7 @@ export default function MonitorPage() {
   const timeCounter = useRef(80) // Melanjutkan titik waktu ke-80
 
   useEffect(() => {
-    ws.current = new WebSocket('ws://127.0.0.1:8000/ws/telemetry')
+    ws.current = new WebSocket(`${WS_URL}/ws/telemetry`)
 
     ws.current.onopen = () => setIsConnected(true)
     ws.current.onclose = () => setIsConnected(false)
