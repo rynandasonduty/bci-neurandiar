@@ -24,7 +24,7 @@ interface NodeQualityMap {
   [key: string]: NodeQuality
 }
 
-// Default state saat belum ada data
+// Default state before the first telemetry frame arrives
 const DEFAULT_NODE_QUALITIES: NodeQualityMap = {
   AF3: "poor", F7: "poor", F3: "poor", FC5: "poor", T7: "poor", P7: "poor",
   O1: "poor", O2: "poor", P8: "poor", T8: "poor", FC6: "poor", F4: "poor",
@@ -57,12 +57,12 @@ const QUALITY_BG: Record<NodeQuality, string> = {
   good: "rgba(16,185,129,0.18)", fair: "rgba(255,144,63,0.18)", poor: "rgba(239,68,68,0.18)",
 }
 
-// Kita pilih 8 channel paling representatif untuk dirender agar grafik tidak terlalu padat
+// Eight representative channels selected for oscilloscope rendering to keep the chart readable
 const EEG_CHANNELS = ["AF3", "F3", "T7", "O1", "O2", "T8", "F4", "AF4"]
 type EEGDataPoint = Record<string, number> & { t: number }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// KOMPONEN VISUALISASI
+// VISUALIZATION COMPONENTS
 // ─────────────────────────────────────────────────────────────────────────────
 function HeadMap({ nodeQualities }: { nodeQualities: NodeQualityMap }) {
   const size = 260
@@ -176,7 +176,13 @@ function FrequencyBandpower({ data }: { data: any[] }) {
   )
 }
 
-// (Sisa komponen AIEngineControls & HardwareTelemetry dibiarkan statis untuk UI Demo)
+/**
+ * UI-ONLY STUB — High-fidelity demo component for the thesis defense.
+ * The "Calibrate Baseline" button triggers a visual animation only and does NOT
+ * call the backend POST /api/v1/calibrate endpoint. Model selection and the
+ * confidence threshold slider are local state only (not wired to inference logic).
+ * These controls will be connected in a future production release.
+ */
 function AIEngineControls() {
   const [model, setModel] = useState("EEGNet-v1.2")
   const [threshold, setThreshold] = useState(75)
@@ -216,6 +222,12 @@ function AIEngineControls() {
   )
 }
 
+/**
+ * UI-ONLY STUB — High-fidelity demo component for the thesis defense.
+ * Battery, signal strength, and packet loss values are hardcoded static strings.
+ * Live hardware telemetry requires a functional Emotiv Cortex API connection,
+ * which is outside the scope of the current BCI prototype.
+ */
 function HardwareTelemetry() {
   return (
     <Card className="rounded-2xl shadow-sm border-border bg-card transition-all duration-300">
@@ -241,7 +253,7 @@ function HardwareTelemetry() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HALAMAN UTAMA (PENYATU WEBSOCKET)
+// MAIN PAGE COMPONENT (WebSocket telemetry aggregator)
 // ─────────────────────────────────────────────────────────────────────────────
 export default function MonitorPage() {
   const [isConnected, setIsConnected] = useState(false)
@@ -249,7 +261,7 @@ export default function MonitorPage() {
   const [mentalStates, setMentalStates] = useState(DEFAULT_MENTAL_STATES)
   const [bandpower, setBandpower] = useState(DEFAULT_BANDPOWER)
   
-  // Inisialisasi 80 titik kosong agar grafik oskiloskop tidak error di awal
+  // Pre-populate 80 zero-value samples so the oscilloscope renders immediately on mount
   const [eegData, setEegData] = useState<EEGDataPoint[]>(() => {
     return Array.from({ length: 80 }).map((_, i) => ({
       t: i, AF3: 0, F3: 0, T7: 0, O1: 0, O2: 0, T8: 0, F4: 0, AF4: 0
@@ -257,13 +269,26 @@ export default function MonitorPage() {
   })
 
   const ws = useRef<WebSocket | null>(null)
-  const timeCounter = useRef(80) // Melanjutkan titik waktu ke-80
+  const timeCounter = useRef(80) // Continues the time axis from sample 80 onward
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isMounted = useRef(true)
 
-  useEffect(() => {
+  const connectTelemetry = () => {
+    if (!isMounted.current) return
+
     ws.current = new WebSocket(`${WS_URL}/ws/telemetry`)
 
     ws.current.onopen = () => setIsConnected(true)
-    ws.current.onclose = () => setIsConnected(false)
+
+    ws.current.onclose = () => {
+      setIsConnected(false)
+      if (isMounted.current) {
+        // Auto-reconnect after 3 seconds to survive backend restarts during demo
+        reconnectTimer.current = setTimeout(() => {
+          if (isMounted.current) connectTelemetry()
+        }, 3000)
+      }
+    }
 
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data)
@@ -284,24 +309,31 @@ export default function MonitorPage() {
       // Update Bar Chart Frekuensi
       if (data.bandpower) {
         setBandpower([
-          { band: "Theta", power: data.bandpower.Theta, color: "#00A3FF" },
-          { band: "Alpha", power: data.bandpower.Alpha, color: "#10B981" },
-          { band: "Beta", power: data.bandpower.Beta, color: "#FF903F" },
-          { band: "Gamma", power: data.bandpower.Gamma, color: "#8B5CF6" },
+          { band: "Theta", power: data.bandpower.Theta,  color: "#00A3FF" },
+          { band: "Alpha", power: data.bandpower.Alpha,  color: "#10B981" },
+          { band: "Beta",  power: data.bandpower.Beta,   color: "#FF903F" },
+          { band: "Gamma", power: data.bandpower.Gamma,  color: "#8B5CF6" },
         ])
       }
 
-      // Update Live EEG Chart (Menggeser array ke kiri)
+      // Update Live EEG Chart — shift the rolling buffer left by one sample
       if (data.eeg) {
         timeCounter.current += 1
         setEegData((prev) => {
           const newPoint = { t: timeCounter.current, ...data.eeg }
-          return [...prev.slice(1), newPoint] // Hapus indeks pertama, masukkan yang baru di akhir
+          return [...prev.slice(1), newPoint]
         })
       }
     }
+  }
+
+  useEffect(() => {
+    isMounted.current = true
+    connectTelemetry()
 
     return () => {
+      isMounted.current = false
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current)
       if (ws.current) ws.current.close()
     }
   }, [])
@@ -330,7 +362,7 @@ export default function MonitorPage() {
           </p>
         </div>
 
-        {/* Indikator Koneksi Stream Telemetri */}
+        {/* Telemetry stream connection indicator */}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${isConnected ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
           <span className="relative flex h-2.5 w-2.5">
             {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}

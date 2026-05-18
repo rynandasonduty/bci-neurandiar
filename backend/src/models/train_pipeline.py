@@ -1,7 +1,6 @@
 import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 from eegnet_model import EEGNetClassifier
 import optuna
 import mlflow
@@ -21,23 +20,6 @@ def load_and_prepare_data(processed_dir):
     X = np.transpose(X, (0, 2, 1))
     X = np.expand_dims(X, axis=3)
     return X, y
-
-def plot_history(history, save_path):
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(history.history['accuracy'], label='Training Accuracy')
-    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-    plt.title('Accuracy Progression')
-    plt.legend()
-
-    plt.subplot(1, 2, 2)
-    plt.plot(history.history['loss'], label='Training Loss')
-    plt.plot(history.history['val_loss'], label='Validation Loss')
-    plt.title('Loss Reduction')
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(save_path)
-    plt.close()
 
 def run_training_pipeline(exp_id="E0_Baseline", n_trials=10, max_epochs=500,
                           use_augmentation=False, augmentation_params=None, target_fs=256):

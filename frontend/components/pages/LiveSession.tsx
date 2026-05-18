@@ -32,10 +32,10 @@ import {
   Database,
 } from "lucide-react"
 
-// 1. Tipe Data untuk Status Intent
+// Intent state type
 type IntentState = "idle" | "spike_detected" | "decoding" | "done"
 
-// 2. Konfigurasi Langkah Pipeline
+// Pipeline step configuration
 const pipelineSteps = [
   { id: 0, label: "EEG Acquisition", icon: Waves },
   { id: 1, label: "Filtering & Extraction", icon: Filter },
@@ -44,7 +44,7 @@ const pipelineSteps = [
   { id: 4, label: "LLM Refining", icon: Sparkles },
 ]
 
-// 3. Komponen Visual Pipeline
+// Pipeline stepper component
 function PipelineStepper({ activeStep }: { activeStep: number }) {
   return (
     <div className="flex items-center gap-1.5 w-full">
@@ -109,7 +109,7 @@ function PipelineStepper({ activeStep }: { activeStep: number }) {
   )
 }
 
-// 4. Komponen Metadata (Sekarang tersambung ke state utama)
+// Session metadata panel — subject selector and audio feedback toggle
 function SessionMetadataControls({
   subject,
   setSubject,
@@ -188,7 +188,7 @@ function ConfidenceRing({ value }: { value: number }) {
   )
 }
 
-// 5. Komponen Result (Sekarang memiliki tombol Save to History)
+// Inference result panel — displays decoded word, refined sentence, confidence, and action buttons
 function ResultDisplay({
   intentState,
   rawDecodedWord,
@@ -298,8 +298,12 @@ export default function LiveSessionPage() {
   const [isSaved, setIsSaved] = useState(false)
   
   const ws = useRef<WebSocket | null>(null)
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isMounted = useRef(true)
 
-  useEffect(() => {
+  const connectWebSocket = () => {
+    if (!isMounted.current) return
+
     ws.current = new WebSocket(`${WS_URL}/ws/inference`)
 
     ws.current.onopen = () => {
@@ -309,34 +313,50 @@ export default function LiveSessionPage() {
 
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      
+
       if (data.status === 'processing') {
         setStatusMsg(data.message)
-        setActiveStep(data.step) 
+        setActiveStep(data.step)
         setIntentState("decoding")
-      } 
-      else if (data.status === 'success') {
+      } else if (data.status === 'success') {
         setStatusMsg('Decoding Complete!')
-        setActiveStep(5) 
+        setActiveStep(5)
         setIntentState("done")
         setIsRunning(false)
-        setIsSaved(false) 
-        
+        setIsSaved(false)
+
         setRawDecodedWord(data.decoded_word)
         setAiConfidence(data.confidence)
-        setRefinedSentence(data.refined_sentence) 
+        setRefinedSentence(data.refined_sentence)
       }
     }
 
     ws.current.onclose = () => {
       setIsConnected(false)
-      setStatusMsg('Connection Lost')
       setActiveStep(0)
       setIntentState("idle")
       setIsRunning(false)
+
+      if (isMounted.current) {
+        // Auto-reconnect after 3 seconds to survive backend restarts during demo
+        setStatusMsg('Connection Lost — Reconnecting in 3s...')
+        reconnectTimer.current = setTimeout(() => {
+          if (isMounted.current) {
+            setStatusMsg('Reconnecting...')
+            connectWebSocket()
+          }
+        }, 3000)
+      }
     }
+  }
+
+  useEffect(() => {
+    isMounted.current = true
+    connectWebSocket()
 
     return () => {
+      isMounted.current = false
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current)
       if (ws.current) ws.current.close()
     }
   }, [])
@@ -397,7 +417,7 @@ export default function LiveSessionPage() {
         setStatusMsg("Saved to History Successfully!");
       }
     } catch (error) {
-      console.error("Gagal menyimpan log:", error);
+      console.error("[LiveSession] Failed to save inference log:", error);
     }
   }
 

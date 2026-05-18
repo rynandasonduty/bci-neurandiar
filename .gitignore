@@ -15,6 +15,7 @@ backend/dataset/
 backend/reports/
 backend/logs/
 backend/models
+backend/models_backup
 *.csv
 *.edf
 *.npy

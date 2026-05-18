@@ -124,9 +124,11 @@ def check_p2_models():
         for subj in SUBJECTS:
             model_file  = os.path.join(exp_dir, f"{exp}_{subj}.h5")
             scaler_file = os.path.join(exp_dir, f"scaler_{exp}_{subj}.pkl")
+            xtest_file  = os.path.join(exp_dir, f"Xtest_{exp}_{subj}.npy")
+            ytest_file  = os.path.join(exp_dir, f"ytest_{exp}_{subj}.npy")
 
-            all_present = all(os.path.exists(f) for f in [model_file, scaler_file])
-            missing = [os.path.basename(f) for f in [model_file, scaler_file]
+            all_present = all(os.path.exists(f) for f in [model_file, scaler_file, xtest_file, ytest_file])
+            missing = [os.path.basename(f) for f in [model_file, scaler_file, xtest_file, ytest_file]
                        if not os.path.exists(f)]
 
             if all_present:
@@ -137,9 +139,9 @@ def check_p2_models():
                 total_fail += 1
 
     if total_fail == 0:
-        log_result(PASS, f"All P2_EEGNet artefacts present ({total_pass} model+scaler pairs)")
+        log_result(PASS, f"All P2_EEGNet artefacts present ({total_pass} model+scaler+test-set quadruplets)")
         record(PASS, "P2_EEGNet", "All artefacts")
-    print(f"\n  Summary — P2_EEGNet: {total_pass} model+scaler pairs passed, {total_fail} missing.")
+    print(f"\n  Summary — P2_EEGNet: {total_pass} quadruplets passed, {total_fail} missing (model, scaler, Xtest, ytest).")
 
 # ---------------------------------------------------------------------------
 # CHECK 3: P3_SVM MODEL ARTEFACTS

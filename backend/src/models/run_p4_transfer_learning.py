@@ -161,11 +161,21 @@ def execute_p4_transfer_learning(
     )
 
     subjects_to_run = target_subjects if target_subjects else all_subjects
-    experiments_to_run = (
-        {k: v for k, v in EXPERIMENT_RECIPES.items() if k in target_experiments}
-        if target_experiments
-        else EXPERIMENT_RECIPES
-    )
+
+    if target_experiments:
+        valid_experiments   = {k: v for k, v in EXPERIMENT_RECIPES.items() if k in target_experiments}
+        invalid_experiments = [e for e in target_experiments if e not in EXPERIMENT_RECIPES]
+        if invalid_experiments:
+            print(f"[ERROR] The following --exp values are not valid experiment IDs: {invalid_experiments}")
+            print(f"[ERROR] Valid experiment IDs: {list(EXPERIMENT_RECIPES.keys())}")
+            sys.exit(1)
+        experiments_to_run = valid_experiments
+    else:
+        experiments_to_run = EXPERIMENT_RECIPES
+
+    if not experiments_to_run:
+        print("[ERROR] No valid experiments to process. Exiting.")
+        sys.exit(1)
 
     print(f"[INFO] Subjects to fine-tune : {subjects_to_run}")
     print(f"[INFO] Experiments to process: {list(experiments_to_run.keys())}")

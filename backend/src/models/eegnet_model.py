@@ -66,8 +66,8 @@ class EEGNetClassifier:
         block2 = Activation('elu')(block2)
 
         # Dynamic pooling size to prevent a shape crash for short ERP windows (E3)
-        sisa_sampel = self.samples // 4
-        pool2_size = 8 if sisa_sampel >= 16 else (4 if sisa_sampel >= 8 else 2)
+        remaining_samples = self.samples // 4
+        pool2_size = 8 if remaining_samples >= 16 else (4 if remaining_samples >= 8 else 2)
 
         block2 = AveragePooling2D((1, pool2_size))(block2)
         block2 = Dropout(self.dropout_rate)(block2)

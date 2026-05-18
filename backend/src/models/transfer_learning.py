@@ -50,12 +50,18 @@ def calibrate_new_user(base_model_path, X_new_3d, y_new, new_subject_id, save_di
             if 'dense' not in layer.name.lower() and 'softmax' not in layer.name.lower():
                 layer.trainable = False
 
-        # Recompile with a low learning rate to preserve pretrained representations
-        optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+        # Recompile with a conservative LR (1e-4) to preserve pretrained spatial filters.
+        # Consistent with run_p4_transfer_learning.py fine-tuning convention.
+        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
         model.compile(loss='sparse_categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
+        # EarlyStopping prevents over-fitting on the small per-user calibration set
+        early_stop = tf.keras.callbacks.EarlyStopping(
+            monitor='loss', patience=3, restore_best_weights=True
+        )
+
         print(f"[INFO] Fine-tuning classification head on {len(X_new_3d)} new user samples...")
-        model.fit(X_new_3d, y_new, epochs=15, batch_size=2, verbose=1)
+        model.fit(X_new_3d, y_new, epochs=15, batch_size=2, callbacks=[early_stop], verbose=1)
 
         save_path = os.path.join(save_dir, f"calibrated_EEGNet_{new_subject_id}.h5")
         model.save(save_path)

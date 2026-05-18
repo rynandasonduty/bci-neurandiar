@@ -21,6 +21,7 @@ from features.extract_eeg_features import EEGFeatureExtractor
 from models.transfer_learning import calibrate_new_user
 from models.logreg_model import WordAssembler, REVERSE_WORD_CLASSES
 from pipeline.llm_agent import refine_with_llm
+from config import TRIALS_PER_SUBJECT
 
 # ---------------------------------------------------------------------------
 # PATHS
@@ -197,8 +198,8 @@ async def get_metrics():
                 rows = list(csv.DictReader(f))
             if rows:
                 confs = [float(r.get("confidence", 0)) for r in rows]
-                # Proxy latency: invert confidence (demo only — replace with
-                # actual latency column once telemetry is instrumented)
+                # Estimated proxy: inverts confidence to a latency-like value.
+                # Real latency instrumentation is not yet implemented.
                 latencies = [max(100, 500 - c * 2) for c in confs]
                 latencies_sorted = sorted(latencies)
                 mid = len(latencies_sorted) // 2
@@ -209,17 +210,25 @@ async def get_metrics():
             pass
 
     overview = {
-        "median_latency": median_latency,
-        "p95_latency":    p95_latency,
-        "active_model":   f"{CHAMPION_PARADIGM} / {CHAMPION_EXP}",
+        "median_latency":      median_latency,
+        "p95_latency":         p95_latency,
+        "active_model":        f"{CHAMPION_PARADIGM} / {CHAMPION_EXP}",
+        "latency_is_proxy":    True,
+        "latency_note":        "Estimated proxy — real per-inference latency instrumentation not yet implemented.",
     }
 
-    # ---- 2. MLflow model registry ---------------------------------------
+    # ---- 2–3–6. MLflow queries — single shared connection ---------------
     mlflow_registry = []
+    optuna_trials   = []
+    training_curves = []
+
     if os.path.exists(MLFLOW_DB):
+        conn = None
         try:
             conn = sqlite3.connect(MLFLOW_DB)
-            cur = conn.cursor()
+            cur  = conn.cursor()
+
+            # 2. Model registry (most recent 20 runs)
             cur.execute("""
                 SELECT r.run_uuid, r.name, r.status,
                        MAX(CASE WHEN m.key='best_val_accuracy' THEN m.value END) AS f1,
@@ -230,57 +239,74 @@ async def get_metrics():
                 ORDER BY r.start_time DESC
                 LIMIT 20
             """)
-            rows = cur.fetchall()
-            conn.close()
-            for row in rows:
-                uuid_, name_, status_, f1_, loss_ = row
+            for uuid_, name_, status_, f1_, loss_ in cur.fetchall():
                 mlflow_registry.append({
-                    "version": name_ or uuid_[:8],
-                    "status":  status_ or "FINISHED",
-                    "f1_score": round(float(f1_) if f1_ is not None else 0.0, 4),
-                    "loss":     round(float(loss_) if loss_ is not None else 0.0, 4),
+                    "version":  name_ or uuid_[:8],
+                    "status":   status_ or "FINISHED",
+                    "f1_score": round(float(f1_)   if f1_   is not None else 0.0, 4),
+                    "loss":     round(float(loss_)  if loss_ is not None else 0.0, 4),
                 })
-        except Exception as e:
-            print(f"[WARNING] MLflow query error: {e}")
 
-    # Fall-back registry entry so the dashboard is never blank
-    if not mlflow_registry:
-        mlflow_registry = [{
-            "version": f"{CHAMPION_PARADIGM}/{CHAMPION_EXP}",
-            "status":  "FINISHED",
-            "f1_score": 0.0,
-            "loss":     0.0,
-        }]
-
-    # ---- 3. Optuna trials -----------------------------------------------
-    optuna_trials = []
-    if os.path.exists(MLFLOW_DB):
-        try:
-            conn = sqlite3.connect(MLFLOW_DB)
-            cur = conn.cursor()
+            # 3. Optuna hyperparameter trials (most recent 10)
             cur.execute("""
                 SELECT r.run_uuid,
                        MAX(CASE WHEN p.key='dropout_rate' THEN p.value END) AS dropout,
-                       MAX(CASE WHEN m.key='val_accuracy' THEN m.value END) AS val_acc
+                       MAX(CASE WHEN m.key='val_accuracy'  THEN m.value END) AS val_acc
                 FROM runs r
-                LEFT JOIN params    p ON r.run_uuid = p.run_uuid
+                LEFT JOIN params         p ON r.run_uuid = p.run_uuid
                 LEFT JOIN latest_metrics m ON r.run_uuid = m.run_uuid
                 WHERE r.name LIKE '%trial%' OR r.tags LIKE '%optuna%'
                 GROUP BY r.run_uuid
                 ORDER BY r.start_time DESC
                 LIMIT 10
             """)
-            rows = cur.fetchall()
-            conn.close()
-            for i, row in enumerate(rows):
-                _, dropout_, val_acc_ = row
+            for i, (_, dropout_, val_acc_) in enumerate(cur.fetchall()):
                 optuna_trials.append({
                     "trial":   i + 1,
                     "dropout": round(float(dropout_), 3) if dropout_ else "N/A",
                     "valAcc":  f"{float(val_acc_)*100:.2f}%" if val_acc_ else "N/A",
                 })
-        except Exception:
-            pass
+
+            # 6. Training curves from the most recent completed run
+            cur.execute("""
+                SELECT run_uuid FROM runs
+                WHERE status='FINISHED'
+                ORDER BY start_time DESC LIMIT 1
+            """)
+            row = cur.fetchone()
+            if row:
+                run_id = row[0]
+                cur.execute(
+                    "SELECT step, value FROM metrics WHERE run_uuid=? AND key='val_accuracy' ORDER BY step",
+                    (run_id,),
+                )
+                acc_map = {r[0]: r[1] for r in cur.fetchall()}
+                cur.execute(
+                    "SELECT step, value FROM metrics WHERE run_uuid=? AND key='val_loss' ORDER BY step",
+                    (run_id,),
+                )
+                loss_map = {r[0]: r[1] for r in cur.fetchall()}
+                for step in sorted(set(acc_map) | set(loss_map)):
+                    training_curves.append({
+                        "epoch": step,
+                        "acc":   round(float(acc_map.get(step, 0)), 4),
+                        "loss":  round(float(loss_map.get(step, 0)), 4),
+                    })
+
+        except Exception as e:
+            print(f"[WARNING] MLflow query error: {e}")
+        finally:
+            if conn:
+                conn.close()
+
+    # Fall-back registry entry so the dashboard is never blank
+    if not mlflow_registry:
+        mlflow_registry = [{
+            "version":  f"{CHAMPION_PARADIGM}/{CHAMPION_EXP}",
+            "status":   "FINISHED",
+            "f1_score": 0.0,
+            "loss":     0.0,
+        }]
 
     # ---- 4. Dataset metadata (from P2 test .npy files as proxy) --------
     dataset_meta = []
@@ -297,8 +323,8 @@ async def get_metrics():
                 pass
         dataset_meta.append({
             "subject":     subj,
-            "trials":      200,
-            "rejected":    max(0, 200 - clean_epochs * 5) if clean_epochs else "N/A",
+            "trials":      TRIALS_PER_SUBJECT,
+            "rejected":    max(0, TRIALS_PER_SUBJECT - clean_epochs * 5) if clean_epochs else "N/A",
             "cleanEpochs": clean_epochs,
         })
 
@@ -315,48 +341,6 @@ async def get_metrics():
             raw_logs_preview = "".join(lines[:30])
         except Exception:
             pass
-
-    # ---- 6. Training curves (from P1 E0 MLflow run if available) -------
-    training_curves = []
-    if os.path.exists(MLFLOW_DB):
-        try:
-            conn = sqlite3.connect(MLFLOW_DB)
-            cur = conn.cursor()
-            # Get the most recent completed P1 run
-            cur.execute("""
-                SELECT run_uuid FROM runs
-                WHERE status='FINISHED'
-                ORDER BY start_time DESC LIMIT 1
-            """)
-            row = cur.fetchone()
-            if row:
-                run_id = row[0]
-                cur.execute("""
-                    SELECT step, value FROM metrics
-                    WHERE run_uuid=? AND key='val_accuracy'
-                    ORDER BY step
-                """, (run_id,))
-                acc_rows = cur.fetchall()
-                cur.execute("""
-                    SELECT step, value FROM metrics
-                    WHERE run_uuid=? AND key='val_loss'
-                    ORDER BY step
-                """, (run_id,))
-                loss_rows = cur.fetchall()
-                conn.close()
-
-                acc_map  = {r[0]: r[1] for r in acc_rows}
-                loss_map = {r[0]: r[1] for r in loss_rows}
-                for step in sorted(set(acc_map) | set(loss_map)):
-                    training_curves.append({
-                        "epoch": step,
-                        "acc":   round(float(acc_map.get(step, 0)), 4),
-                        "loss":  round(float(loss_map.get(step, 0)), 4),
-                    })
-            else:
-                conn.close()
-        except Exception as e:
-            print(f"[WARNING] Training curves query error: {e}")
 
     return {
         "status":          "success",
@@ -493,7 +477,7 @@ async def inference_endpoint(websocket: WebSocket):
                 decoded_word = None
                 confidence   = 0.0
 
-                if "eegnet" in ai_models and X_test_pool is not None and assembler is not None:
+                if "eegnet" in ai_models and X_test_pool is not None and assembler is not None and assembler._is_loaded:
                     try:
                         # Sample a random test epoch for live demo
                         idx   = random.randint(0, len(X_test_pool) - 1)

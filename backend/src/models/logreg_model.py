@@ -37,6 +37,7 @@ class WordAssembler:
             os.makedirs(self.model_dir, exist_ok=True)
 
         self.model = LogisticRegression(max_iter=1000, random_state=42)
+        self._is_loaded = False  # Set to True only after a successful load_model() call
 
     def train(self, X_train, y_train):
         """
@@ -73,6 +74,7 @@ class WordAssembler:
 
         with open(self.model_path, 'rb') as f:
             self.model = pickle.load(f)
+        self._is_loaded = True
         print(f"[INFO] Word assembler model loaded from: {self.model_path}")
 
     def assemble_word(self, prob_slot1, prob_slot2):
