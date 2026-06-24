@@ -1,0 +1,168 @@
+{
+  "export_timestamp": "20260614_0728",
+  "export_directory": "e:\\ANDIARS-ARCHIVE\\TUGAS AKHIR\\NEURANDIAR\\Daftar Sidang Proposal\\SKRIPSI\\Source Code SKRIPSI\\neurandiar-bci\\notebooks\\reports\\data_export_claude",
+  "n_classes": 19,
+  "chance_level_pct": 5.263,
+  "p1_summary": {
+    "mean_acc_pct": 9.871,
+    "best_config": "E6 Imagined Only",
+    "best_acc_pct": 10.208,
+    "source": "freshly computed from real P1_Global model artefacts"
+  },
+  "p2_summary": {
+    "best_subject": "S10",
+    "best_config": "E3 N400 Window",
+    "peak_acc_pct": 13.7255,
+    "f1_weighted": 0.0558,
+    "cohens_kappa": 0.0603,
+    "mean_acc_pct": 13.5
+  },
+  "p3_summary": {
+    "best_feature_group": "Barlow Params",
+    "peak_acc_pct": 19.048,
+    "mean_acc_pct": 15.436
+  },
+  "statistical_tests": {
+    "wilcoxon_p2_vs_p3": {
+      "w_stat": 20.0,
+      "p_raw": 0.151367,
+      "p_holm": 0.151367,
+      "effect_r": 0.7436,
+      "significant": false
+    },
+    "friedman_p2": {
+      "chi2": 25.917,
+      "p_value": 0.000521,
+      "k_configs": 8,
+      "n_subjects": 12,
+      "significant": true
+    },
+    "nemenyi_cd": {
+      "q_alpha_005": 3.031,
+      "cd_value": 3.031,
+      "best_config": "E5 Augmentation",
+      "best_rank": 2.292
+    }
+  },
+  "shap_xai": {
+    "fdr": 1.0721,
+    "n400_auc_e3": 51.0749,
+    "n400_auc_e0": 19.2877,
+    "top_channel": "T7",
+    "top_channel_importance": 9e-06
+  },
+  "inference_latency": {
+    "p2_mean_ms": 59.666,
+    "p2_p95_ms": 70.533,
+    "p3_mean_ms": 0.16,
+    "p3_p95_ms": 0.172,
+    "realtime_threshold_ms": 100.0
+  },
+  "exported_files": {
+    "T0_pillar1_raw_fresh.csv": {
+      "description": "P1 Global EEGNet accuracy (freshly computed from real model artefacts)",
+      "shape": [
+        8,
+        4
+      ]
+    },
+    "T0_pillar2_raw_fresh.csv": {
+      "description": "P2 Subject-Dependent EEGNet accuracy (E3 freshly computed; other exps from prior run)",
+      "shape": [
+        96,
+        5
+      ]
+    },
+    "T0_pillar3_raw_fresh.csv": {
+      "description": "P3 Subject-Dependent SVM accuracy from prior computed run",
+      "shape": [
+        472,
+        6
+      ]
+    },
+    "T1_p1_descriptive_stats.csv": {
+      "description": "P1 Global EEGNet descriptive statistics and one-sample t-test against chance",
+      "shape": [
+        7,
+        1
+      ]
+    },
+    "T2_cross_pillar_summary.csv": {
+      "description": "Cross-pillar accuracy summary: mean, median, max, std, gain over chance",
+      "shape": [
+        3,
+        6
+      ]
+    },
+    "T3_wilcoxon_p2_vs_p3.csv": {
+      "description": "Wilcoxon Signed-Rank test: P2 vs P3 (best per subject), Holm-Bonferroni corrected",
+      "shape": [
+        1,
+        7
+      ]
+    },
+    "T3_per_subject_p2_vs_p3.csv": {
+      "description": "Per-subject best accuracy comparison: P2 vs P3",
+      "shape": [
+        12,
+        4
+      ]
+    },
+    "T4_subject_rescue.csv": {
+      "description": "Subject rescue analysis: subjects where P3 outperforms P2",
+      "shape": [
+        12,
+        5
+      ]
+    },
+    "T5_champion_grand_matrix.csv": {
+      "description": "Grand summary matrix for the champion model (P2/E3/S11)",
+      "shape": [
+        1,
+        9
+      ]
+    },
+    "T5_per_class_recall.csv": {
+      "description": "Per-class precision, recall, F1-score for the champion model",
+      "shape": [
+        19,
+        4
+      ]
+    },
+    "T6_shap_channel_importance.csv": {
+      "description": "SHAP channel importance (mean absolute SHAP) and FDR for champion model",
+      "shape": [
+        14,
+        3
+      ]
+    },
+    "T6_n400_temporal_auc.csv": {
+      "description": "N400 AUC values for E3 champion and E0 baseline reference",
+      "shape": [
+        2,
+        3
+      ]
+    },
+    "T7_friedman_avg_ranks.csv": {
+      "description": "Average ranks from Friedman test on P2 (k=8 configurations, n=12 subjects)",
+      "shape": [
+        8,
+        3
+      ]
+    },
+    "T8_p3_feature_ablation.csv": {
+      "description": "P3 feature group ablation statistics across all experiments and subjects",
+      "shape": [
+        5,
+        6
+      ]
+    },
+    "T9_inference_latency.csv": {
+      "description": "Inference latency (mean, 95th percentile) for P2 EEGNet and P3 SVM",
+      "shape": [
+        2,
+        4
+      ]
+    }
+  }
+}
