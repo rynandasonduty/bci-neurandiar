@@ -1,5 +1,5 @@
 {
-  "export_timestamp": "20260614_0728",
+  "export_timestamp": "20260705_0432",
   "export_directory": "e:\\ANDIARS-ARCHIVE\\TUGAS AKHIR\\NEURANDIAR\\Daftar Sidang Proposal\\SKRIPSI\\Source Code SKRIPSI\\neurandiar-bci\\notebooks\\reports\\data_export_claude",
   "n_classes": 19,
   "chance_level_pct": 5.263,
@@ -7,32 +7,48 @@
     "mean_acc_pct": 9.871,
     "best_config": "E6 Imagined Only",
     "best_acc_pct": 10.208,
+    "p1_odm_pct": 89.792,
     "source": "freshly computed from real P1_Global model artefacts"
   },
   "p2_summary": {
-    "best_subject": "S10",
-    "best_config": "E3 N400 Window",
-    "peak_acc_pct": 13.7255,
-    "f1_weighted": 0.0558,
-    "cohens_kappa": 0.0603,
-    "mean_acc_pct": 13.5
+    "best_subject": "S6",
+    "best_config": "E6 Imagined Only",
+    "peak_acc_pct": 22.2222,
+    "mean_acc_pct": 11.476
   },
   "p3_summary": {
     "best_feature_group": "Barlow Params",
-    "peak_acc_pct": 19.048,
-    "mean_acc_pct": 15.436
+    "best_subject": "S3",
+    "best_config": "E6 Imagined Only",
+    "peak_acc_pct": 21.591,
+    "mean_acc_pct": 15.447
+  },
+  "champion": {
+    "paradigm": "P3",
+    "paradigm_name": "P3 Subject-Dependent SVM",
+    "subject": "S3",
+    "config": "E5",
+    "config_label": "E5 Augmentation + Barlow Params",
+    "feature_group": "barlow",
+    "tag": "P3/E5/S3/barlow",
+    "test_acc_pct": 18.0952,
+    "f1_weighted": 0.1801,
+    "cohens_kappa": 0.1326,
+    "class_coverage": "18/19",
+    "n_qualified_candidates": 8,
+    "selection_criterion": "highest subject-paradigm mean accuracy among top-10 peak-accuracy finalists with class coverage >= 8/19"
   },
   "statistical_tests": {
     "wilcoxon_p2_vs_p3": {
-      "w_stat": 20.0,
-      "p_raw": 0.151367,
-      "p_holm": 0.151367,
-      "effect_r": 0.7436,
-      "significant": false
+      "w_stat": 5.0,
+      "p_raw": 0.004883,
+      "p_holm": 0.004883,
+      "effect_r": 0.9359,
+      "significant": true
     },
     "friedman_p2": {
-      "chi2": 25.917,
-      "p_value": 0.000521,
+      "chi2": 31.5982,
+      "p_value": 4.8e-05,
       "k_configs": 8,
       "n_subjects": 12,
       "significant": true
@@ -40,23 +56,90 @@
     "nemenyi_cd": {
       "q_alpha_005": 3.031,
       "cd_value": 3.031,
-      "best_config": "E5 Augmentation",
-      "best_rank": 2.292
+      "best_config": "E7 Alpha Band",
+      "best_rank": 2.042
+    },
+    "cohens_d": {
+      "P2 vs P1": 0.5772,
+      "P3 vs P1": 2.3508,
+      "P2 vs P3": -1.2061
+    },
+    "bootstrap_ci_95pct": {
+      "P1": [
+        9.588,
+        10.059
+      ],
+      "P2": [
+        10.117,
+        13.576
+      ],
+      "P3": [
+        13.919,
+        17.104
+      ],
+      "n_resamples": 2000
+    },
+    "friedman_p3": {
+      "chi2": 33.9128,
+      "p_value": 1.8e-05,
+      "k_configs": 8,
+      "n_subjects": 12,
+      "significant": true,
+      "best_config": "E2 Resample 512Hz",
+      "best_rank": 2.792
+    },
+    "spearman_p2_p3": {
+      "r": -0.0998,
+      "p_value": 0.757534,
+      "significant": false
+    },
+    "kruskal_p1": {
+      "h_stat": 11.6484,
+      "p_value": 0.11273,
+      "unit": "per-class recall (19 classes) per configuration",
+      "k_configs": 8,
+      "significant": false
     }
   },
   "shap_xai": {
-    "fdr": 1.0721,
-    "n400_auc_e3": 51.0749,
-    "n400_auc_e0": 19.2877,
-    "top_channel": "T7",
-    "top_channel_importance": 9e-06
+    "method": "permutation_importance",
+    "top_feature": "O1_freq",
+    "top_feature_importance": 0.051746,
+    "fdr": null,
+    "n400_auc_champ": null,
+    "note": "permutation_importance (accuracy-drop); not numerically comparable to P2 SHAP"
   },
   "inference_latency": {
-    "p2_mean_ms": 59.666,
-    "p2_p95_ms": 70.533,
-    "p3_mean_ms": 0.16,
-    "p3_p95_ms": 0.172,
+    "p2_mean_ms": 70.351,
+    "p2_p95_ms": 106.654,
+    "p3_mean_ms": 0.447,
+    "p3_p95_ms": 0.685,
     "realtime_threshold_ms": 100.0
+  },
+  "figure_index": {
+    "Figure 1": "P1 bar chart accuracy per experiment",
+    "Figure 1b": "P1 per-syllable recall (best config) — NEW",
+    "Figure 2": "P2 boxplot distribution per experiment",
+    "Figure 2b": "P2 per-syllable mean recall aggregated across 12 subjects — NEW",
+    "Figure 2c": "P2 subject × syllable recall heatmap (12×19) — NEW",
+    "Figure 3": "P2 subject × experiment accuracy heatmap",
+    "Figure 4": "P3 feature × experiment accuracy heatmap",
+    "Figure 4b": "P3 per-subject × feature group accuracy heatmap — NEW",
+    "Figure 4c": "P3 SVM per-syllable mean recall aggregated across 12 subjects — NEW",
+    "Figure 4d": "P3 SVM subject × syllable recall heatmap (12×19) — NEW",
+    "Figure 5": "Cross-pillar violin+box distribution",
+    "Figure 6": "Subject rescue: P2 vs P3 grouped bar",
+    "Figure 6b": "Spearman scatter P2 vs P3 per-subject accuracy — NEW",
+    "Figure 7": "Champion model per-class recall (19 syllable classes)",
+    "Figure 8": "Champion model normalized confusion matrix",
+    "Figure 9": "Permutation feature importance (P3 champion)",
+    "Figure 10": "P1 global EEGNet confusion matrix",
+    "Figure 11": "Nemenyi CD diagram (Friedman P2)",
+    "Figure 11b": "Nemenyi CD diagram (Friedman P3 SVM, k=8 ablation configs) — NEW",
+    "Figure 12": "P3 feature group ablation bar chart",
+    "Figure 13": "Inference latency comparison",
+    "Figure 14": "Bootstrap CI forest plot",
+    "Figure 15": "Cohen's d effect size bar chart"
   },
   "exported_files": {
     "T0_pillar1_raw_fresh.csv": {
@@ -76,7 +159,7 @@
     "T0_pillar3_raw_fresh.csv": {
       "description": "P3 Subject-Dependent SVM accuracy from prior computed run",
       "shape": [
-        472,
+        480,
         6
       ]
     },
@@ -115,31 +198,38 @@
         5
       ]
     },
+    "T5_champion_top3_candidates.csv": {
+      "description": "Top 3 champion candidates ranked by subject-paradigm mean (CV tie-break) after class-coverage gate",
+      "shape": [
+        3,
+        7
+      ]
+    },
+    "T5_champion_candidate_coverage.csv": {
+      "description": "Top-10 finalists with class coverage (classes with recall>0 of 19) used for the champion gate",
+      "shape": [
+        10,
+        6
+      ]
+    },
     "T5_champion_grand_matrix.csv": {
-      "description": "Grand summary matrix for the champion model (P2/E3/S11)",
+      "description": "Grand summary matrix for the objectively selected champion model (P3/E5/S3/barlow)",
       "shape": [
         1,
-        9
+        10
       ]
     },
     "T5_per_class_recall.csv": {
-      "description": "Per-class precision, recall, F1-score for the champion model",
+      "description": "Per-class precision, recall, F1-score for champion model (correct 19-class syllable labels)",
       "shape": [
         19,
         4
       ]
     },
-    "T6_shap_channel_importance.csv": {
-      "description": "SHAP channel importance (mean absolute SHAP) and FDR for champion model",
+    "T6_permutation_importance.csv": {
+      "description": "Permutation importance (n_repeats=30) of handcrafted features for P3 champion (P3/E5/S3/barlow)",
       "shape": [
-        14,
-        3
-      ]
-    },
-    "T6_n400_temporal_auc.csv": {
-      "description": "N400 AUC values for E3 champion and E0 baseline reference",
-      "shape": [
-        2,
+        28,
         3
       ]
     },
@@ -161,7 +251,105 @@
       "description": "Inference latency (mean, 95th percentile) for P2 EEGNet and P3 SVM",
       "shape": [
         2,
+        5
+      ]
+    },
+    "T10_p2_subject_experiment_matrix.csv": {
+      "description": "P2 EEGNet: best test accuracy (%) per subject × ablation configuration (12x8 matrix)",
+      "shape": [
+        12,
+        8
+      ]
+    },
+    "T10_p2_best_config_per_subject.csv": {
+      "description": "Best performing ablation configuration per subject for P2 EEGNet",
+      "shape": [
+        12,
+        2
+      ]
+    },
+    "T14_p1_per_syllable_recall.csv": {
+      "description": "P1 Global EEGNet per-syllable classification metrics (best config: E6 Imagined Only)",
+      "shape": [
+        19,
         4
+      ]
+    },
+    "T15_p2_per_syllable_recall_aggregated.csv": {
+      "description": "P2 (P2/E3): per-syllable mean recall and std across 12 subjects",
+      "shape": [
+        19,
+        3
+      ]
+    },
+    "T16_p2_subject_syllable_heatmap.csv": {
+      "description": "P2 (P2/E3): per-subject × per-syllable recall (%) — 12x19 matrix",
+      "shape": [
+        12,
+        19
+      ]
+    },
+    "T17_p3_per_subject_stats.csv": {
+      "description": "P3 SVM per-subject accuracy statistics (mean, std, peak, floor, CV across all feature groups & experiments)",
+      "shape": [
+        12,
+        5
+      ]
+    },
+    "T17_p3_subject_feature_heatmap.csv": {
+      "description": "P3 SVM best accuracy (%) per subject × feature group — 12x5 matrix",
+      "shape": [
+        12,
+        5
+      ]
+    },
+    "T18_p3_per_syllable_recall.csv": {
+      "description": "P3 SVM per-syllable mean recall and std across 12 subjects (best config per subject)",
+      "shape": [
+        19,
+        3
+      ]
+    },
+    "T18b_p3_subject_syllable_heatmap.csv": {
+      "description": "P3 SVM per-subject × per-syllable recall (%) — 12×19 matrix",
+      "shape": [
+        12,
+        19
+      ]
+    },
+    "T19_spearman_p2_p3.csv": {
+      "description": "Spearman rank correlation between P2 and P3 best-per-subject accuracy",
+      "shape": [
+        4,
+        1
+      ]
+    },
+    "T20_p3_friedman_avg_ranks.csv": {
+      "description": "Average ranks from Friedman test on P3 SVM (k=8 configurations, n=12 subjects)",
+      "shape": [
+        8,
+        3
+      ]
+    },
+    "T11_p1_global_confusion_matrix.csv": {
+      "description": "P1 Global EEGNet normalized confusion matrix for best config (E6 Imagined Only)",
+      "shape": [
+        19,
+        19
+      ]
+    },
+    "T12_bootstrap_ci.csv": {
+      "description": "Bootstrap confidence intervals (95%, n=2000 resamples) per paradigm",
+      "shape": [
+        3,
+        5
+      ]
+    },
+    "T13_cohens_d_effect_size.csv": {
+      "description": "Cohen's d pairwise effect size across the three paradigm comparisons",
+      "shape": [
+        3,
+        5
       ]
     }
   }
