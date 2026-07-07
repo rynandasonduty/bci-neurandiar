@@ -1,7 +1,7 @@
 import os
 import sys
+import time
 import asyncio
-import pickle
 import sqlite3
 import csv
 import glob
@@ -12,26 +12,26 @@ import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from tensorflow.keras.models import load_model
 
 # Internal module imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from preprocessing.signal_processor import SignalProcessor
-from features.extract_eeg_features import EEGFeatureExtractor
+from pipeline.offline_trial_reader import OfflineTrialReader
+from pipeline.svm_champion import SVMChampion
+from pipeline.sentence_refiner import refine_sentence_rule_based
 from models.transfer_learning import calibrate_new_user
-from models.logreg_model import WordAssembler, REVERSE_WORD_CLASSES
-from pipeline.llm_agent import refine_with_llm
-from config import TRIALS_PER_SUBJECT
+from models.logreg_model import WordAssembler
+from config import TRIALS_PER_SUBJECT, RAW_DATA_DIR
 
 # ---------------------------------------------------------------------------
 # PATHS
 # ---------------------------------------------------------------------------
-BASE_DIR     = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-WEIGHTS_DIR  = os.path.join(BASE_DIR, "models", "weights")
-LOGS_DIR     = os.path.join(BASE_DIR, "logs")
-MLFLOW_DB    = os.path.join(LOGS_DIR, "mlflow", "mlruns.db")
-HISTORY_FILE = os.path.join(LOGS_DIR, "inference_history.csv")
-RAW_LOGS_DIR = os.path.join(BASE_DIR, "dataset", "raw", "logs")
+BASE_DIR      = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+WEIGHTS_DIR   = os.path.join(BASE_DIR, "models", "weights")
+LOGS_DIR      = os.path.join(BASE_DIR, "logs")
+MLFLOW_DB     = os.path.join(LOGS_DIR, "mlflow", "mlruns.db")
+HISTORY_FILE  = os.path.join(LOGS_DIR, "inference_history.csv")
+LATENCY_FILE  = os.path.join(LOGS_DIR, "latency_history.csv")
+RAW_LOGS_DIR  = os.path.join(BASE_DIR, "dataset", "raw", "logs")
 
 os.makedirs(LOGS_DIR, exist_ok=True)
 
@@ -42,12 +42,53 @@ if not os.path.exists(HISTORY_FILE):
             ["timestamp", "subject_id", "raw_word", "final_sentence", "confidence"]
         )
 
+# Initialise latency history CSV header if the file does not yet exist
+LATENCY_FIELDS = [
+    "timestamp", "subject_id", "trial_index",
+    "signal_read_filter_ms", "svm_inference_slot1_ms", "svm_inference_slot2_ms",
+    "word_assembly_ms", "refinement_ms", "total_ms",
+]
+if not os.path.exists(LATENCY_FILE):
+    with open(LATENCY_FILE, mode="w", newline="") as f:
+        csv.writer(f).writerow(LATENCY_FIELDS)
+
 # ---------------------------------------------------------------------------
 # CHAMPION MODEL CONFIGURATION
 # ---------------------------------------------------------------------------
-CHAMPION_EXP      = "E0_Baseline"
-CHAMPION_PARADIGM = "P1_Global"
-CHAMPION_DIR      = os.path.join(WEIGHTS_DIR, CHAMPION_PARADIGM, CHAMPION_EXP)
+# Champion resmi: SVM, Paradigma 3 (feature ablation), subjek S3,
+# konfigurasi E5 (Data Augmentation), grup fitur Barlow.
+# Akurasi uji 18,10%, cakupan 18/19 kelas suku kata (lihat notebook analisis).
+# Model ini bersifat subject-dependent (dilatih hanya dari data S3), sehingga
+# demo inferensi online dikunci hanya untuk subjek S3.
+CHAMPION_PARADIGM   = "P3_SVM"
+CHAMPION_EXP        = "E5_Data_Augmentation"
+CHAMPION_SUBJECT    = "S3"
+CHAMPION_FEAT_GROUP = "barlow"
+CHAMPION_DIR        = os.path.join(WEIGHTS_DIR, CHAMPION_PARADIGM, CHAMPION_EXP)
+
+CHAMPION_MODEL_PATH = os.path.join(
+    CHAMPION_DIR, f"SVM_{CHAMPION_FEAT_GROUP}_{CHAMPION_EXP}_{CHAMPION_SUBJECT}.pkl"
+)
+CHAMPION_SCALER_PATH = os.path.join(
+    CHAMPION_DIR, f"scaler_SVM_{CHAMPION_FEAT_GROUP}_{CHAMPION_EXP}_{CHAMPION_SUBJECT}.pkl"
+)
+
+# Parameter preprocessing SIS persis sama dengan processor_params resep E5
+# di EXPERIMENT_RECIPES (models/run_subject_dependent.py). Nilainya dituliskan
+# ulang di sini (bukan import langsung) agar proses API produksi tidak perlu
+# memuat dependensi berat khusus training (mlflow, TensorFlow/EEGNet).
+E5_PROCESSOR_PARAMS = {"band": "broadband", "apply_ica": False, "target_fs": 256}
+
+# Word assembler untuk demo dilatih KHUSUS dari trial subjek S3 saja
+# (train_word_assembler_s3.py), bukan varian pooled 12-subjek
+# (train_word_assembler.py) — champion SVM subject-dependent, sehingga
+# assembler yang representatif untuk demo juga harus konsisten dilatih
+# hanya dari sinyal S3. Model pooled tetap ada di disk terpisah sebagai
+# bukti pendukung diskusi keterbatasan generalisasi lintas-subjek, dan
+# TIDAK dimuat di sini.
+WORD_ASSEMBLER_FILENAME = (
+    f"logreg_assembler_svm_S3only_{CHAMPION_FEAT_GROUP}_{CHAMPION_EXP}.pkl"
+)
 
 # ---------------------------------------------------------------------------
 # APPLICATION
@@ -80,67 +121,84 @@ class CalibrationPayload(BaseModel):
 # ---------------------------------------------------------------------------
 # GLOBAL STATE
 # ---------------------------------------------------------------------------
-processor        = SignalProcessor(target_fs=256)
-feature_extractor = EEGFeatureExtractor(fs=256)
-
 # Populated at startup
-ai_models   = {}
-ai_scalers  = {}
-assembler   = None
-X_test_pool = None  # held-out test samples used for demo inference
+svm_champion = None   # SVMChampion instance (feature extraction + SVM predict_proba)
+assembler    = None   # WordAssembler instance (LogReg: 2x19-dim probs -> word)
+trial_reader = None   # OfflineTrialReader instance (real raw-data epoch extraction)
 
 # ---------------------------------------------------------------------------
 # STARTUP — Load champion model
 # ---------------------------------------------------------------------------
 @app.on_event("startup")
 async def startup_event():
-    global assembler, X_test_pool
+    global assembler, svm_champion, trial_reader
 
     print("[INFO] Neurandiar BCI backend initialising...")
 
-    # ---- EEGNet champion model ------------------------------------------
-    model_path = os.path.join(CHAMPION_DIR, f"eegnet_trained_{CHAMPION_EXP}.h5")
-    if os.path.exists(model_path):
+    # ---- SVM champion model (feature extraction is owned by SVMChampion) ----
+    if os.path.exists(CHAMPION_MODEL_PATH) and os.path.exists(CHAMPION_SCALER_PATH):
         try:
-            ai_models["eegnet"] = load_model(model_path)
-            print(f"[INFO] Champion EEGNet loaded: {CHAMPION_PARADIGM}/{CHAMPION_EXP}")
+            svm_champion = SVMChampion(
+                model_path=CHAMPION_MODEL_PATH,
+                scaler_path=CHAMPION_SCALER_PATH,
+                feat_group=CHAMPION_FEAT_GROUP,
+                fs=E5_PROCESSOR_PARAMS["target_fs"],
+            )
+            print(
+                f"[INFO] Model champion berhasil dimuat: "
+                f"{CHAMPION_PARADIGM}/{CHAMPION_EXP}/{CHAMPION_SUBJECT}/{CHAMPION_FEAT_GROUP}."
+            )
         except Exception as e:
-            print(f"[WARNING] EEGNet load failed: {e}")
+            print(f"[WARNING] Gagal memuat model champion SVM: {e}")
     else:
-        print(f"[WARNING] Champion model not found at: {model_path}")
+        print(f"[WARNING] Artefak model champion tidak ditemukan di: {CHAMPION_MODEL_PATH}")
 
-    # ---- StandardScaler -------------------------------------------------
-    scaler_path = os.path.join(CHAMPION_DIR, f"scaler_{CHAMPION_EXP}.pkl")
-    if os.path.exists(scaler_path):
-        try:
-            with open(scaler_path, "rb") as f:
-                ai_scalers["eegnet"] = pickle.load(f)
-            print(f"[INFO] Champion scaler loaded: scaler_{CHAMPION_EXP}.pkl")
-        except Exception as e:
-            print(f"[WARNING] Scaler load failed: {e}")
-
-    # ---- LogReg word assembler ------------------------------------------
-    assembler = WordAssembler(exp_id=CHAMPION_EXP)
-    logreg_path = assembler.model_path
-    if os.path.exists(logreg_path):
+    # ---- LogReg word assembler (trained on real SVM champion outputs) ----
+    assembler = WordAssembler(
+        exp_id=CHAMPION_EXP, pilar=CHAMPION_PARADIGM, filename=WORD_ASSEMBLER_FILENAME
+    )
+    if os.path.exists(assembler.model_path):
         try:
             assembler.load_model()
-            print(f"[INFO] Word assembler loaded: {os.path.basename(logreg_path)}")
+            print(f"[INFO] Word assembler berhasil dimuat: {os.path.basename(assembler.model_path)}")
         except Exception as e:
-            print(f"[WARNING] Word assembler load failed: {e}")
+            print(f"[WARNING] Gagal memuat word assembler: {e}")
     else:
-        print(f"[WARNING] Word assembler not found at: {logreg_path}")
+        print(
+            f"[WARNING] Word assembler tidak ditemukan di: {assembler.model_path}. "
+            f"Jalankan models/train_word_assembler.py terlebih dahulu."
+        )
 
-    # ---- Test sample pool for demo inference ----------------------------
-    x_test_path = os.path.join(CHAMPION_DIR, "X_test.npy")
-    if os.path.exists(x_test_path):
-        try:
-            X_test_pool = np.load(x_test_path)
-            print(f"[INFO] Test sample pool loaded: {X_test_pool.shape} samples.")
-        except Exception as e:
-            print(f"[WARNING] Could not load X_test.npy: {e}")
+    # ---- Offline trial reader (real raw-data epoch extraction) ----
+    trial_reader = OfflineTrialReader(RAW_DATA_DIR, E5_PROCESSOR_PARAMS)
+    try:
+        trial_reader._load_subject(CHAMPION_SUBJECT)
+        print(f"[INFO] Data mentah subjek {CHAMPION_SUBJECT} berhasil dimuat dan difilter.")
+    except Exception as e:
+        print(f"[WARNING] Gagal memuat data mentah subjek {CHAMPION_SUBJECT}: {e}")
 
     print("[INFO] Server ready. Awaiting frontend connection.")
+
+# ---------------------------------------------------------------------------
+# LATENCY LOGGING HELPER
+# ---------------------------------------------------------------------------
+def _log_latency(subject_id, trial_index, timings):
+    """Persist one real per-inference latency measurement to disk (Masalah 5)."""
+    try:
+        with open(LATENCY_FILE, mode="a", newline="") as f:
+            csv.writer(f).writerow([
+                datetime.now().isoformat(),
+                subject_id,
+                trial_index,
+                timings.get("signal_read_filter_ms", ""),
+                timings.get("svm_inference_slot1_ms", ""),
+                timings.get("svm_inference_slot2_ms", ""),
+                timings.get("word_assembly_ms", ""),
+                timings.get("refinement_ms", ""),
+                timings.get("total_ms", ""),
+            ])
+    except Exception as e:
+        print(f"[WARNING] Gagal menyimpan log latensi: {e}")
 
 # ---------------------------------------------------------------------------
 # REST ENDPOINTS
@@ -184,37 +242,39 @@ async def get_metrics():
 
     Reads from:
       - MLflow SQLite database (model registry, Optuna trials)
-      - inference_history.csv (latency overview)
+      - latency_history.csv (real per-inference latency measurements)
       - backend/logs/logs_backup/ (raw experiment log preview)
       - P1/P2/P3 model weight directories (dataset metadata inferred from
         the number of .npy test files)
     """
-    # ---- 1. Overview latency from inference history ---------------------
-    median_latency = 0.0
-    p95_latency    = 0.0
-    if os.path.exists(HISTORY_FILE):
+    # ---- 1. Overview latency from REAL per-inference measurements --------
+    median_latency  = 0.0
+    p95_latency     = 0.0
+    latency_is_proxy = True
+    latency_note = "Belum ada siklus inferensi tercatat — jalankan Live Session untuk mengukur latensi nyata."
+
+    if os.path.exists(LATENCY_FILE):
         try:
-            with open(HISTORY_FILE, mode="r") as f:
+            with open(LATENCY_FILE, mode="r") as f:
                 rows = list(csv.DictReader(f))
-            if rows:
-                confs = [float(r.get("confidence", 0)) for r in rows]
-                # Estimated proxy: inverts confidence to a latency-like value.
-                # Real latency instrumentation is not yet implemented.
-                latencies = [max(100, 500 - c * 2) for c in confs]
-                latencies_sorted = sorted(latencies)
-                mid = len(latencies_sorted) // 2
-                median_latency = round(latencies_sorted[mid], 1)
-                p95_idx = int(len(latencies_sorted) * 0.95)
-                p95_latency = round(latencies_sorted[min(p95_idx, len(latencies_sorted) - 1)], 1)
+            totals = [float(r["total_ms"]) for r in rows if r.get("total_ms")]
+            if totals:
+                totals_sorted = sorted(totals)
+                mid = len(totals_sorted) // 2
+                median_latency = round(totals_sorted[mid], 1)
+                p95_idx = int(len(totals_sorted) * 0.95)
+                p95_latency = round(totals_sorted[min(p95_idx, len(totals_sorted) - 1)], 1)
+                latency_is_proxy = False
+                latency_note = f"Diukur nyata (time.perf_counter()) dari {len(totals)} siklus inferensi."
         except Exception:
             pass
 
     overview = {
-        "median_latency":      median_latency,
-        "p95_latency":         p95_latency,
-        "active_model":        f"{CHAMPION_PARADIGM} / {CHAMPION_EXP}",
-        "latency_is_proxy":    True,
-        "latency_note":        "Estimated proxy — real per-inference latency instrumentation not yet implemented.",
+        "median_latency":   median_latency,
+        "p95_latency":      p95_latency,
+        "active_model":     f"{CHAMPION_PARADIGM}/{CHAMPION_EXP}/{CHAMPION_SUBJECT}/{CHAMPION_FEAT_GROUP}",
+        "latency_is_proxy": latency_is_proxy,
+        "latency_note":     latency_note,
     }
 
     # ---- 2–3–6. MLflow queries — single shared connection ---------------
@@ -302,7 +362,7 @@ async def get_metrics():
     # Fall-back registry entry so the dashboard is never blank
     if not mlflow_registry:
         mlflow_registry = [{
-            "version":  f"{CHAMPION_PARADIGM}/{CHAMPION_EXP}",
+            "version":  f"{CHAMPION_PARADIGM}/{CHAMPION_EXP}/{CHAMPION_SUBJECT}",
             "status":   "FINISHED",
             "f1_score": 0.0,
             "loss":     0.0,
@@ -313,7 +373,7 @@ async def get_metrics():
     subjects = [f"S{i}" for i in range(1, 13)]
     p2_e0_dir = os.path.join(WEIGHTS_DIR, "P2_EEGNet", "E0_Baseline")
     for subj in subjects:
-        x_path = os.path.join(p2_e0_dir, f"Xtest_{CHAMPION_EXP}_{subj}.npy")
+        x_path = os.path.join(p2_e0_dir, f"Xtest_E0_Baseline_{subj}.npy")
         clean_epochs = 0
         if os.path.exists(x_path):
             try:
@@ -355,11 +415,8 @@ async def get_metrics():
 
 @app.post("/api/v1/calibrate")
 async def calibrate(payload: CalibrationPayload):
-    """Calibrate the champion model to a new user via transfer learning."""
+    """Calibrate the champion SVM model to a new user via fast retraining."""
     try:
-        base_model_path = os.path.join(
-            CHAMPION_DIR, f"eegnet_trained_{CHAMPION_EXP}.h5"
-        )
         save_dir = os.path.join(WEIGHTS_DIR, "P4_TransferLearning", "Calibrated")
         os.makedirs(save_dir, exist_ok=True)
 
@@ -367,14 +424,15 @@ async def calibrate(payload: CalibrationPayload):
         y_new = np.array(payload.labels, dtype=np.int32)
 
         save_path, model_type = calibrate_new_user(
-            base_model_path=base_model_path,
+            base_model_path=CHAMPION_MODEL_PATH,
             X_new_3d=X_new,
             y_new=y_new,
             new_subject_id=payload.subject_id,
             save_dir=save_dir,
-            champion_type="eegnet",
+            champion_type="svm",
+            feat_group=CHAMPION_FEAT_GROUP,
         )
-        return {"status": "success", "message": "Calibration complete.", "model_path": save_path}
+        return {"status": "success", "message": "Kalibrasi selesai.", "model_path": save_path}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -418,12 +476,14 @@ async def telemetry_endpoint(websocket: WebSocket):
 
 
 # ---------------------------------------------------------------------------
-# WEBSOCKET — LIVE INFERENCE
+# WEBSOCKET — LIVE INFERENCE (Model Offline: real raw-data replay)
 # ---------------------------------------------------------------------------
 @app.websocket("/ws/inference")
 async def inference_endpoint(websocket: WebSocket):
     """
-    Step-by-step BCI inference pipeline over WebSocket.
+    Step-by-step BCI inference pipeline over WebSocket, running on real EEG
+    epochs replayed from stored raw recordings ("Model Offline" — no live
+    LSL/Cortex streaming is involved).
 
     Message protocol (client → server):
         START_DECODE|{subject_id}   — trigger one inference cycle
@@ -431,8 +491,11 @@ async def inference_endpoint(websocket: WebSocket):
 
     Message protocol (server → client):
         {"status": "processing", "step": N, "message": "..."}   — pipeline step N
-        {"status": "success",    "step": 5, "decoded_word": "MAKAN",
-         "refined_sentence": "Saya ingin makan.", "confidence": 91.3}
+        {"status": "error", "message": "..."}                   — request could not be served
+        {"status": "success", "step": 5, "decoded_word": "MAKAN",
+         "refined_sentence": "Saya ingin makan.", "confidence": 91.3,
+         "ground_truth_word": "MAKAN", "trial_index": 42,
+         "latency_ms": {...}}
     """
     await websocket.accept()
     print("[INFO] Live session connected.")
@@ -442,78 +505,98 @@ async def inference_endpoint(websocket: WebSocket):
 
             if data.startswith("START_DECODE"):
                 parts      = data.split("|")
-                subject_id = parts[1] if len(parts) > 1 else "Unknown"
+                subject_id = parts[1] if len(parts) > 1 else CHAMPION_SUBJECT
                 print(f"[INFO] Inference requested by: {subject_id}")
 
-                # Step 1 — Signal acquisition / bandpass
+                if svm_champion is None or assembler is None or not assembler._is_loaded:
+                    await websocket.send_json({
+                        "status": "error",
+                        "message": "Model champion atau word assembler belum termuat di server.",
+                    })
+                    continue
+
+                # Champion SVM is subject-dependent (dilatih hanya dari data S3).
+                if subject_id != CHAMPION_SUBJECT:
+                    await websocket.send_json({
+                        "status": "error",
+                        "message": (
+                            f"Model champion bersifat subject-dependent dan hanya valid untuk "
+                            f"subjek {CHAMPION_SUBJECT}. Subjek '{subject_id}' tidak didukung."
+                        ),
+                    })
+                    continue
+
+                timings = {}
+                t_pipeline_start = time.perf_counter()
+
+                # ---- Step 1: read real trial + bandpass filter + windowing ----
                 await websocket.send_json({
                     "status": "processing", "step": 1,
-                    "message": "Applying bandpass filter to EEG signal...",
+                    "message": "Membaca epoch trial nyata dan menerapkan filter bandpass...",
                 })
-                await asyncio.sleep(0.6)
+                t0 = time.perf_counter()
+                try:
+                    trial = trial_reader.read_trial(subject_id, trial_index=None)
+                except Exception as e:
+                    await websocket.send_json({
+                        "status": "error",
+                        "message": f"Gagal membaca data trial nyata: {e}",
+                    })
+                    continue
+                timings["signal_read_filter_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
-                # Step 2 — EEGNet decoding
+                # ---- Step 2: Barlow feature extraction + SVM inference (x2) ----
                 await websocket.send_json({
                     "status": "processing", "step": 2,
-                    "message": "Extracting N400 features via EEGNet...",
+                    "message": "Mengekstraksi fitur Barlow dan menjalankan inferensi SVM...",
                 })
-                await asyncio.sleep(0.8)
+                t0 = time.perf_counter()
+                prob_slot1 = svm_champion.predict_proba_full(trial["epoch_slot1"])
+                t1 = time.perf_counter()
+                prob_slot2 = svm_champion.predict_proba_full(trial["epoch_slot2"])
+                t2 = time.perf_counter()
+                timings["svm_inference_slot1_ms"] = round((t1 - t0) * 1000, 2)
+                timings["svm_inference_slot2_ms"] = round((t2 - t1) * 1000, 2)
 
-                # Step 3 — Syllable assembly
+                # ---- Step 3: word assembly ----
                 await websocket.send_json({
                     "status": "processing", "step": 3,
-                    "message": "Assembling syllable sequence...",
+                    "message": "Merangkai kata dari probabilitas dua slot suku kata...",
                 })
-                await asyncio.sleep(0.6)
+                t0 = time.perf_counter()
+                decoded_word, assembler_confidence = assembler.assemble_word_with_confidence(
+                    prob_slot1, prob_slot2
+                )
+                confidence = round(assembler_confidence * 100, 2)
+                timings["word_assembly_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
-                # Step 4 — LLM refinement
+                # ---- Step 4: rule-based sentence refinement ----
                 await websocket.send_json({
                     "status": "processing", "step": 4,
-                    "message": "Performing final semantic validation...",
+                    "message": "Menyusun kalimat komunikatif (rule-based)...",
                 })
-                await asyncio.sleep(0.5)
+                t0 = time.perf_counter()
+                refined = refine_sentence_rule_based(decoded_word)
+                timings["refinement_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
-                # ---- Inference -------------------------------------------
-                decoded_word = None
-                confidence   = 0.0
-
-                if "eegnet" in ai_models and X_test_pool is not None and assembler is not None and assembler._is_loaded:
-                    try:
-                        # Sample a random test epoch for live demo
-                        idx   = random.randint(0, len(X_test_pool) - 1)
-                        sample = X_test_pool[idx : idx + 1]  # shape (1, C, T, 1)
-
-                        # Run EEGNet forward pass
-                        probs = ai_models["eegnet"].predict(sample, verbose=0)[0]  # (19,)
-
-                        # Split into slot1 / slot2 probability vectors (each 19-dim)
-                        # In the P1 model the output is a 19-class syllable posterior;
-                        # we replicate it for both slots as a single-slot demo.
-                        prob_slot1 = probs
-                        prob_slot2 = probs
-
-                        decoded_word = assembler.assemble_word(prob_slot1, prob_slot2)
-                        confidence   = round(float(np.max(probs)) * 100, 2)
-                        print(f"[INFO] Model inference: {decoded_word} ({confidence:.1f}%)")
-                    except Exception as e:
-                        print(f"[WARNING] Model inference error: {e}. Falling back to random.")
-
-                # Fall-back if model unavailable
-                if decoded_word is None:
-                    from models.logreg_model import WORD_CLASSES
-                    decoded_word = random.choice(list(WORD_CLASSES.keys()))
-                    confidence   = round(random.uniform(72.0, 94.0), 2)
-
-                refined = refine_with_llm(decoded_word)
+                timings["total_ms"] = round((time.perf_counter() - t_pipeline_start) * 1000, 2)
+                _log_latency(subject_id, trial["trial_index"], timings)
 
                 await websocket.send_json({
-                    "status":          "success",
-                    "step":            5,
-                    "decoded_word":    decoded_word,
-                    "refined_sentence": refined,
-                    "confidence":      confidence,
+                    "status":            "success",
+                    "step":              5,
+                    "decoded_word":      decoded_word,
+                    "refined_sentence":  refined,
+                    "confidence":        confidence,
+                    "ground_truth_word": trial["word"],
+                    "trial_index":       trial["trial_index"],
+                    "latency_ms":        timings,
                 })
-                print(f"[INFO] Inference complete: {decoded_word} -> {refined} ({confidence}%)")
+                print(
+                    f"[INFO] Inference complete: {decoded_word} -> {refined} ({confidence}%) "
+                    f"[ground truth: {trial['word']}, trial {trial['trial_index']}] "
+                    f"total_latency={timings['total_ms']}ms"
+                )
 
             elif data == "EMERGENCY_STOP":
                 print("[INFO] Inference sequence terminated by user.")

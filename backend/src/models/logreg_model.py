@@ -18,18 +18,26 @@ WORD_CLASSES = {
 REVERSE_WORD_CLASSES = {v: k for k, v in WORD_CLASSES.items()}
 
 class WordAssembler:
-    def __init__(self, exp_id=None):
+    def __init__(self, exp_id=None, pilar="P1_Global", filename=None):
         """
         Logistic Regression word assembler for combining syllable-slot probabilities.
 
         If exp_id is provided, model artefacts are stored under the corresponding
-        Golden Standard experiment directory. If None, a simulation mode directory
-        is used to prevent errors when the assembler is called without experiment context.
+        Golden Standard experiment directory for the given paradigm (`pilar`,
+        default 'P1_Global' for backward compatibility). If None, a simulation
+        mode directory is used to prevent errors when the assembler is called
+        without experiment context.
+
+        Args:
+            exp_id (str or None): Experiment identifier (e.g., 'E5_Data_Augmentation').
+            pilar (str): Paradigm label ('P1_Global', 'P2_EEGNet', or 'P3_SVM').
+            filename (str or None): Override for the model artefact filename.
+                Defaults to 'logreg_assembler_{exp_id}.pkl' if not provided.
         """
         if exp_id:
-            paths = setup_experiment(exp_id)
+            paths = setup_experiment(exp_id, pilar=pilar)
             self.model_dir = paths["weights"]
-            self.model_path = os.path.join(self.model_dir, f"logreg_assembler_{exp_id}.pkl")
+            self.model_path = os.path.join(self.model_dir, filename or f"logreg_assembler_{exp_id}.pkl")
         else:
             # Default/simulation mode: prevents FileNotFoundError when called without context
             self.model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'weights', 'E_Sim'))
@@ -93,6 +101,31 @@ class WordAssembler:
         pred_idx = self.model.predict(X_input)[0]
         pred_word = REVERSE_WORD_CLASSES[pred_idx]
         return pred_word
+
+    def assemble_word_with_confidence(self, prob_slot1, prob_slot2):
+        """
+        Same as `assemble_word()`, but additionally returns the assembler's own
+        class-probability confidence, so callers can report a meaningful
+        word-level confidence instead of the raw slot-classifier's max probability.
+
+        Args:
+            prob_slot1 (np.ndarray): Slot 1 syllable probabilities, shape (19,).
+            prob_slot2 (np.ndarray): Slot 2 syllable probabilities, shape (19,).
+
+        Returns:
+            tuple: (pred_word (str), confidence (float in [0, 1])).
+        """
+        combined_probs = np.concatenate((prob_slot1, prob_slot2))
+        X_input = combined_probs.reshape(1, -1)
+        proba = self.model.predict_proba(X_input)[0]
+        # np.argmax(proba) is a positional index into self.model.classes_, not
+        # necessarily the class label itself — map explicitly to avoid relying
+        # on classes_ happening to equal [0..9] in sorted order.
+        pred_pos = int(np.argmax(proba))
+        pred_label = int(self.model.classes_[pred_pos])
+        pred_word = REVERSE_WORD_CLASSES[pred_label]
+        confidence = float(proba[pred_pos])
+        return pred_word, confidence
 
 if __name__ == "__main__":
     print("=" * 50)

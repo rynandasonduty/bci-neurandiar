@@ -1,21 +1,17 @@
 """
-LLM Agent — Syllable-to-Sentence Refinement Module
-====================================================
+Sentence Refiner — Rule-Based Syllable-to-Sentence Refinement Module
+=======================================================================
 Converts a raw decoded word (e.g., "MAKAN") from the BCI pipeline into a
 natural-language sentence appropriate for assistive communication contexts.
 
-The current implementation uses a deterministic rule-based refinement table
-so that the system is fully operational without an external LLM API key. This
-is semantically equivalent for the 10-word closed-vocabulary used in this study.
-
-To upgrade to a generative LLM backend (e.g., Anthropic Claude), replace the
-body of `refine_with_llm()` with an API call and set ANTHROPIC_API_KEY in
-the backend .env file.
+This module is intentionally rule-based (dictionary lookup), NOT a
+generative LLM backend. For a closed vocabulary of 10 words, a fixed
+mapping is deterministic, faster, and does not depend on an external API —
+this is a final design decision for this study, not a placeholder awaiting
+an LLM integration.
 """
 
 from __future__ import annotations
-
-import os
 
 # ---------------------------------------------------------------------------
 # REFINEMENT TABLE
@@ -26,8 +22,8 @@ import os
 REFINEMENT_TABLE: dict[str, str] = {
     "MAKAN":  "Saya ingin makan.",
     "MINUM":  "Saya ingin minum.",
-    "BERAK":  "Saya ingin ke toilet (BAB).",
-    "PIPIS":  "Saya ingin ke toilet (BAK).",
+    "BERAK":  "Saya ingin buang air besar.",
+    "PIPIS":  "Saya ingin buang air kecil.",
     "MANDI":  "Saya ingin mandi.",
     "BOSAN":  "Saya merasa bosan.",
     "LELAH":  "Saya merasa lelah.",
@@ -39,7 +35,7 @@ REFINEMENT_TABLE: dict[str, str] = {
 # ---------------------------------------------------------------------------
 # PUBLIC API
 # ---------------------------------------------------------------------------
-def refine_with_llm(raw_word: str) -> str:
+def refine_sentence_rule_based(raw_word: str) -> str:
     """
     Refine a raw BCI-decoded word into a communicative sentence.
 
@@ -80,9 +76,9 @@ def get_confidence_label(confidence: float) -> str:
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     test_cases = list(REFINEMENT_TABLE.keys()) + ["UNKNOWN_WORD", "sakit", "Makan"]
-    print("LLM Agent — Refinement Table Dry-Run")
+    print("Sentence Refiner — Rule-Based Refinement Table Dry-Run")
     print("=" * 50)
     for word in test_cases:
-        result = refine_with_llm(word)
+        result = refine_sentence_rule_based(word)
         print(f"  {word:<12} -> {result}")
     print("=" * 50)

@@ -39,9 +39,9 @@ type IntentState = "idle" | "spike_detected" | "decoding" | "done"
 const pipelineSteps = [
   { id: 0, label: "EEG Acquisition", icon: Waves },
   { id: 1, label: "Filtering & Extraction", icon: Filter },
-  { id: 2, label: "EEGNet Decoding", icon: BrainCircuit },
+  { id: 2, label: "SVM Decoding", icon: BrainCircuit },
   { id: 3, label: "Word Assembly", icon: Layers },
-  { id: 4, label: "LLM Refining", icon: Sparkles },
+  { id: 4, label: "Rule-Based Refining", icon: Sparkles },
 ]
 
 // Pipeline stepper component
@@ -133,15 +133,17 @@ function SessionMetadataControls({
           <label className="text-xs font-semibold text-slate-600 uppercase tracking-widest" style={{ fontFamily: "var(--font-inter)" }}>
             Subject
           </label>
-          <Select value={subject} onValueChange={setSubject}>
+          <Select value={subject} onValueChange={setSubject} disabled>
             <SelectTrigger className="h-9 text-xs rounded-lg border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Subject-01">Subject-01 (Andiar)</SelectItem>
-              <SelectItem value="Subject-02">Subject-02 (Anonim)</SelectItem>
+              <SelectItem value="S3">S3 (Champion Model)</SelectItem>
             </SelectContent>
           </Select>
+          <p className="text-[10px] text-slate-400 leading-snug pt-0.5" style={{ fontFamily: "var(--font-inter)" }}>
+            Model champion bersifat subject-dependent dan hanya valid untuk subjek S3.
+          </p>
         </div>
 
         <div className="flex items-center justify-between py-2 px-2.5 rounded-lg border border-border bg-slate-50/50">
@@ -195,6 +197,8 @@ function ResultDisplay({
   refinedSentence,
   aiConfidence,
   isSaved,
+  isTTSEnabled,
+  isSpeaking,
   onDeleteLastWord,
   onClearSentence,
   onSaveLog
@@ -204,6 +208,8 @@ function ResultDisplay({
   refinedSentence: string
   aiConfidence: number
   isSaved: boolean
+  isTTSEnabled: boolean
+  isSpeaking: boolean
   onDeleteLastWord: () => void
   onClearSentence: () => void
   onSaveLog: () => void
@@ -247,10 +253,12 @@ function ResultDisplay({
                 <div className="px-3 py-2 rounded-lg border border-[#00A3FF]/30 bg-blue-50/60 transition-all duration-300 hover:border-[#00A3FF]/60">
                   <div className="flex items-center gap-1">
                     <p className="text-sm font-semibold text-[#196484]" style={{ fontFamily: "var(--font-poppins)" }}>{refinedSentence}</p>
-                    <div className="flex items-center gap-0.5 ml-1 flex-shrink-0">
-                      <Volume2 className="w-3 h-3 text-[#00A3FF]" />
-                      <TTSWaveAnimation />
-                    </div>
+                    {isTTSEnabled && isSpeaking && (
+                      <div className="flex items-center gap-0.5 ml-1 flex-shrink-0">
+                        <Volume2 className="w-3 h-3 text-[#00A3FF]" />
+                        <TTSWaveAnimation />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -293,13 +301,52 @@ export default function LiveSessionPage() {
   const [aiConfidence, setAiConfidence] = useState<number>(0)
   const [isRunning, setIsRunning] = useState(false)
   
-  const [activeSubject, setActiveSubject] = useState("Subject-01") 
+  const [activeSubject, setActiveSubject] = useState("S3")
   const [isTTSEnabled, setIsTTSEnabled] = useState(true)
   const [isSaved, setIsSaved] = useState(false)
-  
+  const [isSpeaking, setIsSpeaking] = useState(false)
+
   const ws = useRef<WebSocket | null>(null)
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isMounted = useRef(true)
+  // Mirrors isTTSEnabled for use inside the WebSocket onmessage closure, which
+  // is created once on mount and would otherwise only ever see the initial value.
+  const isTTSEnabledRef = useRef(isTTSEnabled)
+
+  useEffect(() => {
+    isTTSEnabledRef.current = isTTSEnabled
+    if (!isTTSEnabled && typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+    }
+  }, [isTTSEnabled])
+
+  // Speak a sentence via the Web Speech API, preferring an Indonesian (id-ID)
+  // voice and falling back gracefully to the browser default voice if none
+  // is installed. Drives isSpeaking via onstart/onend so the wave animation
+  // stays in sync with the actual audio playback.
+  const speakSentence = (text: string) => {
+    if (typeof window === "undefined" || !window.speechSynthesis || !text) return
+
+    window.speechSynthesis.cancel()
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = "id-ID"
+
+    const voices = window.speechSynthesis.getVoices()
+    const idVoice = voices.find((v) => v.lang.toLowerCase().startsWith("id"))
+    if (idVoice) {
+      utterance.voice = idVoice
+    }
+    // If no id-ID voice is installed, utterance.lang stays "id-ID" and the
+    // browser falls back to its default system voice automatically.
+
+    utterance.onstart = () => setIsSpeaking(true)
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
+
+    window.speechSynthesis.speak(utterance)
+  }
 
   const connectWebSocket = () => {
     if (!isMounted.current) return
@@ -328,6 +375,15 @@ export default function LiveSessionPage() {
         setRawDecodedWord(data.decoded_word)
         setAiConfidence(data.confidence)
         setRefinedSentence(data.refined_sentence)
+
+        if (isTTSEnabledRef.current) {
+          speakSentence(data.refined_sentence)
+        }
+      } else if (data.status === 'error') {
+        setStatusMsg(data.message || 'Terjadi kesalahan pada server.')
+        setActiveStep(0)
+        setIntentState("idle")
+        setIsRunning(false)
       }
     }
 
@@ -358,6 +414,7 @@ export default function LiveSessionPage() {
       isMounted.current = false
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current)
       if (ws.current) ws.current.close()
+      if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel()
     }
   }, [])
 
@@ -376,8 +433,9 @@ export default function LiveSessionPage() {
 
   const emergencyStop = () => {
     if (ws.current && isConnected) {
-        ws.current.send('EMERGENCY_STOP') 
+        ws.current.send('EMERGENCY_STOP')
     }
+    if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel()
     setActiveStep(0)
     setIntentState("idle")
     setIsRunning(false)
@@ -505,6 +563,8 @@ export default function LiveSessionPage() {
           refinedSentence={refinedSentence}
           aiConfidence={aiConfidence}
           isSaved={isSaved}
+          isTTSEnabled={isTTSEnabled}
+          isSpeaking={isSpeaking}
           onDeleteLastWord={handleDeleteLastWord}
           onClearSentence={handleClearSentence}
           onSaveLog={handleSaveToHistory}
