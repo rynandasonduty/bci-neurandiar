@@ -1,3 +1,17 @@
+# ============================================================================
+# DEPRECATED — DO NOT RUN.
+# This was an early P4 research direction (fine-tuning the P1 champion model
+# per subject) that was not carried forward. It is superseded by the new P4
+# paradigm, "No-Windowing" (full 5-second epochs vs. 1-second windows), under
+# backend/src/experiments_p4_p7/. This file is kept only for project history
+# and is archived here in legacy/, out of the active experiment set.
+#
+# Unrelated to this file despite the shared name: the production new-user
+# calibration feature (`calibrate_new_user()` in
+# backend/src/models/transfer_learning.py, used live by the
+# `/api/v1/calibrate` endpoint) is a separate, active, unrelated feature —
+# it was not touched or affected by this deprecation.
+# ============================================================================
 """
 P4 Transfer Learning Grid — Champion Model Strategy (Option B)
 ==============================================================

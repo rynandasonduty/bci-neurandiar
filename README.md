@@ -16,7 +16,7 @@
 
 NEURANDIAR is a Brain-Computer Interface (BCI) research prototype developed as an undergraduate thesis at Institut Teknologi Sepuluh Nopember (ITS). The system decodes imagined and overt speech from 14-channel EEG signals recorded using the Emotiv EPOC X consumer-grade headset, classifying 19 Indonesian syllables and assembling them into 10 clinically relevant target words. The overarching research question is whether consumer-grade EEG can sustain reliable syllable-level imagined speech decoding for clinical communication assistance applications.
 
-The investigation employs a three-paradigm, eight-experiment ablation framework yielding 584+ trained model artefacts, evaluated with a rigorous non-parametric statistical pipeline (Friedman omnibus test, Nemenyi post-hoc, Holm-Bonferroni correction, rank-biserial effect sizes, bootstrap 95% confidence intervals). A fourth paradigm, transfer learning from the global champion model to individual subjects (P4), is architecturally complete and prepared for future evaluation.
+The investigation employs a three-paradigm, eight-experiment ablation framework yielding 584+ trained model artefacts, evaluated with a rigorous non-parametric statistical pipeline (Friedman omnibus test, Nemenyi post-hoc, Holm-Bonferroni correction, rank-biserial effect sizes, bootstrap 95% confidence intervals). P1, P2, and P3 are final and form the basis of the thesis results; the current champion configuration is **P3 / E5_Data_Augmentation / subject S3 / Barlow features (18.10% test accuracy, 18/19 class coverage)**. Four supplementary single-variable paradigms (P4–P7) extending this champion configuration are documented in [Section 12](#12-supplementary-experiments-p4p7).
 
 **Author:** Andiar Rinanda Agastya
 **Institution:** Institut Teknologi Sepuluh Nopember (ITS), Department of Informatics
@@ -63,11 +63,12 @@ The investigation employs a three-paradigm, eight-experiment ablation framework 
     - [11.4 Running the P1 Global Training Pipeline](#114-running-the-p1-global-training-pipeline)
     - [11.5 Running the P2 Subject-Dependent EEGNet Grid](#115-running-the-p2-subject-dependent-eegnet-grid)
     - [11.6 Running the P3 Classical SVM Feature Ablation Grid](#116-running-the-p3-classical-svm-feature-ablation-grid)
-    - [11.7 Running P4 Transfer Learning](#117-running-p4-transfer-learning)
+    - [11.7 Running the P4–P7 Supplementary Experiment Orchestrator](#117-running-the-p4p7-supplementary-experiment-orchestrator)
     - [11.8 Replicating the Q1 Journal Analysis (Jupyter Notebook)](#118-replicating-the-q1-journal-analysis-jupyter-notebook)
-  - [12. Implementation Status](#12-implementation-status)
-  - [13. Future Work and Research Roadmap](#13-future-work-and-research-roadmap)
-  - [14. Research Acknowledgements](#14-research-acknowledgements)
+  - [12. Supplementary Experiments: P4–P7](#12-supplementary-experiments-p4p7)
+  - [13. Implementation Status](#13-implementation-status)
+  - [14. Future Work and Research Roadmap](#14-future-work-and-research-roadmap)
+  - [15. Research Acknowledgements](#15-research-acknowledgements)
 
 ---
 
@@ -190,13 +191,6 @@ flowchart TD
         P3B["NaN / Inf sanitization via np.nan_to_num\n(ICA numerical stability guard)"]
         P3C["SVM-RBF with Optuna C / γ search\n5 groups × 12 subjects × 8 experiments\n= 480 trained models"]
         P3A --> P3B --> P3C
-    end
-
-    subgraph P4["P4 — Transfer Learning  ·  Prepared · Not yet evaluated"]
-        P4A["Load P1 Champion model weights\n(freeze all layers below classification head)"]
-        P4B["isinstance() layer type check\n(Dense · Softmax · Activation remain trainable)"]
-        P4C["Fine-tune per subject · LR = 1e-4\nMax 50 epochs · EarlyStopping patience=10"]
-        P4A --> P4B --> P4C
     end
 
     P1 & P2 & P3 --> GOLDEN
@@ -366,7 +360,12 @@ neurandiar-bci/
 │   │       ├── P1_Global/              # Global EEGNet (8 experiment dirs)
 │   │       ├── P2_EEGNet/              # Subject-dependent EEGNet (8 × 12)
 │   │       ├── P3_SVM/                 # Classical SVM (8 × 12 × 5 feature groups)
-│   │       └── P4_TransferLearning/    # Transfer learning fine-tuned models
+│   │       ├── P4_TransferLearning/    # Calibrated/ = production new-user calibration artefacts only
+│   │       │                           # (unrelated to the P4 research paradigm below — see Section 12)
+│   │       ├── P4_NoWindowing/         # P4-P7 supplementary experiments — see Section 12
+│   │       ├── P5_ShiftedBandpass/
+│   │       ├── P6_TransferOvertImagined/
+│   │       └── P7_CoarseToFine/
 │   ├── src/
 │   │   ├── acquisition/
 │   │   │   ├── cortex_client.py        # Emotiv Cortex API WebSocket wrapper
@@ -385,9 +384,21 @@ neurandiar-bci/
 │   │   │   ├── logreg_model.py         # Word assembler (LogisticRegression)
 │   │   │   ├── run_e8_classical.py     # P3 SVM feature ablation runner
 │   │   │   ├── run_master_experiments.py  # P1 end-to-end orchestrator (E0–E7)
-│   │   │   ├── run_p4_transfer_learning.py  # P4 transfer learning runner
 │   │   │   ├── run_subject_dependent.py    # P2 subject-dependent EEGNet runner
-│   │   │   └── train_pipeline.py       # Optuna HPO + MLflow training core
+│   │   │   ├── train_pipeline.py       # Optuna HPO + MLflow training core
+│   │   │   ├── transfer_learning.py    # PRODUCTION new-user calibration (calibrate_new_user, /api/v1/calibrate)
+│   │   │   └── legacy/
+│   │   │       └── run_p4_transfer_learning_DEPRECATED.py  # abandoned early P4 direction, archived — see Section 12
+│   │   ├── experiments_p4_p7/          # P4-P7 supplementary experiments (isolated) — see Section 12
+│   │   │   ├── signal_processors_ext.py
+│   │   │   ├── dataset_builders_ext.py
+│   │   │   ├── verify_p6_phase_labels.py
+│   │   │   ├── verify_p7_label_scheme.py
+│   │   │   ├── run_p4_nowindowing.py
+│   │   │   ├── run_p5_shifted_bandpass.py
+│   │   │   ├── run_p6_transfer_overt_imagined.py
+│   │   │   ├── run_p7_coarse_to_fine.py
+│   │   │   └── run_orchestrator_p4_p7.py
 │   │   ├── pipeline/
 │   │   │   └── llm_agent.py            # LLM sentence refinement (stub — future work)
 │   │   ├── preprocessing/
@@ -409,7 +420,8 @@ neurandiar-bci/
 │   │   └── api.ts                      # API_URL / WS_URL from NEXT_PUBLIC_* env vars
 │   └── package.json
 ├── notebooks/
-│   ├── BCI_Master_Journal_Q1_Final.ipynb  # Primary Q1 analysis notebook
+│   ├── BCI_Master_Journal_Q1_Final.ipynb  # Primary Q1 analysis notebook (P1-P3 champion results)
+│   ├── P4_P7_Analysis.ipynb            # P4-P7 supplementary experiment analysis — see Section 12
 │   ├── outputs/                        # Generated figures (PNG)
 │   └── reports/
 │       └── data_export_claude/         # CSV exports for LLM-assisted analysis
@@ -448,14 +460,12 @@ backend/models/weights/
 │       └── scaler_SVM_{feat_group}_{exp_id}_{subj_id}.pkl # Feature scaler
 │
 └── P4_TransferLearning/
-    └── {exp_id}/
-        ├── TL_{exp_id}_{subj_id}.h5            # Fine-tuned model
-        ├── scaler_TL_{exp_id}_{subj_id}.pkl     # Per-subject scaler
-        ├── Xtest_TL_{exp_id}_{subj_id}.npy      # Held-out test features
-        └── ytest_TL_{exp_id}_{subj_id}.npy      # Held-out test labels
+    └── Calibrated/                              # PRODUCTION new-user calibration artefacts only
+        └── ...                                  # written by /api/v1/calibrate at runtime — unrelated
+                                                   # to the P4 research paradigm, see Section 12
 ```
 
-The function `setup_experiment(exp_id, pilar="P1_Global")` in `backend/src/config.py` constructs and guarantees the existence of this directory tree for any given experiment-paradigm combination, returning a dictionary of guaranteed-existent absolute paths.
+The function `setup_experiment(exp_id, pilar="P1_Global")` in `backend/src/config.py` constructs and guarantees the existence of this directory tree for any given experiment-paradigm combination, returning a dictionary of guaranteed-existent absolute paths. The P4-P7 supplementary experiments (Section 12) reuse this same function with `pilar="P4_NoWindowing"`, `"P5_ShiftedBandpass"`, `"P6_TransferOvertImagined"`, `"P7_CoarseToFine"` to get their own isolated artefact trees, fully separate from `P4_TransferLearning/`.
 
 ---
 
@@ -535,7 +545,7 @@ All experiments enforce a strict three-phase anti-leakage protocol implemented i
 
 The decoupled two-stage inference architecture is motivated by the structure of the target vocabulary:
 
-- **Stage 1 — Acoustic Decoder (EEGNet):** Maps a single EEG epoch to a 19-dimensional probability distribution over syllable classes. This stage is paradigm-specific (P1, P2, or P4 model may be loaded).
+- **Stage 1 — Acoustic Decoder (EEGNet or SVM):** Maps a single EEG epoch to a 19-dimensional probability distribution over syllable classes. This stage is paradigm-specific (P1, P2, or P3 model may be loaded; the live demo loads the P3 champion). The P4-P7 supplementary experiments (Section 12) are offline research paradigms and are not wired into this live inference path.
 - **Stage 2 — Language Assembler (WordAssembler / LogisticRegression):** Receives the full 19-dim probability vector from Slot 1 and the full 19-dim probability vector from Slot 2, concatenates them into a 38-dimensional feature vector, and applies a trained LogisticRegression classifier to produce a 10-dimensional word-class probability distribution.
 
 The critical advantage of using the full probability vector (rather than a hard argmax) is that the assembler can leverage uncertainty information. For the ambiguous syllable `SA` (shared by *Sakit* and *Sayang*), the assembler can inspect the relative probabilities of `KIT` vs. `YANG` in Slot 2 to resolve the ambiguity, even when neither prediction is maximally confident.
@@ -722,28 +732,27 @@ cd backend/src/models
 python run_e8_classical.py
 ```
 
-### 11.7 Running P4 Transfer Learning
+### 11.7 Running the P4–P7 Supplementary Experiment Orchestrator
 
-P4 fine-tunes the P1 champion model on each subject's data. The base model must exist at `models/weights/P1_Global/{champion_exp}/eegnet_trained_{champion_exp}.h5` before P4 can run.
+P4-P7 each test one single variable against the P3 champion configuration (E5_Data_Augmentation / S3 / Barlow). Full detail — motivation, methodology, folder layout, and the automatic feature-selection rule — is in [Section 12](#12-supplementary-experiments-p4p7). The entire pipeline runs unattended as one command:
 
 ```bash
-cd backend/src/models
+cd backend/src/experiments_p4_p7
 
-# Fine-tune all subjects on all experiments using the default E0_Baseline champion
-python run_p4_transfer_learning.py
+# Full unattended run: pre-flight verification -> P4 -> P5 -> P6 -> P7, in order
+python run_orchestrator_p4_p7.py
 
-# Specify a different champion model
-python run_p4_transfer_learning.py --champion E2_Resampling_512Hz
+# Resume after an interruption (crash / power loss / lab machine restart),
+# skipping stages already checkpointed as complete in orchestrator_run_log.md
+python run_orchestrator_p4_p7.py --resume-from p6
 
-# Fine-tune on a specific experiment (with validation)
-python run_p4_transfer_learning.py --exp E0_Baseline E1_ICA_Filtering
-
-# Fine-tune specific subjects only
-python run_p4_transfer_learning.py --subj S1 S2 S3
-
-# Reduce epoch budget for a quick test
-python run_p4_transfer_learning.py --epochs 10
+# Valid --resume-from stage names: verify, p4-stage-a, p4-stage-b, p5-stage-a,
+# p5-stage-b, p6, p7-stage-a, p7-stage-b
 ```
+
+Each stage runs as an isolated subprocess (matching the memory-hygiene pattern already used by `train_word_assembler.py` for large raw-CSV processing) and is checkpointed to `backend/reports/P4_P7_Experiments/orchestrator_run_log.md` before the next stage starts. A failed stage is logged and the pipeline continues to the next stage rather than aborting, so a single failure never costs the rest of an unattended lab run.
+
+Individual stages can also be run standalone, e.g. `python run_p4_nowindowing.py` from the same directory.
 
 ### 11.8 Replicating the Q1 Journal Analysis (Jupyter Notebook)
 
@@ -792,7 +801,63 @@ The notebook is divided into 15 chapters with a strict dependency order. Chapter
 
 ---
 
-## 12. Implementation Status
+## 12. Supplementary Experiments: P4–P7
+
+P1, P2, and P3 are final and form the basis of the thesis results (Bab 6). P4-P7 are four **supplementary, single-variable experiments** built on top of the current champion configuration (**P3 / E5_Data_Augmentation / subject S3 / Barlow, 18.10% test accuracy, 18/19 class coverage**), each changing exactly one variable relative to that champion while locking everything else. Each is a candidate for Bab 6 if its result is positive and statistically significant, or for the Bab 7 future-work section otherwise — that judgment is made by the researcher after a full run, not automated.
+
+> **Note:** an earlier, unrelated "P4 Transfer Learning" research direction (fine-tuning the P1 champion per subject) was explored and abandoned before evaluation. It has been archived to `backend/src/models/legacy/run_p4_transfer_learning_DEPRECATED.py` and is superseded by the "P4 — No-Windowing" paradigm below. **This is unrelated to the production new-user calibration feature** (`calibrate_new_user()` in `backend/src/models/transfer_learning.py`, used live by `POST /api/v1/calibrate`, writing to `models/weights/P4_TransferLearning/Calibrated/`) — that feature is untouched and still active; the naming collision ("transfer learning") is coincidental.
+
+### Isolation guarantees
+
+- All P4-P7 code lives in `backend/src/experiments_p4_p7/`, fully separate from `backend/src/models/` and `backend/src/preprocessing/`.
+- No P1/P2/P3 file was modified. New behavior comes from subclassing (`SignalProcessor`, `DatasetBuilder`) or from calling existing, unmodified functions (`three_way_split`, `fit_and_apply_scaler`, `EEGFeatureExtractor`, `ClassicalClassifier`, `setup_experiment`) with different parameters.
+- P4, P5, P6, and P7 are mutually isolated: separate modules, separate `backend/models/weights/P{4..7}_*/` trees, separate reports. None depends on another's output.
+- Verified with `git status` / `git diff --stat` after implementation — see `backend/reports/P4_P7_Experiments/implementation_summary.md` for the recorded output.
+
+### Automatic feature-group selection rule
+
+P4, P5, and P7's coarse stage each spot-check five feature groups (`time`, `hjorth`, `barlow`, `band_ratio`, `all`) on subject S3 only, then pick a winner automatically so the full pipeline can run unattended:
+
+1. Highest test accuracy wins.
+2. **Tie-break** (candidates within 1 pp of the top score): prefer `barlow` if it's among the tied candidates, otherwise prefer the tied candidate with the highest class coverage.
+3. If the winner doesn't beat chance level, a `[PERINGATAN]` warning is logged but the pipeline still proceeds to full scale automatically — whether the result is thesis-worthy is a judgment call left to the researcher, not the code.
+4. The full spot-check table and the reasoning for the winning pick are always logged to that paradigm's report.
+
+### P4 — No-Windowing
+
+**Variable:** epoch length (one full 5-second epoch vs. the standard 5×1-second windows). **Locked:** 0.5-50 Hz broadband, SVM, subject-dependent, no augmentation (E0), `phase_filter='all'`.
+`FullEpochSignalProcessor` (in `signal_processors_ext.py`) overrides `SignalProcessor.windowing_slot()` to return the whole 5s slot as one sample; `NoWindowDatasetBuilder` (in `dataset_builders_ext.py`) swaps it in via subclassing, everything else inherited unchanged from `DatasetBuilder`. Stage A spot-checks S3; Stage B trains all 12 subjects with the auto-selected feature group. Artefacts: `backend/models/weights/P4_NoWindowing/{Spotcheck_S3_E0,Fullscale_12Subj_E0}/`.
+
+A same-day prior pilot (S3, Barlow only) already exists at `backend/models/weights/P4_NoWindowing/E0_Baseline/` (see `backend/reports/p4_no_windowing_pilot_report.md` and the companion control experiment in `p4_control_subsampled_report.md`) — it found 0% test accuracy at n=106, and the control experiment attributed this mainly to sample size rather than the no-windowing structure itself (z≈-1.57, not significant). That pilot's code (`preprocessing/full_epoch_processor.py`, `preprocessing/windowed_reference_processor.py`, `models/run_p4_no_windowing.py`, `models/run_p4_control_subsampled.py`) is left untouched as historical reference; the new implementation supersedes it with proper subclassing and the full 5-feature/12-subject grid, writing to a different subfolder so both coexist without collision.
+
+### P5 — Shifted Bandpass Filter
+
+**Variable:** bandpass range (15-65 Hz vs. the standard 0.5-50 Hz). **Locked:** standard 5×1s windowing, SVM, E0 baseline, `phase_filter='all'`.
+`ShiftedBandSignalProcessor` overrides only `self.lowcut`/`self.highcut` after calling `SignalProcessor.__init__`; `ShiftedBandDatasetBuilder` swaps it in the same way as P4. Same Stage A/B structure as P4. Artefacts: `backend/models/weights/P5_ShiftedBandpass/{Spotcheck_S3_E0,Fullscale_12Subj_E0}/`.
+
+### P6 — Transfer Overt→Imagined
+
+**Variable:** training-data composition (imagined-only vs. imagined+overt combined). **Locked:** standard windowing/filter, SVM, Barlow (no spot-check — the signal itself is unchanged). **Test set:** always pure imagined, identical between baseline and enriched conditions.
+
+The baseline condition is **not retrained** — it reuses the already-validated `E6_CrossModality_ImaginedOnly`/Barlow artefacts from `backend/models/weights/P3_SVM/E6_CrossModality_ImaginedOnly/` (present for all 12 subjects) as both the fixed official test set and the baseline accuracy figure. P6 rebuilds the imagined-only train/val split via the real, unmodified `DatasetBuilder` and sanity-checks it against the loaded `Xtest`/`ytest` before adding overt-phase data as extra training samples, retraining only the enriched-condition model. Artefacts: `backend/models/weights/P6_TransferOvertImagined/Fullscale_12Subj_E0/`.
+
+### P7 — Coarse-to-Fine Hierarchical Decoding
+
+**Variable:** decision structure (hierarchical vowel-group → syllable vs. flat 19-way). **Locked:** standard windowing/filter, SVM, E0, `phase_filter='all'`. One `three_way_split` (seed 42) per subject on the standard 19-class dataset; all five sub-models (`coarse`, `fine_A`, `fine_I`, `fine_E`, `sa_branch`) are derived by filtering that same split by label — never re-split independently. Group O (`BO`) has no fine-stage model by design: a coarse "O" prediction passes straight through as `BO`.
+
+Two end-to-end metrics are computed beyond per-sub-model accuracy:
+- **First-syllable accuracy** — computed directly from the shared held-out window-level test split (no leakage), compared against the 9 first-syllable rows of the existing P3 per-syllable recall table (`T18_p3_per_syllable_recall.csv`).
+- **Full-word accuracy** — requires pairing a trial's slot-1 and slot-2 epochs, which the flat window-level split doesn't preserve. Reconstructed via the existing `pipeline/offline_trial_reader.py` (`OfflineTrialReader`, already used by the production word-assembler training scripts), with an 80/20 trial-level holdout (`test_size=0.2, random_state=42`) mirroring `train_word_assembler_s3.py`'s own methodology exactly. Because this trial-level split is independent of the window-level split used to train the sub-models, it is not a strictly leakage-free estimate — the same caveat already applies to the existing word-assembler's reported accuracy, so this is reported as a secondary, precedent-consistent number alongside the leakage-free first-syllable metric.
+
+Artefacts: `backend/models/weights/P7_CoarseToFine/{Spotcheck_Coarse_S3,Fullscale_12Subj}/`.
+
+### Running P4-P7
+
+See [Section 11.7](#117-running-the-p4p7-supplementary-experiment-orchestrator) for the orchestrator command. Reports land in `backend/reports/P4_P7_Experiments/`, one Markdown file per paradigm plus `orchestrator_run_log.md` (per-stage checkpoint log) and `implementation_summary.md` (design-decision record). Analysis (summary tables, per-subject paired Wilcoxon tests against each paradigm's baseline, automatic Bab 6/Bab 7 recommendation text) is in `notebooks/P4_P7_Analysis.ipynb`, kept deliberately simple (descriptive statistics and `scipy.stats.wilcoxon` only, no SHAP/XAI), with figures in `notebooks/outputs/p4p7_*.png`.
+
+---
+
+## 13. Implementation Status
 
 | Component | Status | Detail |
 |-----------|--------|--------|
@@ -802,8 +867,9 @@ The notebook is divided into 15 chapters with a strict dependency order. Chapter
 | EEGNet-8,2 training — P2 Subject-Dependent | Complete | 96 models · per-subject split · anti-leakage protocol |
 | SVM feature ablation — P3 | Complete | 480 models · 5 feature groups · Optuna C/γ search |
 | Word assembler (LogisticRegression) | Complete | 38-dim input · `_is_loaded` inference guard |
-| P4 Transfer Learning (architecture) | Complete | Champion model loading · layer freeze via `isinstance()` · fine-tune loop |
-| P4 Transfer Learning (evaluation) | Not yet run | Artefacts absent; future research item |
+| P4 Transfer Learning (early research direction) | Deprecated / archived | Abandoned before evaluation; moved to `backend/src/models/legacy/`, superseded by P4-P7 (Section 12) |
+| P4-P7 supplementary experiments (code) | Complete | No-Windowing · Shifted Bandpass · Overt→Imagined Transfer · Coarse-to-Fine; see Section 12 |
+| P4-P7 supplementary experiments (full 12-subject evaluation) | Not yet run | Code smoke-tested only; full grid to be run on lab hardware — see Section 12 |
 | Statistical evaluation notebook | Complete | Friedman · Nemenyi · Holm-Bonferroni · bootstrap CI · effect sizes |
 | SHAP interpretability | Complete | GradientExplainer · min(50, n//2) background samples |
 | System diagnostics script | Complete | 8 checks · P1/P2/P3/P4 artefact verification · AST syntax dry-run |
@@ -816,13 +882,13 @@ The notebook is divided into 15 chapters with a strict dependency order. Chapter
 
 ---
 
-## 13. Future Work and Research Roadmap
+## 14. Future Work and Research Roadmap
 
 The following items are explicitly deferred from the current thesis scope and are documented here for future researchers who extend this system.
 
 | Priority | Item | Motivation |
 |----------|------|-----------|
-| P0 | **P4 Transfer Learning evaluation** | Architecture is complete; a full grid run and statistical comparison against P1/P2 is needed |
+| P0 | **P4-P7 full 12-subject evaluation** | Code is complete and smoke-tested (Section 12); a full grid run on lab hardware plus the Wilcoxon significance tests in `P4_P7_Analysis.ipynb` is needed to decide Bab 6 inclusion vs. Bab 7 future-work framing per paradigm |
 | P0 | **Replace mock inference with real EEGNet pipeline** | Wire `SignalProcessor → EEGNet → WordAssembler` into `/ws/inference` to enable genuine live decoding |
 | P1 | **Leave-One-Subject-Out (LOSO) cross-validation for P1** | Current P1 uses a single 70/15/15 random split; LOSO over 12 subjects provides a community-standard generalization estimate for small-N BCI studies |
 | P1 | **Per-subject z-scoring before pooling in P1** | Current P1 fits a single global StandardScaler; inter-subject amplitude variability creates implicit domain shift not accounted for in the current design |
@@ -835,7 +901,7 @@ The following items are explicitly deferred from the current thesis scope and ar
 
 ---
 
-## 14. Research Acknowledgements
+## 15. Research Acknowledgements
 
 | Field | Detail |
 |-------|--------|
