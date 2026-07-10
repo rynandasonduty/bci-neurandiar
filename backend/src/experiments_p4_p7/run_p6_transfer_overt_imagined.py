@@ -247,6 +247,7 @@ def run_fullscale(subject_ids=None):
         print(f"[INFO][P6] All baseline artifacts present for all {len(subject_ids)} subject(s).")
 
     results = {}
+    skipped_no_data = []
     for subject_id in subject_ids:
         if subject_id in missing:
             continue
@@ -264,6 +265,7 @@ def run_fullscale(subject_ids=None):
         result = run_one_subject(subject_id, weights_dir)
         if result.get("status") == "no_imagined_data":
             print(f"[WARNING][P6] No imagined-phase data rebuilt for {subject_id}; skipping.")
+            skipped_no_data.append(subject_id)
             continue
 
         results[subject_id] = result
@@ -276,7 +278,17 @@ def run_fullscale(subject_ids=None):
               f"sanity: shape={result['sanity_check']['shape_match']} value={result['sanity_check']['value_match']}")
 
     write_report(results, subject_ids, missing)
-    return results
+
+    return {
+        "results": results,
+        "subject_ids": list(subject_ids),
+        "n_total": len(subject_ids),
+        "n_processed": len(results),
+        "n_skipped_missing_baseline": len(missing),
+        "n_skipped_no_data": len(skipped_no_data),
+        "missing_baseline": missing,
+        "skipped_no_data": skipped_no_data,
+    }
 
 
 def write_report(results, all_subject_ids, missing_baseline):
@@ -336,4 +348,30 @@ if __name__ == "__main__":
                          help="Restrict to specific subject IDs (e.g. --subjects S1 S2). "
                               "Default: all 12 subjects, auto-discovered.")
     args = parser.parse_args()
-    run_fullscale(subject_ids=args.subjects)
+
+    # Any unhandled exception raised out of run_fullscale() (e.g. mid-subject
+    # crash) is intentionally NOT caught here -- it must propagate and exit
+    # non-zero rather than being swallowed, matching whatever regular Python
+    # behavior already does for an uncaught exception.
+    summary = run_fullscale(subject_ids=args.subjects)
+
+    n_total = summary["n_total"]
+    n_processed = summary["n_processed"]
+    n_missing_baseline = summary["n_skipped_missing_baseline"]
+
+    if n_total > 0 and n_missing_baseline == n_total:
+        print(f"[ERROR][P6] Total failure: all {n_total} subject(s) were skipped because baseline "
+              f"artifacts are missing ({BASELINE_PARADIGM}/{BASELINE_EXP}/{FEAT_GROUP}). Zero subjects "
+              f"were actually processed. Missing files per subject: {summary['missing_baseline']}. "
+              f"Copy/generate the missing baseline artifacts before re-running this script.",
+              file=sys.stderr)
+        sys.exit(1)
+
+    if n_missing_baseline > 0:
+        print(f"[WARNING][P6] Partial run: {n_missing_baseline}/{n_total} subject(s) skipped (missing "
+              f"baseline artifacts), {n_processed}/{n_total} processed successfully. This is normal "
+              f"auto-resume behavior -- re-run once the remaining baseline artifacts are available.",
+              file=sys.stderr)
+
+    print(f"[INFO][P6] Done: {n_processed}/{n_total} subject(s) processed "
+          f"({n_missing_baseline} skipped for missing baseline, {summary['n_skipped_no_data']} skipped for no data).")
