@@ -445,7 +445,7 @@ bars = ax.bar([EXP_LABELS[e] for e in df_p1['exp_id']], p1_accs * 100,
 ax.axhline(CHANCE_LEVEL * 100, color='black', linestyle='--', linewidth=1.2,
            label=f'Chance level ({CHANCE_LEVEL*100:.1f}%)')
 ax.set_ylabel('Test Accuracy (%)')
-ax.set_title('Figure 1. Paradigm 1 (Global EEGNet): Test Accuracy per Ablation Configuration\n'
+ax.set_title('Paradigm 1 (Global EEGNet): Test Accuracy per Ablation Configuration\n'
              'All values remain in proximity to the chance level, confirming Inter-Subject Variability (ISV) as the dominant failure mode.')
 ax.set_xticklabels([EXP_LABELS[e] for e in df_p1['exp_id']], rotation=25, ha='right')
 ax.legend(fontsize=9)
@@ -453,7 +453,7 @@ for bar, val in zip(bars, p1_accs):
     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
             f'{val*100:.2f}%', ha='center', va='bottom', fontsize=8)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p1_global_accuracy.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p1_global_accuracy.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 1 saved.")
 
@@ -522,13 +522,13 @@ ax.axvline(p1_chance_1b, color='red', linestyle='--', linewidth=1.1,
 ax.axvline(np.mean(p1_recalls_1b), color='navy', linestyle=':', linewidth=1.1,
            label=f'Mean recall ({np.mean(p1_recalls_1b):.3f})')
 ax.set_xlabel('Per-Class Recall')
-ax.set_title(f'Figure 1b. Paradigm 1 – Per-Syllable Recall (Best Config: {EXP_LABELS[p1_best_exp_1b]})\n'
+ax.set_title(f'Paradigm 1 – Per-Syllable Recall (Best Config: {EXP_LABELS[p1_best_exp_1b]})\n'
              'Near-chance recall across all 19 syllables confirms ISV prevents class-discriminative learning.')
 ax.legend(fontsize=9)
 for i, r in enumerate(p1_recalls_1b):
     ax.text(r + 0.003, i, f'{r:.3f}', va='center', fontsize=8)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p1_per_class_recall.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p1_per_class_recall.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 1b saved.")
 
@@ -577,11 +577,11 @@ ax.axhline(CHANCE_LEVEL * 100, color='red', linestyle='--', linewidth=1.2,
            label=f'Chance level ({CHANCE_LEVEL*100:.1f}%)')
 ax.set_xticklabels(labels_ord, rotation=25, ha='right', fontsize=9)
 ax.set_ylabel('Test Accuracy (%)')
-ax.set_title('Figure 2. Paradigm 2 (Subject-Dependent EEGNet): Accuracy Distribution per Ablation Configuration\n'
+ax.set_title('Paradigm 2 (Subject-Dependent EEGNet): Accuracy Distribution per Ablation Configuration\n'
              'Each box represents the interquartile range across 12 participants.')
 ax.legend(fontsize=9)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p2_eegnet_distribution.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p2_eegnet_distribution.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 2 saved.")
 
@@ -615,13 +615,13 @@ sns.heatmap(pivot_p2_subj, annot=True, fmt='.1f', cmap='Blues',
             vmin=CHANCE_LEVEL*100, linewidths=0.4, ax=ax,
             xticklabels=[EXP_LABELS[e] for e in EXP_ORDER],
             yticklabels=SUBJECTS)
-ax.set_title('Figure 3. Paradigm 2 (EEGNet): Test Accuracy (%) per Subject and Ablation Configuration\n'
+ax.set_title('Paradigm 2 (EEGNet): Test Accuracy (%) per Subject and Ablation Configuration\n'
              'Each cell = maximum test accuracy for that subject × configuration pair.\n'
              'Pale rows indicate subjects with uniformly low performance (high ISV).')
 ax.set_xlabel('Ablation Configuration')
 ax.set_ylabel('Subject')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p2_subject_heatmap.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p2_subject_heatmap.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 3 saved.")
 
@@ -695,7 +695,7 @@ ax.axhline(chance * 100, color='red', linestyle='--', linewidth=1.1,
 ax.axhline(np.mean(means_2b) * 100, color='navy', linestyle=':', linewidth=1.1,
            label=f'Mean across syllables ({np.mean(means_2b)*100:.2f}%)')
 ax.set_ylabel('Mean Per-Class Recall (%) ± Std (across 12 subjects)')
-ax.set_title('Figure 2b. Paradigm 2 (P2/E3): Per-Syllable Mean Recall Aggregated Across 12 Subjects\n'
+ax.set_title('Paradigm 2 (P2/E3): Per-Syllable Mean Recall Aggregated Across 12 Subjects\n'
              'Syllables above mean (dark blue) are consistently more decodable; '
              'error bars reflect inter-subject variability.')
 ax.set_xticklabels(SYL_ORDER, rotation=35, ha='right', fontsize=9)
@@ -703,7 +703,7 @@ ax.legend(fontsize=9)
 for i, (m, s) in enumerate(zip(means_2b, stds_2b)):
     ax.text(i, (m + s) * 100 + 0.5, f'{m*100:.1f}', ha='center', fontsize=7.5)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p2_per_syllable_recall_aggregated.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p2_per_syllable_recall_aggregated.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 2b saved.")
 
@@ -715,13 +715,13 @@ fig, ax = plt.subplots(figsize=(14, 6))
 sns.heatmap(pivot_subj_syl, annot=True, fmt='.0f', cmap='Blues',
             vmin=0, vmax=100, linewidths=0.3, ax=ax,
             xticklabels=SYL_ORDER, yticklabels=SUBJECTS)
-ax.set_title('Figure 2c. Paradigm 2 (P2/E3): Per-Subject × Per-Syllable Recall (%)\n'
+ax.set_title('Paradigm 2 (P2/E3): Per-Subject × Per-Syllable Recall (%)\n'
              'Dark columns = syllables consistently decodable across subjects; '
              'pale rows = high-ISV subjects with globally low recall.')
 ax.set_xlabel('Syllable')
 ax.set_ylabel('Subject')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p2_subject_syllable_heatmap.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p2_subject_syllable_heatmap.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 2c saved.")""", "cell-11e"))
 
@@ -759,12 +759,12 @@ sns.heatmap(pivot_p3, annot=True, fmt='.1f', cmap='YlGn',
             vmin=CHANCE_LEVEL*100, linewidths=0.4, ax=ax,
             xticklabels=[FEAT_LABELS[f] for f in FEAT_ORDER],
             yticklabels=[EXP_LABELS[e] for e in EXP_ORDER])
-ax.set_title('Figure 4. Paradigm 3 (SVM): Maximum Test Accuracy (%) by Experiment and Feature Group\n'
+ax.set_title('Paradigm 3 (SVM): Maximum Test Accuracy (%) by Experiment and Feature Group\n'
              'Values represent the maximum accuracy achieved across 12 subjects for each cell.')
 ax.set_xlabel('Feature Group')
 ax.set_ylabel('Ablation Configuration')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p3_feature_heatmap.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p3_feature_heatmap.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 4 saved.")""", "cell-13"))
 
@@ -786,13 +786,13 @@ sns.heatmap(pivot_p3_subj, annot=True, fmt='.1f', cmap='YlGn',
             vmin=CHANCE_LEVEL * 100, linewidths=0.4, ax=ax,
             xticklabels=[FEAT_LABELS[f] for f in FEAT_ORDER],
             yticklabels=SUBJECTS)
-ax.set_title('Figure 4b. Paradigm 3 (SVM): Best Test Accuracy (%) per Subject × Feature Group\n'
+ax.set_title('Paradigm 3 (SVM): Best Test Accuracy (%) per Subject × Feature Group\n'
              'Each cell = maximum accuracy across all 8 ablation configurations for that subject–feature pair.\n'
              'Pale rows = subjects with uniformly low SVM performance regardless of feature type.')
 ax.set_xlabel('Feature Group')
 ax.set_ylabel('Subject')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p3_subject_feature_heatmap.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p3_subject_feature_heatmap.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 4b saved.")
 
@@ -900,14 +900,14 @@ ax.axhline(chance_p3s * 100, color='red', linestyle='--', linewidth=1.1,
 ax.axhline(np.mean(means_p3s) * 100, color='navy', linestyle=':', linewidth=1.1,
            label=f'Mean across syllables ({np.mean(means_p3s)*100:.2f}%)')
 ax.set_ylabel('Mean Per-Class Recall (%) ± Std (across 12 subjects)')
-ax.set_title('Figure 4c. Paradigm 3 (SVM): Per-Syllable Mean Recall Aggregated Across 12 Subjects\n'
+ax.set_title('Paradigm 3 (SVM): Per-Syllable Mean Recall Aggregated Across 12 Subjects\n'
              'Best-performing (exp_id × feature_group) combination selected per subject.')
 ax.set_xticklabels(SYL_ORDER_P3, rotation=35, ha='right', fontsize=9)
 ax.legend(fontsize=9)
 for i, (m, sv) in enumerate(zip(means_p3s, stds_p3s)):
     ax.text(i, (m + sv) * 100 + 0.5, f'{m*100:.1f}', ha='center', fontsize=7.5)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p3_per_syllable_recall.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p3_per_syllable_recall.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 4c saved.")
 
@@ -919,12 +919,12 @@ fig, ax = plt.subplots(figsize=(14, 6))
 sns.heatmap(pivot_p3_syl, annot=True, fmt='.0f', cmap='YlGn',
             vmin=0, vmax=100, linewidths=0.3, ax=ax,
             xticklabels=SYL_ORDER_P3, yticklabels=SUBJECTS)
-ax.set_title('Figure 4d. Paradigm 3 (SVM): Per-Subject × Per-Syllable Recall (%)\n'
+ax.set_title('Paradigm 3 (SVM): Per-Subject × Per-Syllable Recall (%)\n'
              'Best-performing model per subject; dark columns = syllables consistently decodable by SVM.')
 ax.set_xlabel('Syllable')
 ax.set_ylabel('Subject')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma1_p3_subject_syllable_heatmap.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma1_p3_subject_syllable_heatmap.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 4d saved.")""", "cell-13e"))
 
@@ -964,13 +964,13 @@ sns.violinplot(data=dist_data, x='Paradigm', y='Accuracy (%)',
                palette=palette, inner='box', cut=0, linewidth=1.2, ax=ax)
 ax.axhline(CHANCE_LEVEL * 100, color='black', linestyle='--', linewidth=1.2,
            label=f'Chance level ({CHANCE_LEVEL*100:.1f}%)')
-ax.set_title('Figure 5. Cross-Pillar Accuracy Distribution\n'
+ax.set_title('Cross-Pillar Accuracy Distribution\n'
              'P2 and P3 consistently outperform the P1 global baseline; '
              'both exhibit comparable median performance above chance.')
 ax.legend(fontsize=9)
 ax.set_xlabel('')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma2_cross_pillar_distribution.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma2_cross_pillar_distribution.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 5 saved.")
 
@@ -990,11 +990,11 @@ cross_stats = pd.DataFrame({
 })
 print("Table 5. Cross-Pillar Performance Summary")
 display(cross_stats)
-print(f"\nConclusion: While P2 achieves the highest peak accuracy ({p2_vals.max():.2f}%), "
-      f"the Wilcoxon test (p={p_holm:.6f}, r={abs(r_biserial):.4f}) shows P3 is statistically superior in mean performance "
-      f"(P3: {p3_vals.mean():.2f}% vs P2: {p2_vals.mean():.2f}%). The objectively selected champion model "
-      f"(P3 SVM, E5 Augmentation, S3, Barlow features, 18.1% accuracy, 18/19 class coverage) balances accuracy "
-      f"with broad syllable decoding, making it the recommended paradigm for robust, multi-class deployment.")""", "cell-16"))
+print(f"\nConclusion: P2 achieves the highest peak accuracy ({p2_vals.max():.2f}%), while mean "
+      f"performance is {p2_vals.mean():.2f}% (P2) vs {p3_vals.mean():.2f}% (P3). Section 2.2 tests "
+      f"whether this mean difference is statistically significant; the objective, data-driven "
+      f"champion-selection protocol (which also screens for class coverage, not peak accuracy "
+      f"alone) is applied in Main Analysis 3.")""", "cell-16"))
 
 # ─────────────────────────────────────────────────────────────
 # CELL – 2.2 WILCOXON P2 VS P3
@@ -1100,11 +1100,11 @@ ax.axvline(CHANCE_LEVEL * 100, color='red', linestyle=':', alpha=0.5, linewidth=
            label=f'Chance ({CHANCE_LEVEL*100:.1f}%)')
 ax.set_xlabel('P2 (EEGNet) Best Accuracy per Subject (%)')
 ax.set_ylabel('P3 (SVM) Best Accuracy per Subject (%)')
-ax.set_title(f'Figure 6b. P2 vs P3 Per-Subject Accuracy Correlation\n'
+ax.set_title(f'P2 vs P3 Per-Subject Accuracy Correlation\n'
              f'Spearman r = {sp_r:.3f}  (p = {sp_p:.4f})  — {_sp_interp}')
 ax.legend(fontsize=9)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma2_spearman_p2_p3.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma2_spearman_p2_p3.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 6b saved.")""", "cell-18c"))
 
@@ -1151,11 +1151,11 @@ ax.axhline(CHANCE_LEVEL*100, color='red', linestyle='--', linewidth=1.1,
 ax.set_xticks(x)
 ax.set_xticklabels(common_subjects, fontsize=9)
 ax.set_ylabel('Best Test Accuracy (%)')
-ax.set_title('Figure 6. Subject-Level Best Accuracy: P2 (EEGNet) vs P3 (SVM)\n'
+ax.set_title('Subject-Level Best Accuracy: P2 (EEGNet) vs P3 (SVM)\n'
              'Subjects where P3 exceeds P2 illustrate the rescue phenomenon.')
 ax.legend(fontsize=9)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma2_subject_rescue.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma2_subject_rescue.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 6 saved.")""", "cell-20"))
 
@@ -1438,13 +1438,13 @@ ax.axvline(1.0/n_cls, color='red', linestyle='--', linewidth=1.1,
 ax.axvline(np.mean(recalls), color='navy', linestyle=':', linewidth=1.1,
            label=f'Mean recall ({np.mean(recalls):.3f})')
 ax.set_xlabel('Per-Class Recall')
-ax.set_title(f'Figure 7. Per-Class Recall – Champion Model ({CHAMP_TAG})\n'
+ax.set_title(f'Per-Class Recall – Champion Model ({CHAMP_TAG})\n'
              'Recall distribution across the 19 syllable classes; small sample sizes per class limit strong phonological claims.')
 ax.legend(fontsize=9)
 for i, (r, lbl) in enumerate(zip(recalls, class_names)):
     ax.text(r + 0.005, i, f'{r:.3f}', va='center', fontsize=8)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma3_champion_per_class_recall.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma3_champion_per_class_recall.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 7 saved.")""", "cell-25"))
 
@@ -1483,10 +1483,10 @@ for i in range(n_cls):
 fig.colorbar(im, ax=ax, label='Proportion of True Class')
 ax.set_xlabel('Predicted Class')
 ax.set_ylabel('True Class')
-ax.set_title(f'Figure 8. Normalized Confusion Matrix – Champion Model ({CHAMP_TAG})\n'
+ax.set_title(f'Normalized Confusion Matrix – Champion Model ({CHAMP_TAG})\n'
              f'Off-Diagonal Mass = {odm*100:.2f}%')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma3_champion_confusion_matrix.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma3_champion_confusion_matrix.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 8 saved.")""", "cell-27"))
 
@@ -1578,10 +1578,10 @@ if CHAMP_PILAR == 'P2':
     ax.bar(sorted_ch, sorted_imp, color=bar_colors, edgecolor='black', linewidth=0.5)
     ax.legend(handles=[mpatches.Patch(color=v, label=k) for k, v in region_col.items()], fontsize=9)
     ax.set_xlabel('EEG Channel'); ax.set_ylabel('Mean |SHAP| Value')
-    ax.set_title(f'Figure 9. SHAP Channel Importance – Champion Model ({CHAMP_TAG})\n'
+    ax.set_title(f'SHAP Channel Importance – Champion Model ({CHAMP_TAG})\n'
                  f'FDR = {_fdr_str}: Language/Motor channels vs frontal (eye-blink) contribution.')
     fig.tight_layout()
-    fig.savefig(str(OUTPUT_DIR / 'ma3_shap_channel_heatmap.png'), dpi=150, bbox_inches='tight')
+    fig.savefig(str(OUTPUT_DIR / 'ma3_shap_channel_heatmap.png'), dpi=300, bbox_inches='tight')
     plt.show()
     print("Figure 9 saved.")
 
@@ -1693,10 +1693,10 @@ else:
             color=C_P3, edgecolor='black', linewidth=0.5, capsize=3, alpha=0.85)
     ax.axvline(0, color='black', linewidth=0.8)
     ax.set_xlabel('Permutation Importance (mean accuracy drop)')
-    ax.set_title(f'Figure 9. Permutation Feature Importance – Champion Model ({CHAMP_TAG})\n'
+    ax.set_title(f'Permutation Feature Importance – Champion Model ({CHAMP_TAG})\n'
                  f'Handcrafted-feature importance (not directly comparable to P2 SHAP magnitudes).')
     fig.tight_layout()
-    fig.savefig(str(OUTPUT_DIR / 'ma3_permutation_importance.png'), dpi=150, bbox_inches='tight')
+    fig.savefig(str(OUTPUT_DIR / 'ma3_permutation_importance.png'), dpi=300, bbox_inches='tight')
     plt.show()
     print("Figure 9 saved (permutation importance).")
     print("\nNote: Permutation importance measures the accuracy decrement when a feature is "
@@ -1754,10 +1754,10 @@ for i in range(n_p1_cls):
 fig.colorbar(im, ax=ax, label='Proportion of True Class')
 ax.set_xlabel('Predicted Class')
 ax.set_ylabel('True Class')
-ax.set_title(f'Figure 10. P1 Global EEGNet – Normalized Confusion Matrix (Best Config: {EXP_LABELS[best_p1_exp]})\n'
+ax.set_title(f'P1 Global EEGNet – Normalized Confusion Matrix (Best Config: {EXP_LABELS[best_p1_exp]})\n'
              f'Off-Diagonal Mass = {p1_odm*100:.2f}%. Near-uniform distribution confirms ISV as the dominant failure mode.')
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma3_p1_confusion_matrix.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma3_p1_confusion_matrix.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 10 saved.")""", "cell-29c"))
 
@@ -1833,7 +1833,7 @@ labels_cd = [EXP_LABELS[e] for e in configs]
 ax.set_xlim(0.5, k_configs + 0.5)
 ax.set_ylim(-1.2, 1.0)
 ax.set_xlabel('Average Rank (1 = Best Performance)', fontsize=11)
-ax.set_title('Figure 11. Nemenyi Critical Difference Diagram (P2 EEGNet, k=8 configurations, n=12 subjects)\n'
+ax.set_title('Nemenyi Critical Difference Diagram (P2 EEGNet, k=8 configurations, n=12 subjects)\n'
              f'CD = {cd:.3f} at alpha=0.05. Algorithms connected by a bar are NOT significantly different.',
              fontsize=10)
 ax.axhline(0, color='black', linewidth=0.8)
@@ -1868,7 +1868,7 @@ ax.set_yticks([])
 for spine in ['top','right','left']:
     ax.spines[spine].set_visible(False)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma4_nemenyi_cd_diagram.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma4_nemenyi_cd_diagram.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 11 saved.")
 
@@ -1923,13 +1923,13 @@ ax.bar([FEAT_LABELS[f] for f in FEAT_ORDER], means, yerr=stds,
 ax.axhline(CHANCE_LEVEL*100, color='red', linestyle='--', linewidth=1.1,
            label=f'Chance ({CHANCE_LEVEL*100:.1f}%)')
 ax.set_ylabel('Mean Test Accuracy (%) ± Std')
-ax.set_title('Figure 12. Paradigm 3 (SVM): Mean Accuracy by Feature Group\n'
+ax.set_title('Paradigm 3 (SVM): Mean Accuracy by Feature Group\n'
              'Error bars represent one standard deviation across subjects and experiments.')
 ax.legend(fontsize=9)
 for i, (m, s) in enumerate(zip(means, stds)):
     ax.text(i, m + s + 0.3, f'{m:.2f}%', ha='center', fontsize=8)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma4_p3_feature_ablation.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma4_p3_feature_ablation.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 12 saved.")""", "cell-34"))
 
@@ -1991,7 +1991,7 @@ labels_p3  = [EXP_LABELS[e] for e in configs_p3]
 ax.set_xlim(0.5, k_p3 + 0.5)
 ax.set_ylim(-1.2, 1.0)
 ax.set_xlabel('Average Rank (1 = Best Performance)', fontsize=11)
-ax.set_title('Figure 11b. Nemenyi CD Diagram (P3 SVM, k=8 configurations, n=12 subjects)\n'
+ax.set_title('Nemenyi CD Diagram (P3 SVM, k=8 configurations, n=12 subjects)\n'
              f'CD = {cd_p3:.3f} at alpha=0.05. Bars connect configurations NOT significantly different.',
              fontsize=10)
 ax.axhline(0, color='black', linewidth=0.8)
@@ -2021,7 +2021,7 @@ ax.set_yticks([])
 for spine in ['top','right','left']:
     ax.spines[spine].set_visible(False)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma4_p3_nemenyi_cd_diagram.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma4_p3_nemenyi_cd_diagram.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 11b saved.")
 
@@ -2147,20 +2147,20 @@ bars = ax.bar(['P2 EEGNet', f'P3 SVM\n({FEAT_LABELS.get(p3_lat_fg,"")})'],
               [p2_mean, p3_mean],
               yerr=[np.std(p2_times), np.nanstd(p3_times)],
               color=[C_P2, C_P3], edgecolor='black', capsize=5, alpha=0.85, linewidth=0.6)
-# Mark the champion bar with a star
+# Mark the champion bar
 _champ_bar = 0 if CHAMP_PILAR == 'P2' else 1
-ax.annotate('★ champion', xy=(_champ_bar, [p2_mean, p3_mean][_champ_bar]),
+ax.annotate('(champion)', xy=(_champ_bar, [p2_mean, p3_mean][_champ_bar]),
             xytext=(0, 14), textcoords='offset points', ha='center', fontsize=9, color='black')
 ax.axhline(REALTIME_THRESHOLD_MS, color='red', linestyle='--', linewidth=1.2,
            label=f'Real-time threshold ({REALTIME_THRESHOLD_MS:.0f}ms)')
 ax.set_ylabel('Mean Inference Latency (ms)')
-ax.set_title(f'Figure 13. Per-Sample Inference Latency on Subject {CHAMP_SUBJ}: P2 (EEGNet) vs P3 (SVM)\n'
+ax.set_title(f'Per-Sample Inference Latency on Subject {CHAMP_SUBJ}: P2 (EEGNet) vs P3 (SVM)\n'
              'Both paradigms are evaluated on the champion subject for a fair comparison.')
 ax.legend(fontsize=9)
 for i, v in enumerate([p2_mean, p3_mean]):
     ax.text(i, v + 0.5, f'{v:.2f}ms', ha='center', fontsize=9)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma5_inference_latency.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma5_inference_latency.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 13 saved.")""", "cell-37"))
 
@@ -2230,12 +2230,12 @@ ax.axvline(CHANCE_LEVEL*100, color='black', linestyle='--', linewidth=1.2,
 ax.set_yticks(list(y_pos))
 ax.set_yticklabels(paradigms_ci)
 ax.set_xlabel('Test Accuracy (%)')
-ax.set_title(f'Figure 14. Bootstrap Confidence Intervals (95%, n={N_BOOTSTRAP} resamples)\n'
+ax.set_title(f'Bootstrap Confidence Intervals (95%, n={N_BOOTSTRAP} resamples)\n'
              'Diamond markers = observed mean; bars span the 95% bootstrap CI.')
 ax.legend(fontsize=9)
 ax.set_xlim(left=max(0, min(ci_los) - 2))
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma6_bootstrap_ci.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma6_bootstrap_ci.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 14 saved.")""", "cell-38c"))
 
@@ -2295,16 +2295,791 @@ for thresh, lbl, ls in [(0.2,'Small','--'), (0.5,'Medium','-.'), (0.8,'Large',':
     ax.axhline(thresh, linestyle=ls, color='gray', linewidth=1.1,
                label=f'{lbl} (|d|={thresh})')
 ax.set_ylabel("|Cohen's d|")
-ax.set_title("Figure 15. Effect Size (|Cohen's d|) – Cross-Paradigm Pairwise Comparisons\n"
+ax.set_title("Effect Size (|Cohen's d|) – Cross-Paradigm Pairwise Comparisons\n"
              "Dashed lines mark conventional Small / Medium / Large thresholds.")
 ax.legend(fontsize=9)
 for bar, d in zip(bars, d_vals):
     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02,
             f'd={d:.3f}', ha='center', fontsize=9)
 fig.tight_layout()
-fig.savefig(str(OUTPUT_DIR / 'ma6_cohens_d.png'), dpi=150, bbox_inches='tight')
+fig.savefig(str(OUTPUT_DIR / 'ma6_cohens_d.png'), dpi=300, bbox_inches='tight')
 plt.show()
 print("Figure 15 saved.")""", "cell-38e"))
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 7 HEADING -- PREPROCESSING BEFORE/AFTER
+# ─────────────────────────────────────────────────────────────
+cells.append(md(r"""---
+
+## Main Analysis 7: Preprocessing and Feature Extraction — Before vs After Comparison
+
+Every classification pipeline in this thesis (P1-P6) operates on features extracted from a Butterworth-filtered EEG epoch, never on the raw acquisition signal directly. This section makes that transformation concrete: a short raw segment from a real subject recording is compared, channel by channel, against its filtered counterpart in both the time and frequency domain, and the handcrafted feature-extraction step (Barlow parameters) is shown collapsing a full epoch down to two numbers per channel.""", "cell-42"))
+
+cells.append(code(r"""# ============================================================
+# CELL MA7.1: RAW vs FILTERED SIGNAL COMPARISON
+# A small, bounded slice (nrows-limited) of one subject's raw CSV is read
+# directly here -- NOT via OfflineTrialReader/DatasetBuilder -- so the
+# truly UNFILTERED signal is available for comparison. The read is capped
+# at a small row count so this stays memory-safe regardless of the full
+# CSV's size (~350-400MB uncapped).
+# ============================================================
+import glob as _glob
+from scipy.signal import welch
+from preprocessing.signal_processor import SignalProcessor
+from features.extract_eeg_features import EEGFeatureExtractor
+
+WEIGHTS_P4   = WEIGHTS_ROOT / 'P4_NoWindowing'
+WEIGHTS_P5   = WEIGHTS_ROOT / 'P5_ShiftedBandpass'
+WEIGHTS_P6   = WEIGHTS_ROOT / 'P7_CoarseToFine'   # on-disk name predates the P6 thesis rename
+RAW_DATA_DIR = BACKEND_DIR / 'dataset' / 'raw'
+FAIR_CMP_DIR = BACKEND_DIR / 'src' / 'experiments_p4_p7' / 'fair_comparison' / 'results'
+C_P4, C_P5, C_P6 = '#9467bd', '#8c564b', '#e377c2'
+
+def load_fair_cmp_json(filename):
+    path = FAIR_CMP_DIR / filename
+    if not path.exists():
+        raise FileNotFoundError(f"[FAIR COMPARISON] Missing expected result file: {path}")
+    with open(path, encoding='utf-8') as fjc:
+        return json.load(fjc)
+
+BEFORE_AFTER_SUBJECT = 'S3'
+_csv_candidates = _glob.glob(str(RAW_DATA_DIR / f'{BEFORE_AFTER_SUBJECT}*.csv'))
+if not _csv_candidates:
+    raise FileNotFoundError(f"[MA7] No raw CSV found for {BEFORE_AFTER_SUBJECT} in {RAW_DATA_DIR}")
+_csv_path = _csv_candidates[0]
+
+# Locate the true header row (EmotivPRO export files carry a metadata preamble)
+_header_idx = 0
+with open(_csv_path, 'r') as _f:
+    for _i, _line in enumerate(_f):
+        if 'EEG.AF3' in _line or 'AF3' in _line:
+            _header_idx = _i
+            break
+
+_proc = SignalProcessor(fs=256, band='broadband', apply_ica=False)
+_raw_slice = pd.read_csv(_csv_path, header=_header_idx, nrows=15000, low_memory=False)
+_ch_cols = [c for c in _proc.eeg_channels if c in _raw_slice.columns]
+if not _ch_cols:
+    _ch_cols = [c.replace('EEG.', '') for c in _proc.eeg_channels if c.replace('EEG.', '') in _raw_slice.columns]
+    _proc.eeg_channels = _ch_cols
+for _c in _ch_cols:
+    _raw_slice[_c] = pd.to_numeric(_raw_slice[_c], errors='coerce')
+_raw_slice = _raw_slice.dropna(subset=_ch_cols).reset_index(drop=True)
+
+raw_eeg      = _raw_slice[_ch_cols].values
+filtered_eeg = _proc.apply_filter(raw_eeg)
+
+print(f"[MA7] Raw slice loaded for {BEFORE_AFTER_SUBJECT}: {raw_eeg.shape[0]} samples "
+      f"({raw_eeg.shape[0]/256:.1f}s at 256 Hz), {raw_eeg.shape[1]} channels.")
+print(f"[MA7] Filter applied: Butterworth band-pass {_proc.lowcut}-{_proc.highcut} Hz, order {_proc.order}.")
+
+# ── Time-domain before vs after (one representative channel) ────────────
+_demo_ch_idx = (_ch_cols.index('EEG.O1') if 'EEG.O1' in _ch_cols
+                else (_ch_cols.index('O1') if 'O1' in _ch_cols else 6))
+_demo_ch_label = _ch_cols[_demo_ch_idx].replace('EEG.', '')
+_t_axis = np.arange(2000) / 256.0
+fig, axes = plt.subplots(2, 1, figsize=(11, 6), sharex=True)
+axes[0].plot(_t_axis, raw_eeg[:2000, _demo_ch_idx], color='#999999', linewidth=0.7)
+axes[0].set_title(f'Raw (Unfiltered) Signal — Channel {_demo_ch_label}, Subject {BEFORE_AFTER_SUBJECT}')
+axes[0].set_ylabel('Amplitude (uV)')
+axes[1].plot(_t_axis, filtered_eeg[:2000, _demo_ch_idx], color=C_P3, linewidth=0.7)
+axes[1].set_title(f'Filtered Signal ({_proc.lowcut}-{_proc.highcut} Hz Butterworth) — Same Channel and Window')
+axes[1].set_xlabel('Time (s)'); axes[1].set_ylabel('Amplitude (uV)')
+fig.suptitle('Preprocessing Before vs After: Time-Domain Comparison', fontsize=12, y=1.00)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma7_before_after_timedomain.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Time-domain before/after figure saved.")
+
+# ── Power spectral density before vs after ───────────────────────────────
+fig, ax = plt.subplots(figsize=(9, 5))
+for _data, _lbl, _col in [(raw_eeg, 'Raw (unfiltered)', '#999999'),
+                           (filtered_eeg, 'Filtered (broadband 0.5-50Hz)', C_P3)]:
+    _freqs, _psd = welch(_data[:, _demo_ch_idx], fs=256, nperseg=512)
+    ax.semilogy(_freqs, _psd, color=_col, linewidth=1.3, label=_lbl)
+ax.axvspan(0.5, 50, color=C_P3, alpha=0.08, label='Pass-band (0.5-50 Hz)')
+ax.set_xlim(0, 80)
+ax.set_xlabel('Frequency (Hz)'); ax.set_ylabel('Power Spectral Density (log scale)')
+ax.set_title(f'Preprocessing Before vs After: Power Spectral Density — Channel {_demo_ch_label}\n'
+             'Filtering removes out-of-band drift and high-frequency noise while preserving in-band power.')
+ax.legend(fontsize=9)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma7_before_after_psd.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("PSD before/after figure saved.")
+
+# ── Feature extraction: full epoch -> 2 numbers/channel (Barlow) ────────
+_extractor = EEGFeatureExtractor(fs=256)
+_demo_epoch = filtered_eeg[:256, :][np.newaxis, :, :].transpose(0, 2, 1)  # (1, channels, time)
+_barlow_feat = _extractor.transform(_demo_epoch, groups=['barlow'])
+_feat_names_demo = [f'{ch.replace("EEG.","")}_{sub}' for ch in _ch_cols for sub in ('amp', 'freq')]
+before_after_feat_table = pd.DataFrame({
+    'Feature': _feat_names_demo[:_barlow_feat.shape[1]],
+    'Value':   np.round(_barlow_feat[0], 4),
+})
+print(f"\nTable MA7. Barlow Feature Extraction Output for One Filtered 1-Second Epoch "
+      f"({filtered_eeg.shape[1]} channels x 256 samples/channel -> {_barlow_feat.shape[1]} features)")
+display(before_after_feat_table)
+print(f"\nDimensionality reduction: {filtered_eeg.shape[1] * 256} raw sample-points -> "
+      f"{_barlow_feat.shape[1]} handcrafted features per epoch "
+      f"({filtered_eeg.shape[1] * 256 / _barlow_feat.shape[1]:.0f}x reduction).")""", "cell-42b"))
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 8 -- PARADIGM 4 NO-WINDOWING
+# ─────────────────────────────────────────────────────────────
+cells.append(md(r"""---
+
+## Main Analysis 8: Paradigm 4 (No-Windowing) — Structural Bottleneck Analysis
+
+Paradigm 4 tests whether the standard 1-second windowing scheme itself limits decoding accuracy, by training on a single 5-second full epoch per trial slot instead of five overlapping 1-second windows. If accuracy were similar to or better than the windowed paradigms, the short window length would be implicated as an unnecessary constraint; if accuracy collapses to near-chance instead, the far smaller number of training samples per subject (one epoch instead of five) is implicated as the dominant bottleneck.""", "cell-43"))
+
+cells.append(code(r"""# ============================================================
+# CELL MA8: PARADIGM 4 -- NO-WINDOWING RESULTS (12 subjects)
+# Reads the existing results_S{n}.json artefacts directly -- no retraining.
+# ============================================================
+p4_rows = []
+for subj in SUBJECTS:
+    _p = WEIGHTS_P4 / 'Fullscale_12Subj_E0' / f'results_{subj}.json'
+    if not _p.exists():
+        continue
+    with open(_p, encoding='utf-8') as _f:
+        _d = json.load(_f)
+    p4_rows.append({
+        'Subject': subj, 'Test Accuracy (%)': round(_d['test_accuracy']*100, 3),
+        'Class Coverage': f"{_d['n_classes_covered']}/{_d['n_classes_total']}",
+        'N Test Samples': _d['n_test'], 'Feature Group': _d['feature_group'],
+    })
+df_p4 = pd.DataFrame(p4_rows)
+n_p4_missing = len(SUBJECTS) - len(df_p4)
+
+print(f"Table MA8. Paradigm 4 (No-Windowing) — Per-Subject Results "
+      f"({len(df_p4)}/{len(SUBJECTS)} subjects; {n_p4_missing} missing raw data)")
+display(df_p4.set_index('Subject'))
+
+p4_mean   = df_p4['Test Accuracy (%)'].mean()
+p4_chance = CHANCE_LEVEL * 100
+print(f"\nMean accuracy: {p4_mean:.3f}%  |  Chance level: {p4_chance:.3f}%  "
+      f"|  Ratio to chance: {p4_mean/p4_chance:.2f}x")
+if n_p4_missing:
+    print(f"Note: {n_p4_missing} subject(s) missing (no raw data extracted for the 5-second full-epoch "
+          f"variant) -- reported as unavailable, not imputed.")
+
+# ── P4 accuracy vs chance, all subjects ──────────────────────────────────
+fig, ax = plt.subplots(figsize=(9, 4.5))
+_accs_p4   = df_p4.set_index('Subject')['Test Accuracy (%)'].reindex(SUBJECTS)
+_colors_p4 = [C_P4 if a == a and a > p4_chance else '#cccccc' for a in _accs_p4]
+ax.bar(SUBJECTS, _accs_p4.fillna(0), color=_colors_p4, edgecolor='black', linewidth=0.6, alpha=0.85)
+ax.axhline(p4_chance, color='red', linestyle='--', linewidth=1.2, label=f'Chance level ({p4_chance:.2f}%)')
+ax.axhline(p4_mean, color='navy', linestyle=':', linewidth=1.2, label=f'Mean ({p4_mean:.2f}%)')
+ax.set_ylabel('Test Accuracy (%)')
+ax.set_title('Paradigm 4 (No-Windowing): Test Accuracy per Subject\n'
+             'Accuracy stays within noise of chance level, implicating sample-size scarcity (not window length) as the bottleneck.')
+ax.legend(fontsize=9)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma8_p4_accuracy.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")
+
+# ── Structural word-decodability projection ──────────────────────────────
+p4_skip = load_fair_cmp_json('quantitative_skip_justification_p1_p2_p4_p5.json')['P4_NoWindowing']
+print(f"\n{p4_skip['narrative']}")""", "cell-43b"))
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 9 -- PARADIGM 5 SHIFTED BANDPASS
+# ─────────────────────────────────────────────────────────────
+cells.append(md(r"""---
+
+## Main Analysis 9: Paradigm 5 (Shifted Bandpass) — Negative Finding Analysis
+
+Paradigm 5 re-runs the standard pipeline with the band-pass filter shifted from the default 0.5-50 Hz to 15-65 Hz, excluding low-frequency drift while including more high-gamma content, to test whether this changes decoding accuracy. Unlike Paradigm 4, this is not a Stage-1 collapse story — P5 remains comparable to the P3 baseline — so the finding here is one of statistical equivalence ("redundant confirmation"), not compounding error.""", "cell-44"))
+
+cells.append(code(r"""# ============================================================
+# CELL MA9: PARADIGM 5 -- SHIFTED BANDPASS RESULTS (12 subjects)
+# vs P3's OWN E0_Baseline/barlow accuracy (same config, fair baseline
+# comparison -- NOT the E5 champion). Reads existing artefacts only.
+# ============================================================
+p5_rows = []
+for subj in SUBJECTS:
+    _p = WEIGHTS_P5 / 'Fullscale_12Subj_E0' / f'results_{subj}.json'
+    if not _p.exists():
+        continue
+    with open(_p, encoding='utf-8') as _f:
+        _d = json.load(_f)
+    p5_rows.append({'Subject': subj, 'P5 Test Accuracy (%)': round(_d['test_accuracy']*100, 3),
+                     'Class Coverage': f"{_d['n_classes_covered']}/{_d['n_classes_total']}"})
+df_p5 = pd.DataFrame(p5_rows).set_index('Subject')
+
+_p3_e0_barlow = (df_p3_all[(df_p3_all['exp_id'] == 'E0') & (df_p3_all['feature_group'] == 'barlow')]
+                  .set_index('subject')['accuracy'] * 100)
+df_p5['P3 E0/Barlow Baseline (%)'] = _p3_e0_barlow.reindex(df_p5.index).round(3)
+df_p5['Delta P5-P3 (pp)'] = (df_p5['P5 Test Accuracy (%)'] - df_p5['P3 E0/Barlow Baseline (%)']).round(3)
+df_p5 = df_p5.reindex(SUBJECTS)
+
+print(f"Table MA9. Paradigm 5 (Shifted Bandpass 15-65Hz) vs P3 E0/Barlow Baseline, Per Subject")
+display(df_p5)
+
+w_stat_p5, p_p5 = wilcoxon(df_p5['P5 Test Accuracy (%)'].dropna(),
+                            df_p5['P3 E0/Barlow Baseline (%)'].dropna())
+mean_delta_p5 = df_p5['Delta P5-P3 (pp)'].mean()
+n_neg_p5 = int((df_p5['Delta P5-P3 (pp)'] < 0).sum())
+n_valid_p5 = int(df_p5['Delta P5-P3 (pp)'].notna().sum())
+print(f"\nMean delta (P5 - P3 baseline): {mean_delta_p5:+.3f} pp")
+print(f"Direction: {n_neg_p5}/{n_valid_p5} subjects negative")
+print(f"Wilcoxon signed-rank test: W={w_stat_p5:.4f}, p={p_p5:.4f} "
+      f"({'significant' if p_p5 < 0.05 else 'not statistically significant'})")
+
+# ── P5 vs P3 baseline paired comparison ──────────────────────────────────
+fig, ax = plt.subplots(figsize=(9, 4.5))
+x = np.arange(len(SUBJECTS)); w = 0.35
+ax.bar(x - w/2, df_p5['P3 E0/Barlow Baseline (%)'], w, label='P3 (E0/Barlow baseline)', color=C_P3, alpha=0.85)
+ax.bar(x + w/2, df_p5['P5 Test Accuracy (%)'], w, label='P5 (Shifted Bandpass)', color=C_P5, alpha=0.85)
+ax.set_xticks(x); ax.set_xticklabels(SUBJECTS, fontsize=9)
+ax.set_ylabel('Test Accuracy (%)')
+ax.set_title(f'Paradigm 5 (Shifted Bandpass) vs P3 Baseline, Per Subject\n'
+             f'Mean delta {mean_delta_p5:+.2f}pp, Wilcoxon p={p_p5:.3f} — statistically indistinguishable from baseline.')
+ax.legend(fontsize=9)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma9_p5_vs_p3_baseline.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-44b"))
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 10 -- PARADIGM 6 FULL CHARACTERIZATION
+# ─────────────────────────────────────────────────────────────
+cells.append(md(r"""---
+
+## Main Analysis 10: Paradigm 6 (Coarse-to-Fine Hierarchical Decoding) — Full Characterization
+
+Paradigm 6 replaces flat 19-class classification with a two-stage hierarchical pipeline: a **coarse** stage predicts one of 4 vowel groups (A/I/E/O) from the first-syllable epoch, then a group-specific **fine** stage (fine_A, fine_I, or fine_E — group O has only one member and needs no fine stage) resolves the exact syllable. A deterministic dictionary then maps the resolved first syllable to a full word, except for the ambiguous "SA" case, which requires one further **sa_branch** model (KIT vs YANG) on the second-syllable epoch. All results below are read from the existing Stage A/B artefacts and the Fase 1 fair-comparison analysis — none are recomputed here.
+
+*(On-disk folder names retain the "P7_CoarseToFine" / "P7" prefix from before the paradigm's final thesis rename to "P6" — this is a naming-history artefact, not a different paradigm.)*""", "cell-45"))
+
+cells.append(md(r"""### 10a. Stage A: Coarse Feature-Group Spot-Check""", "cell-45a"))
+
+cells.append(code(r"""# ── STAGE A: COARSE FEATURE-GROUP SPOT-CHECK (S3) ────────────────────────
+with open(WEIGHTS_P6 / 'Spotcheck_Coarse_S3' / 'spotcheck_summary.json', encoding='utf-8') as _f:
+    p6_spotcheck = json.load(_f)
+
+p6_spotcheck_df = pd.DataFrame([
+    {'Feature Group': FEAT_LABELS.get(fg, fg), 'Test Accuracy (%)': round(r['test_accuracy']*100, 3),
+     'Class Coverage (/4)': r['n_classes_covered']}
+    for fg, r in p6_spotcheck.items()
+]).set_index('Feature Group').reindex([FEAT_LABELS[f] for f in FEAT_ORDER])
+print("Table MA10a. P6 Coarse Sub-Model Feature-Group Spot-Check (Subject S3)")
+display(p6_spotcheck_df)
+
+with open(WEIGHTS_P6 / 'Fullscale_12Subj' / 'feature_selection_decision.json', encoding='utf-8') as _f:
+    p6_feat_decision = json.load(_f)
+print(f"\nAutomatically selected coarse feature group: '{p6_feat_decision['winner']}' "
+      f"— {p6_feat_decision['reason']}")""", "cell-45b"))
+
+cells.append(md(r"""### 10b. Stage B: Full-Scale Sub-Model Results (12 Subjects × 5 Sub-Models)""", "cell-45c"))
+
+cells.append(code(r"""# ── STAGE B: FULL-SCALE SUB-MODEL + END-TO-END RESULTS (12 subjects) ─────
+P6_SUBMODELS = ['coarse', 'fine_A', 'fine_I', 'fine_E', 'sa_branch']
+p6_results_all = {}
+for subj in SUBJECTS:
+    _p = WEIGHTS_P6 / 'Fullscale_12Subj' / f'results_{subj}.json'
+    if _p.exists():
+        with open(_p, encoding='utf-8') as _f:
+            p6_results_all[subj] = json.load(_f)
+
+p6_stageb_rows = []
+for subj, d in p6_results_all.items():
+    row = {'Subject': subj}
+    for sm in P6_SUBMODELS:
+        row[f'{sm} (%)'] = round(d['sub_models'][sm]['test_accuracy']*100, 2)
+    row['First-syllable e2e (%)'] = round(d['first_syllable_e2e']['accuracy']*100, 2)
+    fw = d['full_word_e2e']
+    row['Full-word e2e (%)'] = round(fw['accuracy']*100, 2) if fw.get('available') else None
+    row['Full-word N test'] = fw.get('n_test_trials')
+    p6_stageb_rows.append(row)
+df_p6_stageb = pd.DataFrame(p6_stageb_rows).set_index('Subject').reindex(SUBJECTS)
+
+print(f"Table MA10b. P6 Stage B — Sub-Model and End-to-End Accuracy per Subject "
+      f"(coarse feature group: {p6_feat_decision['winner']})")
+display(df_p6_stageb)
+
+print(f"\nMean first-syllable e2e accuracy: {df_p6_stageb['First-syllable e2e (%)'].mean():.3f}% "
+      f"(n={df_p6_stageb['First-syllable e2e (%)'].notna().sum()})")
+print(f"Mean full-word e2e accuracy: {df_p6_stageb['Full-word e2e (%)'].mean():.3f}% "
+      f"(n={df_p6_stageb['Full-word e2e (%)'].notna().sum()})")
+
+# ── Sub-model accuracy heatmap ────────────────────────────────────────────
+fig, ax = plt.subplots(figsize=(9, 6))
+_hm_cols = [f'{sm} (%)' for sm in P6_SUBMODELS]
+sns.heatmap(df_p6_stageb[_hm_cols], annot=True, fmt='.1f', cmap='RdPu', linewidths=0.4, ax=ax,
+            xticklabels=P6_SUBMODELS, yticklabels=df_p6_stageb.index)
+ax.set_title('Paradigm 6: Sub-Model Test Accuracy (%) per Subject × Sub-Model\n'
+             'coarse is consistently the weakest stage across subjects.')
+ax.set_xlabel('Sub-Model'); ax.set_ylabel('Subject')
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma10_p6_submodel_heatmap.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-45d"))
+
+cells.append(md(r"""### 10c. Class Coverage Verification (S3 and All 12 Subjects)""", "cell-45e"))
+
+cells.append(code(r"""# ── CLASS COVERAGE VERIFICATION (Fase 1 Task 1.2 output) ─────────────────
+p6_coverage_pipeline = load_fair_cmp_json('p6_first_syllable_pipeline_coverage.json')
+
+p6_coverage_rows = [
+    {'Subject': subj, 'Syllables Covered (/9)': d['n_syllables_covered'],
+     'Never-Correct Syllables': ', '.join(d['syllables_never_correct']) or '(none — full coverage)'}
+    for subj, d in p6_coverage_pipeline.items()
+]
+df_p6_coverage = pd.DataFrame(p6_coverage_rows).set_index('Subject').reindex(SUBJECTS)
+print("Table MA10c. P6 First-Syllable Pipeline Class Coverage per Subject (of 9 First-Syllable Classes)")
+display(df_p6_coverage)
+
+_full_cov = (df_p6_coverage['Syllables Covered (/9)'] == 9).sum()
+print(f"\n{_full_cov}/12 subjects achieve full 9/9 first-syllable pipeline coverage.")
+print(f"Champion candidate S3: {df_p6_coverage.loc['S3', 'Syllables Covered (/9)']}/9 "
+      f"({'the only subject with full coverage' if df_p6_coverage.loc['S3','Syllables Covered (/9)']==9 and _full_cov==1 else 'see table above'}).")
+
+fig, ax = plt.subplots(figsize=(8, 4.5))
+_cov_vals = df_p6_coverage['Syllables Covered (/9)'].reindex(SUBJECTS)
+_cov_colors = [C_P6 if s == 'S3' else '#d8a5c4' for s in SUBJECTS]
+ax.bar(SUBJECTS, _cov_vals, color=_cov_colors, edgecolor='black', linewidth=0.6)
+ax.set_ylim(0, 9.5); ax.set_ylabel('First-Syllable Classes Covered (of 9)')
+ax.set_title('Paradigm 6: First-Syllable Pipeline Class Coverage per Subject\n'
+             'S3 (highlighted) is the only subject with full 9/9 coverage.')
+for i, v in enumerate(_cov_vals):
+    ax.text(i, v + 0.15, str(int(v)), ha='center', fontsize=9)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma10_p6_coverage.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-45f"))
+
+cells.append(md(r"""### 10d. Error Decomposition Analysis (S3)""", "cell-45g"))
+
+cells.append(code(r"""# ── ERROR DECOMPOSITION (Fase 1 Task 1.5 output) ─────────────────────────
+p6_errdecomp = load_fair_cmp_json('p6_error_decomposition_s3.json')
+
+errdecomp_table = pd.DataFrame([
+    {'Failure Category': cat, 'N Trials': p6_errdecomp['category_counts'][cat],
+     '% of Total Errors': pct}
+    for cat, pct in p6_errdecomp['error_category_pct_of_total_errors'].items()
+]).sort_values('% of Total Errors', ascending=False)
+print(f"Table MA10d. P6 Full-Word Error Decomposition (Subject S3, n={p6_errdecomp['n_test_trials']} test trials, "
+      f"{p6_errdecomp['n_wrong_total']} incorrect)")
+display(errdecomp_table.set_index('Failure Category'))
+
+fig, ax = plt.subplots(figsize=(7, 5))
+ax.pie(errdecomp_table['% of Total Errors'], labels=errdecomp_table['Failure Category'],
+       autopct='%1.1f%%', colors=[C_P6, C_P3, C_P4], startangle=90,
+       wedgeprops={'edgecolor': 'black', 'linewidth': 0.6})
+ax.set_title(f'Paradigm 6: Full-Word Error Decomposition by Pipeline Stage (Subject S3)\n'
+             f'The coarse stage accounts for the majority of errors — the pipeline\'s primary bottleneck.')
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma10_p6_error_decomposition.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-45h"))
+
+cells.append(md(r"""### 10e. Theoretical Ceiling vs Actual Accuracy""", "cell-45i"))
+
+cells.append(code(r"""# ── THEORETICAL CEILING vs ACTUAL (Fase 1 Task 1.6 output) ───────────────
+p6_ceiling = load_fair_cmp_json('p6_theoretical_ceiling_analysis.json')
+df_p6_ceiling = pd.DataFrame(p6_ceiling['summary_table']).set_index('subject').reindex(SUBJECTS)
+print("Table MA10e. Theoretical First-Syllable E2E Ceiling (Coarse/Fine Independence Assumption) vs Actual")
+display(df_p6_ceiling)
+
+print(f"\nMean delta (actual - ceiling) across subjects: {p6_ceiling['mean_delta_pp_across_subjects']:+.2f}pp")
+print(f"{p6_ceiling['n_subjects_actual_below_ceiling']}/{p6_ceiling['n_subjects_total']} subjects fall below "
+      f"their theoretical ceiling — mild positive correlation between coarse and fine stage errors "
+      f"(cases hard for coarse tend to also be slightly harder for fine), but the gap is small "
+      f"(a few percentage points), not a drastic compounding effect.")
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+x = np.arange(len(SUBJECTS)); w = 0.35
+ax.bar(x - w/2, df_p6_ceiling['ceiling_pct'], w, label='Theoretical ceiling (independence)', color='#cccccc', alpha=0.9)
+ax.bar(x + w/2, df_p6_ceiling['actual_pct'], w, label='Actual first-syllable e2e', color=C_P6, alpha=0.9)
+ax.set_xticks(x); ax.set_xticklabels(SUBJECTS, fontsize=9)
+ax.set_ylabel('First-Syllable E2E Accuracy (%)')
+ax.set_title('Paradigm 6: Theoretical Ceiling (Coarse × Fine Independence) vs Actual Accuracy\n'
+             'Actual mostly tracks the ceiling closely, confirming only mild stage-error correlation.')
+ax.legend(fontsize=9)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma10_p6_theoretical_ceiling.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-45j"))
+
+cells.append(md(r"""### 10f. Exploratory Ablation Study (Fase 1-4)
+
+**Framing note — read before interpreting this subsection:** the results below are an **exploratory side-study**, not the basis for the P3-vs-P6 champion decision made in Main Analysis 11. The ablation's Fase 1-4 optimisations (balanced class weights, data augmentation, per-subject C-tuning, alternative feature group, probability calibration, confidence-gated post-processing) were all targeted at **first-syllable** accuracy. When carried through to full-word accuracy, the *combined* candidate's mean **decreased slightly** (11.10% vs the Stage B baseline's 11.64%) — a small regression, not an improvement. The unmodified Stage B baseline shown in 10a-10e above is therefore what Main Analysis 11 compares against P3, not this ablated variant. Numbers below are cited as-is from `P7_CoarseAblation_Phase1_report.md` — the ablation itself was not re-run in this Fase.""", "cell-45k"))
+
+cells.append(code(r"""# ── ABLATION STUDY SUMMARY (cited, not recomputed — see framing note above) ──
+ablation_variants = pd.DataFrame([
+    {'Candidate': 'Baseline (Stage B)',     'Mean Coarse Acc (%)': 38.99, 'Delta vs Baseline (pp)': 0.00,  'Wilcoxon p': None},
+    {'Candidate': 'A: Balanced class_weight','Mean Coarse Acc (%)': 36.88, 'Delta vs Baseline (pp)': -2.11, 'Wilcoxon p': 0.1602},
+    {'Candidate': 'B: Augmented (E5 recipe)','Mean Coarse Acc (%)': 37.46, 'Delta vs Baseline (pp)': -1.53, 'Wilcoxon p': 0.3594},
+    {'Candidate': 'C: Per-subject C-tuned', 'Mean Coarse Acc (%)': 41.40, 'Delta vs Baseline (pp)': +2.41, 'Wilcoxon p': 0.1543},
+    {'Candidate': 'D: Feature group = all', 'Mean Coarse Acc (%)': 34.83, 'Delta vs Baseline (pp)': -4.16, 'Wilcoxon p': 0.0186},
+    {'Candidate': 'E: Calibrated (CalibratedClassifierCV)', 'Mean Coarse Acc (%)': 43.28, 'Delta vs Baseline (pp)': +4.29, 'Wilcoxon p': 0.0640},
+    {'Candidate': 'Combined final (C-tuned + calibrated)', 'Mean Coarse Acc (%)': 42.44, 'Delta vs Baseline (pp)': +3.45, 'Wilcoxon p': 0.1763},
+]).set_index('Candidate')
+print("Table MA10f. P6 Coarse Sub-Model Ablation Study — Mean Accuracy Across 12 Subjects (Cited, Not Recomputed)")
+display(ablation_variants)
+
+print("\nFase 4 end-to-end effect of the full ablation pipeline (post-processing = confidence-gated):")
+print("  Mean first-syllable e2e: 19.31% (baseline) -> 20.81% (after ablation)  [+1.50pp, Wilcoxon p=0.42, n.s.]")
+print("  Mean full-word e2e:      11.64% (baseline) -> 11.10% (after ablation)  [-0.53pp — a small REGRESSION]")
+print("\nConclusion: the ablation raises first-syllable accuracy marginally (not significantly) but slightly "
+      "REDUCES full-word accuracy. Main Analysis 11 therefore compares P3 against the unmodified Stage B "
+      "baseline, not this ablated variant.")""", "cell-45l"))
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 11 -- P3 vs P6 FAIR COMPARISON
+# ─────────────────────────────────────────────────────────────
+cells.append(md(r"""---
+
+## Main Analysis 11: P3 vs P6 — Fair Three-Tier Comparison and Champion Selection
+
+Comparing P3 (flat 19-class SVM) against P6 (hierarchical coarse-to-fine SVM cascade) is not a single number — the two architectures answer structurally different questions. This section separates the comparison into three tiers of increasing structural similarity, then combines accuracy, feature importance, calibration, latency, and pipeline-consistency evidence into a single scored comparison. All numbers below are read from the Fase 1 fair-comparison analysis (`backend/src/experiments_p4_p7/fair_comparison/`) — none are recomputed in this notebook.""", "cell-46"))
+
+cells.append(md(r"""### 11a. Tier 1: Flat 19-Class Accuracy (P3 Only)
+
+P6 has no structural equivalent to a single-model flat 19-class decision — its coarse stage only ever outputs one of 4 vowel groups — so this tier is a standalone P3 metric, not a head-to-head comparison.""", "cell-46a"))
+
+cells.append(code(r"""print(f"P3 champion (S3, E5_Data_Augmentation, Barlow): {champ_acc*100:.2f}% flat 19-class accuracy, "
+      f"{champ_coverage}/19 class coverage." if CHAMP_PILAR == 'P3' else
+      "P3's flat 19-class champion figure is reported from the objectively-selected champion above "
+      "(Main Analysis 3) when P3 wins the overall champion search; see T5_champion_grand_matrix.csv "
+      "for the exact number regardless of which paradigm won.")
+print("P6 has no Tier-1 equivalent: its coarse stage structurally outputs only 1 of 4 vowel groups, "
+      "never a flat 19-class decision.")""", "cell-46b"))
+
+cells.append(md(r"""### 11b. Tier 2: First-Syllable End-to-End Comparison (9-Class, Apples-to-Apples)""", "cell-46c"))
+
+cells.append(code(r"""# ── TIER 2: FIRST-SYLLABLE 9-WAY COMPARISON (Fase 1 Task 1.1 + 1.3) ──────
+p3_tier2 = load_fair_cmp_json('p3_first_syllable_only_accuracy.json')
+p6_tier2_acc = p6_results_all['S3']['first_syllable_e2e']['accuracy']
+
+tier2_table = pd.DataFrame({
+    'Metric': ['Accuracy (9-way, S3)', 'N Test Samples', 'Class Coverage (/9)'],
+    'P3 (flat 19-class model, scored 9-way)': [
+        f"{p3_tier2['accuracy_9way']*100:.2f}%", p3_tier2['n_test_samples'], f"{p3_tier2['n_classes_covered']}/9"],
+    'P6 (structural 9-way coarse->fine)': [
+        f"{p6_tier2_acc*100:.2f}%", p6_results_all['S3']['first_syllable_e2e']['n_test_samples'],
+        f"{df_p6_coverage.loc['S3','Syllables Covered (/9)']}/9"],
+}).set_index('Metric')
+print("Table MA11b. Tier 2 — First-Syllable End-to-End Accuracy (9-Class, Subject S3)")
+display(tier2_table)
+
+_n_wrong = p3_tier2['error_breakdown']['n_wrong_total']
+_n_wrong_2nd = p3_tier2['error_breakdown']['n_wrong_guessed_second_syllable_class']
+print(f"\nP3 architectural note: of {_n_wrong} incorrect P3 predictions on this 9-class subset, "
+      f"{_n_wrong_2nd} ({_n_wrong_2nd/_n_wrong*100:.0f}%) were guesses toward a SECOND-syllable class — "
+      f"structurally impossible for P6's coarse stage, which only ever outputs one of 4 vowel groups. "
+      f"P3's flat 19-class flexibility works against it on this restricted metric.")
+
+fig, ax = plt.subplots(figsize=(6, 5))
+_t2_vals = [p3_tier2['accuracy_9way']*100, p6_tier2_acc*100]
+ax.bar(['P3 (9-way scored)', 'P6 (structural 9-way)'], _t2_vals, color=[C_P3, C_P6],
+       edgecolor='black', linewidth=0.6, alpha=0.9)
+ax.axhline(100/9, color='red', linestyle='--', linewidth=1.1, label=f'Chance (1/9 = {100/9:.2f}%)')
+for i, v in enumerate(_t2_vals):
+    ax.text(i, v + 0.5, f'{v:.2f}%', ha='center', fontsize=10)
+ax.set_ylabel('Accuracy (%)')
+ax.set_title('Tier 2: First-Syllable End-to-End Accuracy, P3 vs P6 (Subject S3, 9-Class Apples-to-Apples)')
+ax.legend(fontsize=9)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma11_tier2_comparison.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-46d"))
+
+cells.append(md(r"""### 11c. Tier 3: Full-Word End-to-End Comparison""", "cell-46e"))
+
+cells.append(code(r"""# ── TIER 3: FULL-WORD ACCURACY ───────────────────────────────────────────
+P3_FULLWORD_S3_PCT = 11.11  # cited from train_word_assembler_s3.py's own result -- P3's only full-word data point, not recomputed
+p6_tier3_acc = p6_results_all['S3']['full_word_e2e']['accuracy'] * 100
+
+tier3_table = pd.DataFrame({
+    'Metric': ['Full-Word Accuracy (S3)', 'Data Points Available'],
+    'P3 (word-assembler, logistic regression on syllable pair)': [f'{P3_FULLWORD_S3_PCT:.2f}%', '1 (S3 only)'],
+    'P6 (deterministic dictionary + sa_branch)': [f'{p6_tier3_acc:.2f}%', '12 (all subjects)'],
+}).set_index('Metric')
+print("Table MA11c. Tier 3 — Full-Word End-to-End Accuracy (Subject S3)")
+display(tier3_table)
+print(f"\nP3 has only ONE full-word data point (S3) because its word assembler was never extended to the "
+      f"other 11 subjects — this asymmetry (1 P3 candidate vs 12 P6 candidates) is a limitation flagged "
+      f"explicitly in the Grand Synthesis below, not concealed.")
+print(f"P6 delta vs P3 (S3): {p6_tier3_acc - P3_FULLWORD_S3_PCT:+.2f}pp")""", "cell-46f"))
+
+cells.append(md(r"""### 11d. Cross-Architecture Feature Importance Comparison""", "cell-46g"))
+
+cells.append(code(r"""# ── FEATURE IMPORTANCE: P3 (T6) vs P6 coarse (Fase 1 Task 1.7) ──────────
+p6_featimp = load_fair_cmp_json('p6_coarse_permutation_importance_s3.json')
+p6_top5 = pd.DataFrame(p6_featimp['comparison']['p6_coarse_top5'])[['Feature','Mean Importance','Rank']]
+p3_top5 = pd.DataFrame(p6_featimp['comparison']['p3_champion_top5'])[['Feature','Mean Importance','Rank']] \
+    if p6_featimp['comparison'].get('p3_champion_top5') else None
+
+print("Table MA11d. Top-5 Permutation Importance — P6 Coarse Sub-Model (S3) vs P3 Champion")
+side_by_side = pd.DataFrame({
+    'P6 Coarse — Feature': p6_top5['Feature'].values, 'P6 Coarse — Importance': p6_top5['Mean Importance'].values,
+})
+if p3_top5 is not None:
+    side_by_side['P3 Champion — Feature'] = p3_top5['Feature'].values
+    side_by_side['P3 Champion — Importance'] = p3_top5['Mean Importance'].values
+display(side_by_side)
+
+_overlap = p6_featimp['comparison'].get('overlapping_channels_top5', [])
+print(f"\nOverlapping channels in both top-5 lists: {_overlap if _overlap else '(none)'} "
+      f"({len(_overlap)}/5) — occipital channel O1 partially replicates across architectures, "
+      f"but the two top-5 lists are not identical.")
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=False)
+axes[0].barh(p6_top5['Feature'][::-1], p6_top5['Mean Importance'][::-1], color=C_P6, edgecolor='black', linewidth=0.5)
+axes[0].set_title('P6 Coarse Sub-Model (S3)'); axes[0].set_xlabel('Permutation Importance')
+if p3_top5 is not None:
+    axes[1].barh(p3_top5['Feature'][::-1], p3_top5['Mean Importance'][::-1], color=C_P3, edgecolor='black', linewidth=0.5)
+    axes[1].set_title('P3 Champion'); axes[1].set_xlabel('Permutation Importance')
+fig.suptitle('Cross-Architecture Feature Importance: Top-5 Permutation Importance, P6 vs P3', fontsize=12)
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma11_feature_importance_comparison.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-46h"))
+
+cells.append(md(r"""### 11e. Calibration Quality Comparison""", "cell-46i"))
+
+cells.append(code(r"""# ── CALIBRATION: P3 champion vs P6 coarse baseline (Fase 1 Task 1.8) ────
+p6_calib = load_fair_cmp_json('calibration_comparison_p3_vs_p6.json')
+
+calib_table = pd.DataFrame({
+    'Metric': ['Brier Score (lower better)', 'ECE, top-label, 10 bins (lower better)', 'N Classes'],
+    'P3 Champion (19-class)': [round(p6_calib['p3_champion']['test_brier_score'], 4),
+                                round(p6_calib['p3_champion']['test_ece'], 4),
+                                p6_calib['p3_champion']['n_classes']],
+    'P6 Coarse Baseline (4-class)': [round(p6_calib['p6_coarse_baseline']['test_brier_score'], 4),
+                                      round(p6_calib['p6_coarse_baseline']['test_ece'], 4),
+                                      p6_calib['p6_coarse_baseline']['n_classes']],
+}).set_index('Metric')
+print("Table MA11e. Calibration Quality — P3 Champion vs P6 Coarse Baseline (Subject S3)")
+display(calib_table)
+print(f"\nCaveat: Brier score is not directly comparable across different class counts (19 vs 4) — a model "
+      f"with more classes tends to a higher achievable Brier score even when perfectly calibrated. ECE "
+      f"(top-label) is comparable across class counts and also favours P6 here "
+      f"({p6_calib['p6_coarse_baseline']['test_ece']:.4f} vs {p6_calib['p3_champion']['test_ece']:.4f}).")
+print(f"Reference only (not recomputed): P6 Varian E (CalibratedClassifierCV, S3) — Brier "
+      f"{p6_calib['p6_variant_e_cited_for_context']['test_brier_score']:.4f}, ECE "
+      f"{p6_calib['p6_variant_e_cited_for_context']['test_ece']:.4f}.")""", "cell-46j"))
+
+cells.append(md(r"""### 11f. Latency Comparison""", "cell-46k"))
+
+cells.append(code(r"""# ── LATENCY: fair same-basis comparison (Fase 1 Task 1.4) ───────────────
+p6_latency = load_fair_cmp_json('p6_latency_measurement.json')
+
+p3_fair_ms = p6_latency['p3_fair_with_extraction']['mean_ms']
+p6_non_sa_ms = p6_latency['p6_cascade_latency_measured']['scenarios']['non_sa_case']['mean_ms']
+p6_sa_ms = p6_latency['p6_cascade_latency_measured']['scenarios']['sa_branch_case']['mean_ms']
+
+latency_table = pd.DataFrame({
+    'Configuration': ['P3 champion (raw epoch -> Barlow extraction -> scale -> predict)',
+                       'P6 non-SA case (coarse + fine, raw epoch -> word)',
+                       'P6 SA-branch case (coarse + fine_A + sa_branch, raw epoch -> word)'],
+    'Mean Latency (ms)': [round(p3_fair_ms, 2), round(p6_non_sa_ms, 2), round(p6_sa_ms, 2)],
+    'Ratio vs P3': ['1.00x', f"{p6_non_sa_ms/p3_fair_ms:.2f}x", f"{p6_sa_ms/p3_fair_ms:.2f}x"],
+}).set_index('Configuration')
+print("Table MA11f. Inference Latency, Same-Basis Comparison (Raw Epoch to Prediction, Subject S3)")
+display(latency_table)
+print("\nNote: this uses the FAIR same-basis figures (both timed from a raw epoch through feature "
+      "extraction, scaling, and prediction) — NOT the T9_inference_latency.csv figure for P3 (0.447ms), "
+      "which times only the scaler+predict step on an already-extracted feature vector and so excludes "
+      "Barlow feature extraction entirely. See Table MA11f's ratios (~1.9x/2.8x) against the theoretical "
+      "2x/3x call-count projection: the fair comparison confirms P6's added cost is almost entirely the "
+      "extra feature-extraction calls, not an architectural inefficiency.")
+
+fig, ax = plt.subplots(figsize=(8, 4.5))
+_lat_labels = ['P3\n(single call)', 'P6 non-SA\n(2 calls)', 'P6 SA-branch\n(3 calls)']
+_lat_vals = [p3_fair_ms, p6_non_sa_ms, p6_sa_ms]
+ax.bar(_lat_labels, _lat_vals, color=[C_P3, C_P6, C_P6], alpha=0.85, edgecolor='black', linewidth=0.6)
+for i, v in enumerate(_lat_vals):
+    ax.text(i, v + 15, f'{v:.0f}ms', ha='center', fontsize=9)
+ax.set_ylabel('Mean Latency (ms)')
+ax.set_title('Inference Latency, Fair Same-Basis Comparison (Raw Epoch to Prediction)')
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma11_latency_comparison.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-46l"))
+
+cells.append(md(r"""### 11g. Stage-1 vs End-to-End Consistency Check""", "cell-46m"))
+
+cells.append(code(r"""# ── STAGE-1 vs FULL-WORD E2E CONSISTENCY (Fase 1 Task 1.9) ───────────────
+p6_consistency = load_fair_cmp_json('p6_stage1_vs_e2e_consistency.json')
+df_p6_consist = pd.DataFrame(p6_consistency['pairs']).set_index('subject')
+print(f"Table MA11g. First-Syllable E2E vs Full-Word E2E, All 12 Subjects "
+      f"(Pearson r={p6_consistency['pearson_r']:.3f}, p={p6_consistency['pearson_p']:.3f}; "
+      f"Spearman r={p6_consistency['spearman_r']:.3f}, p={p6_consistency['spearman_p']:.3f})")
+display(df_p6_consist)
+print(f"\n{p6_consistency['interpretation']}")
+if p6_consistency.get('s3_vs_s9_note'):
+    print(f"\n{p6_consistency['s3_vs_s9_note']['explanation']}")
+
+fig, ax = plt.subplots(figsize=(7, 6))
+ax.scatter(df_p6_consist['first_syllable_e2e_pct'], df_p6_consist['full_word_e2e_pct'],
+           color=C_P6, s=90, edgecolors='black', linewidth=0.8, alpha=0.85, zorder=3)
+for subj, row in df_p6_consist.iterrows():
+    ax.annotate(subj, (row['first_syllable_e2e_pct'], row['full_word_e2e_pct']),
+                textcoords='offset points', xytext=(5, 4), fontsize=8)
+ax.set_xlabel('First-Syllable E2E Accuracy (%)'); ax.set_ylabel('Full-Word E2E Accuracy (%)')
+ax.set_title(f"Paradigm 6: Stage-1 vs Full-Pipeline Accuracy Consistency (12 Subjects)\n"
+             f"Pearson r = {p6_consistency['pearson_r']:.3f} (p = {p6_consistency['pearson_p']:.3f}) — "
+             f"near-zero correlation, consistent with small full-word n_test per subject.")
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma11_stage1_vs_e2e_consistency.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-46n"))
+
+cells.append(md(r"""### 11h. MCDA Scoring Table and Champion Decision""", "cell-46o"))
+
+cells.append(code(r"""# ── MCDA SCORING TABLE (Fase 1 Task 1.10, weights confirmed by researcher) ──
+p6_mcda = load_fair_cmp_json('mcda_scoring_table_p3_vs_p6.json')
+df_mcda = pd.DataFrame(p6_mcda['criteria_table'])
+df_mcda_disp = df_mcda[['criterion', 'weight', 'p3_raw_value', 'p6_raw_value',
+                         'p3_score_0_100', 'p6_score_0_100']].set_index('criterion')
+df_mcda_disp.columns = ['Weight', 'P3 Raw', 'P6 Raw', 'P3 Score (/100)', 'P6 Score (/100)']
+print("Table MA11h. Multi-Criteria Decision Analysis — P3 vs P6 (Weights Confirmed by Researcher, 2026-07-12)")
+display(df_mcda_disp)
+print(f"\nFinal weighted score: P3 = {p6_mcda['final_weighted_score_P3']:.2f}/100, "
+      f"P6 = {p6_mcda['final_weighted_score_P6']:.2f}/100.")
+print(f"\nWith accuracy weighted at 60/100 total (30 Tier-2 + 30 Tier-3), P6 scores higher overall, "
+      f"driven primarily by its Tier-2 and Tier-3 accuracy advantage. P3 remains stronger on system "
+      f"simplicity (1 model vs 5) and, on the T9-cited (non-fair) latency figure, would appear far "
+      f"faster — but the fair same-basis comparison (Section 11f) shows the true gap is a modest "
+      f"~1.9-2.8x, driven by call count, not architecture.")
+
+fig, ax = plt.subplots(figsize=(7, 5))
+_mcda_scores = [p6_mcda['final_weighted_score_P3'], p6_mcda['final_weighted_score_P6']]
+ax.bar(['P3 (SVM, flat/champion)', 'P6 (Coarse-to-Fine cascade)'], _mcda_scores,
+       color=[C_P3, C_P6], edgecolor='black', linewidth=0.6, alpha=0.9)
+for i, v in enumerate(_mcda_scores):
+    ax.text(i, v + 1, f'{v:.2f}', ha='center', fontsize=11)
+ax.set_ylim(0, 100); ax.set_ylabel('MCDA Weighted Score (/100)')
+ax.set_title('MCDA Weighted Score, P3 vs P6\n'
+             'Weights: Tier-2 accuracy 30, Tier-3 accuracy 30, coverage 16, latency 12, complexity 8, calibration 4.')
+fig.tight_layout()
+fig.savefig(str(OUTPUT_DIR / 'ma11_mcda_score.png'), dpi=300, bbox_inches='tight')
+plt.show()
+print("Figure saved.")""", "cell-46p"))
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 12 -- WHY P1/P2/P4/P5 E2E WAS NOT COMPUTED
+# ─────────────────────────────────────────────────────────────
+cells.append(md(r"""---
+
+## Main Analysis 12: Why P1, P2, P4, and P5 End-to-End Accuracy Was Not Computed
+
+An end-to-end (full-word) accuracy figure was computed only for P3 and P6. This section makes explicit, with numbers, why the other four paradigms were not carried through to an end-to-end evaluation — each has a different reason, not one generic excuse.""", "cell-47"))
+
+cells.append(code(r"""# ── QUANTITATIVE SKIP JUSTIFICATION (Fase 1 Task 1.11) ───────────────────
+skip_just = load_fair_cmp_json('quantitative_skip_justification_p1_p2_p4_p5.json')
+
+for pname, key in [('P1 (Global EEGNet)', 'P1_Global'), ('P2 (Subject-Dependent EEGNet)', 'P2_SubjectDependent_EEGNet'),
+                    ('P4 (No-Windowing)', 'P4_NoWindowing'), ('P5 (Shifted Bandpass)', 'P5_ShiftedBandpass')]:
+    print(f"=== {pname} ===")
+    print(skip_just[key]['narrative'])
+    print()
+
+skip_summary = pd.DataFrame([
+    {'Paradigm': 'P1 Global EEGNet', 'Reason': 'Structural: 1/19 class coverage',
+     'Key Number': f"{skip_just['P1_Global']['n_words_structurally_decodable_of_10']}/10 words even theoretically decodable"},
+    {'Paradigm': 'P2 Subject-Dependent EEGNet', 'Reason': 'Structural: coverage gate failure',
+     'Key Number': f"{skip_just['P2_SubjectDependent_EEGNet']['n_subjects_fail_gate']}/12 subjects fail the 8/19 gate"},
+    {'Paradigm': 'P4 No-Windowing', 'Reason': 'Near-chance accuracy',
+     'Key Number': f"P(word correct) ~ {skip_just['P4_NoWindowing']['p_both_syllables_correct_at_observed_rate_pct']:.3f}%"},
+    {'Paradigm': 'P5 Shifted Bandpass', 'Reason': 'Redundant confirmation (not a Stage-1 failure)',
+     'Key Number': f"{skip_just['P5_ShiftedBandpass']['mean_delta_pp']:+.2f}pp vs P3 baseline, n.s."},
+]).set_index('Paradigm')
+print("Table MA12. Skip Justification Summary — Why No End-to-End Evaluation Was Built")
+display(skip_summary)""", "cell-47b"))
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 13 -- GRAND SYNTHESIS
+# ─────────────────────────────────────────────────────────────
+cells.append(md(r"""---
+
+## Main Analysis 13: Grand Synthesis — All Paradigms, Final Decision, Contributions, and Limitations""", "cell-48"))
+
+cells.append(code(r"""# ── GRAND SYNTHESIS TABLE: ALL 6 PARADIGMS ───────────────────────────────
+grand_synthesis = pd.DataFrame([
+    {'Paradigm': 'P1 Global EEGNet', 'Type': 'Subject-independent baseline',
+     'Best Metric': f"{df_p1['accuracy'].max()*100:.2f}% (peak, flat 19-class)",
+     'Outcome': 'Near-chance; ISV dominant failure mode; excluded from champion search'},
+    {'Paradigm': 'P2 Subject-Dependent EEGNet', 'Type': 'Deep learning, per-subject',
+     'Best Metric': f"{df_p2_best['accuracy'].max()*100:.2f}% (peak)",
+     'Outcome': 'Peak accuracy attractive but collapses class coverage; 12/12 subjects fail coverage gate'},
+    {'Paradigm': 'P3 Subject-Dependent SVM', 'Type': 'Classical ML, per-subject',
+     'Best Metric': f"{champ_acc*100:.2f}% (S3, champion)" if CHAMP_PILAR == 'P3' else f"{df_p3_best['accuracy'].max()*100:.2f}% (peak)",
+     'Outcome': 'Overall champion (Main Analysis 3): broad class coverage, modest but honest accuracy'},
+    {'Paradigm': 'P4 No-Windowing', 'Type': 'Windowing ablation',
+     'Best Metric': f"{p4_mean:.2f}% (mean)",
+     'Outcome': 'Near-chance; confirms sample-size scarcity (not window length) as bottleneck'},
+    {'Paradigm': 'P5 Shifted Bandpass', 'Type': 'Filter-band ablation',
+     'Best Metric': f"{mean_delta_p5:+.2f}pp vs P3 baseline",
+     'Outcome': 'Statistically indistinguishable from baseline; redundant confirmation, not compounding failure'},
+    {'Paradigm': 'P6 Coarse-to-Fine (SVM cascade)', 'Type': 'Hierarchical decomposition',
+     'Best Metric': f"{p6_tier2_acc*100:.2f}% first-syllable e2e / {p6_tier3_acc:.2f}% full-word e2e (S3)",
+     'Outcome': f'Beats P3 on both fair-comparison tiers; MCDA score {p6_mcda["final_weighted_score_P6"]:.1f} vs P3 {p6_mcda["final_weighted_score_P3"]:.1f}'},
+]).set_index('Paradigm')
+print("Table MA13. Grand Synthesis — All Six Paradigms")
+display(grand_synthesis)
+
+print("\n" + "="*78)
+print("FINAL DECISION")
+print("="*78)
+print(
+    f"\nUnder the researcher-confirmed MCDA weights (Tier-2 accuracy 30, Tier-3 accuracy 30, class\n"
+    f"coverage 16, latency 12, system complexity 8, calibration 4), Paradigm 6 (Coarse-to-Fine\n"
+    f"Hierarchical Decoding, subject S3) scores {p6_mcda['final_weighted_score_P6']:.2f}/100 against\n"
+    f"Paradigm 3's {p6_mcda['final_weighted_score_P3']:.2f}/100. P6 wins on both accuracy tiers\n"
+    f"(first-syllable +8.57pp, full-word +2.78pp) and on class coverage and calibration; P3 wins on\n"
+    f"system simplicity (1 model vs 5) and on fair same-basis latency (~1.9-2.8x faster, though both\n"
+    f"are far from real-time at hundreds of milliseconds once feature extraction is included).\n"
+)
+
+print("="*78)
+print("RESEARCH CONTRIBUTIONS")
+print("="*78)
+print(
+    "\n1. An objective, data-driven, non-hardcoded champion-selection protocol across P1-P3 (class\n"
+    "   coverage gate + subject-paradigm mean ranking), preventing a deceptive accuracy peak (P2/S6/E6,\n"
+    "   22.2% but only 4/19 class coverage) from being mistaken for the strongest model.\n"
+    "2. A hierarchical coarse-to-fine decoding architecture (P6) that outperforms the flat SVM\n"
+    "   champion (P3) on both first-syllable and full-word accuracy under a fair, apples-to-apples\n"
+    "   evaluation -- while making the accumulation of error across pipeline stages explicit and\n"
+    "   quantified (Main Analysis 10d, 10e), rather than assumed.\n"
+    "3. A systematic ablation program (P4, P5) that rules out two plausible confounds -- window\n"
+    "   length and filter band -- as bottlenecks, isolating training-sample scarcity as the true\n"
+    "   limiting factor for both flat and hierarchical decoding.\n"
+    "4. A fair-comparison methodology (Main Analysis 11) that surfaces and corrects a latency\n"
+    "   measurement artefact affecting the entire thesis's real-time-feasibility narrative -- the\n"
+    "   previously-reported \"0.447ms, real-time feasible\" P3 figure excludes feature extraction\n"
+    "   entirely; the true same-basis latency is roughly three orders of magnitude higher.\n"
+)
+
+print("="*78)
+print("LIMITATIONS")
+print("="*78)
+_s9_fw = p6_results_all.get('S9', {}).get('full_word_e2e', {})
+_s9_fw_pct = _s9_fw['accuracy'] * 100 if _s9_fw.get('available') else float('nan')
+print(
+    f"\n1. P3's full-word accuracy rests on a SINGLE data point (S3, {P3_FULLWORD_S3_PCT:.2f}%) because its\n"
+    f"   word assembler was never extended to the other 11 subjects, while P6 has 12 full-word data\n"
+    f"   points -- an asymmetric search space (1 candidate vs 12) that favours P6 in this comparison.\n"
+    f"2. Stage-1 (first-syllable) and full-pipeline (full-word) accuracy show near-zero correlation\n"
+    f"   across P6's 12 subjects (Pearson r={p6_consistency['pearson_r']:.3f}), reflecting genuinely\n"
+    f"   high variance from small per-subject full-word test sets (n=10-40 trials) rather than a\n"
+    f"   contradiction -- champion selection by Stage-1 metric (S3) does not guarantee the highest\n"
+    f"   full-word accuracy (that belongs to S9, {_s9_fw_pct:.2f}% if available).\n"
+    "3. Brier score is not directly comparable between the 19-class P3 champion and the 4-class P6\n"
+    "   coarse stage; ECE was used as the class-count-robust metric instead.\n"
+    "4. The coarse stage's ablation study (Main Analysis 10f) improves first-syllable accuracy only\n"
+    "   marginally and non-significantly while slightly regressing full-word accuracy -- it is\n"
+    "   reported as an exploratory finding, not folded into the champion decision.\n"
+    "5. The P5 \"12/12 subjects consistent negative direction\" figure referenced in early project\n"
+    "   planning was found, on recomputation, to be 7/12 -- the mean delta and non-significance\n"
+    "   conclusion are unchanged, but the per-subject direction claim required correction.\n"
+)""", "cell-48b"))
 
 # ─────────────────────────────────────────────────────────────
 # STAGE 7 HEADING + EXPORT
@@ -2445,6 +3220,44 @@ export_csv(boot_table.set_index('Paradigm'), 'T12_bootstrap_ci.csv',
 # T13: NEW – Cohen's d (Figure 15)
 export_csv(df_cohens.set_index('Comparison'), 'T13_cohens_d_effect_size.csv',
            "Cohen's d pairwise effect size across the three paradigm comparisons")
+
+# T21-T38: NEW – P4/P5/P6 characterization + P3-vs-P6 fair comparison + MCDA (Main Analysis 7-13)
+export_csv(before_after_feat_table.set_index('Feature'), 'T21_preprocessing_before_after_features.csv',
+           'Barlow feature extraction output for one filtered 1-second epoch (before/after demo)')
+export_csv(df_p4.set_index('Subject'), 'T22_p4_nowindowing_results.csv',
+           'Paradigm 4 (No-Windowing) per-subject test accuracy and class coverage')
+export_csv(df_p5, 'T23_p5_shifted_bandpass_vs_p3.csv',
+           'Paradigm 5 (Shifted Bandpass) vs P3 E0/Barlow baseline, per subject')
+export_csv(p6_spotcheck_df, 'T24_p6_stageA_spotcheck.csv',
+           'P6 Stage A coarse feature-group spot-check (subject S3)')
+export_csv(df_p6_stageb, 'T25_p6_stageB_results.csv',
+           'P6 Stage B sub-model and end-to-end accuracy, all 12 subjects')
+export_csv(df_p6_coverage, 'T26_p6_class_coverage.csv',
+           'P6 first-syllable pipeline class coverage per subject (of 9 first-syllable classes)')
+export_csv(errdecomp_table.set_index('Failure Category'), 'T27_p6_error_decomposition_s3.csv',
+           'P6 full-word error decomposition by pipeline stage (subject S3)')
+export_csv(df_p6_ceiling, 'T28_p6_theoretical_ceiling.csv',
+           'P6 theoretical first-syllable e2e ceiling (coarse/fine independence) vs actual, all subjects')
+export_csv(ablation_variants, 'T29_p6_ablation_study_cited.csv',
+           'P6 coarse sub-model ablation study summary (cited from P7_CoarseAblation_Phase1_report.md, not recomputed)')
+export_csv(tier2_table, 'T30_tier2_first_syllable_comparison.csv',
+           'Tier 2 fair comparison: first-syllable e2e accuracy, P3 (9-way scored) vs P6, subject S3')
+export_csv(tier3_table, 'T31_tier3_full_word_comparison.csv',
+           'Tier 3 fair comparison: full-word e2e accuracy, P3 vs P6, subject S3')
+export_csv(side_by_side, 'T32_feature_importance_p3_vs_p6.csv',
+           'Cross-architecture permutation importance top-5, P3 champion vs P6 coarse sub-model')
+export_csv(calib_table, 'T33_calibration_p3_vs_p6.csv',
+           'Calibration quality (Brier score, ECE) comparison, P3 champion vs P6 coarse baseline')
+export_csv(latency_table, 'T34_latency_p3_vs_p6_fair.csv',
+           'Fair same-basis inference latency comparison (raw epoch to prediction), P3 vs P6')
+export_csv(df_p6_consist, 'T35_p6_stage1_vs_e2e_consistency.csv',
+           'P6 first-syllable e2e vs full-word e2e per subject, correlation analysis')
+export_csv(df_mcda_disp, 'T36_mcda_scoring_p3_vs_p6.csv',
+           'Multi-criteria decision analysis scoring table, P3 vs P6 (researcher-confirmed weights)')
+export_csv(skip_summary, 'T37_skip_justification_p1_p2_p4_p5.csv',
+           'Quantitative justification for not computing end-to-end accuracy for P1/P2/P4/P5')
+export_csv(grand_synthesis, 'T38_grand_synthesis_all_paradigms.csv',
+           'Grand synthesis summary table across all six paradigms (P1-P6)')
 
 # Paradigm-level peak rows (independent of which paradigm won the championship)
 _p2_peak_row = df_p2_all.sort_values('accuracy', ascending=False).iloc[0]
@@ -2595,6 +3408,57 @@ json_summary = {
         'Figure 13':  'Inference latency comparison',
         'Figure 14':  'Bootstrap CI forest plot',
         'Figure 15':  "Cohen's d effect size bar chart",
+        'MA7 before/after':  'Preprocessing before/after time-domain and PSD comparison — NEW',
+        'MA8 P4 accuracy':   'Paradigm 4 (No-Windowing) per-subject accuracy vs chance — NEW',
+        'MA9 P5 vs P3':      'Paradigm 5 (Shifted Bandpass) vs P3 baseline, per-subject — NEW',
+        'MA10 P6 submodels': 'P6 sub-model accuracy heatmap, all 12 subjects — NEW',
+        'MA10 P6 coverage':  'P6 first-syllable pipeline class coverage per subject — NEW',
+        'MA10 P6 error decomposition': 'P6 full-word error decomposition pie chart (S3) — NEW',
+        'MA10 P6 ceiling':   'P6 theoretical ceiling vs actual, per subject — NEW',
+        'MA11 Tier2':        'Tier 2 first-syllable accuracy, P3 vs P6 — NEW',
+        'MA11 feature importance': 'Cross-architecture feature importance, P3 vs P6 — NEW',
+        'MA11 latency':      'Fair same-basis latency comparison, P3 vs P6 — NEW',
+        'MA11 stage1 vs e2e': 'P6 stage-1 vs full-word e2e consistency scatter — NEW',
+        'MA11 MCDA':         'MCDA weighted score bar chart, P3 vs P6 — NEW',
+    },
+    'p4_p5_p6_summary': {
+        'p4_no_windowing': {
+            'mean_accuracy_pct': round(float(p4_mean), 3),
+            'n_subjects': int(len(df_p4)),
+            'chance_level_pct': round(p4_chance, 3),
+            'conclusion': 'near-chance; sample-size scarcity implicated, not window length',
+        },
+        'p5_shifted_bandpass': {
+            'mean_delta_pp_vs_p3_baseline': round(float(mean_delta_p5), 3),
+            'wilcoxon_p': round(float(p_p5), 4),
+            'n_subjects_negative_direction': int(n_neg_p5),
+            'n_subjects_total': int(n_valid_p5),
+            'conclusion': 'statistically indistinguishable from P3 E0/Barlow baseline (redundant confirmation)',
+        },
+        'p6_coarse_to_fine': {
+            'champion_subject': 'S3',
+            'winning_coarse_feature_group': p6_feat_decision['winner'],
+            'mean_first_syllable_e2e_pct': round(float(df_p6_stageb['First-syllable e2e (%)'].mean()), 3),
+            'mean_full_word_e2e_pct': round(float(df_p6_stageb['Full-word e2e (%)'].mean()), 3),
+            'n_subjects_full_pipeline_coverage_9of9': int(_full_cov),
+        },
+    },
+    'p3_vs_p6_fair_comparison': {
+        'tier1_flat19class_p3_only_pct': round(champ_acc*100, 3) if CHAMP_PILAR == 'P3' else None,
+        'tier2_first_syllable_9way': {
+            'p3_pct': round(float(p3_tier2['accuracy_9way'])*100, 3),
+            'p6_pct': round(float(p6_tier2_acc)*100, 3),
+        },
+        'tier3_full_word': {
+            'p3_pct': P3_FULLWORD_S3_PCT,
+            'p6_pct': round(float(p6_tier3_acc), 3),
+        },
+        'mcda_confirmed_weights': p6_mcda['confirmed_weights'],
+        'mcda_final_score_p3': p6_mcda['final_weighted_score_P3'],
+        'mcda_final_score_p6': p6_mcda['final_weighted_score_P6'],
+        'latency_fair_basis_ms': {'p3': round(float(p3_fair_ms), 2), 'p6_non_sa': round(float(p6_non_sa_ms), 2),
+                                   'p6_sa_branch': round(float(p6_sa_ms), 2)},
+        'stage1_vs_e2e_pearson_r': round(float(p6_consistency['pearson_r']), 4),
     },
     'exported_files': export_meta,
 }

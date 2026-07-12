@@ -1,0 +1,229 @@
+{
+  "S1": {
+    "n_syllables_covered": 5,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "BO",
+      "MI",
+      "PI",
+      "SA"
+    ],
+    "syllables_never_correct": [
+      "LE",
+      "MA",
+      "MAN",
+      "TI"
+    ],
+    "first_syllable_e2e_accuracy": 0.17142857142857143,
+    "n_test_samples": 70
+  },
+  "S2": {
+    "n_syllables_covered": 8,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "BO",
+      "LE",
+      "MA",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [
+      "MAN"
+    ],
+    "first_syllable_e2e_accuracy": 0.25,
+    "n_test_samples": 60
+  },
+  "S3": {
+    "n_syllables_covered": 9,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "BO",
+      "LE",
+      "MA",
+      "MAN",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [],
+    "first_syllable_e2e_accuracy": 0.2857142857142857,
+    "n_test_samples": 105
+  },
+  "S4": {
+    "n_syllables_covered": 8,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "LE",
+      "MA",
+      "MAN",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [
+      "BO"
+    ],
+    "first_syllable_e2e_accuracy": 0.22448979591836735,
+    "n_test_samples": 98
+  },
+  "S5": {
+    "n_syllables_covered": 4,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "MA",
+      "MAN",
+      "MI",
+      "SA"
+    ],
+    "syllables_never_correct": [
+      "BE",
+      "BO",
+      "LE",
+      "PI",
+      "TI"
+    ],
+    "first_syllable_e2e_accuracy": 0.14035087719298245,
+    "n_test_samples": 57
+  },
+  "S6": {
+    "n_syllables_covered": 3,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "PI",
+      "SA"
+    ],
+    "syllables_never_correct": [
+      "BO",
+      "LE",
+      "MA",
+      "MAN",
+      "MI",
+      "TI"
+    ],
+    "first_syllable_e2e_accuracy": 0.15789473684210525,
+    "n_test_samples": 19
+  },
+  "S7": {
+    "n_syllables_covered": 8,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "LE",
+      "MA",
+      "MAN",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [
+      "BO"
+    ],
+    "first_syllable_e2e_accuracy": 0.1937984496124031,
+    "n_test_samples": 129
+  },
+  "S8": {
+    "n_syllables_covered": 4,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "MA",
+      "MI",
+      "PI",
+      "SA"
+    ],
+    "syllables_never_correct": [
+      "BE",
+      "BO",
+      "LE",
+      "MAN",
+      "TI"
+    ],
+    "first_syllable_e2e_accuracy": 0.14545454545454545,
+    "n_test_samples": 110
+  },
+  "S9": {
+    "n_syllables_covered": 7,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "BO",
+      "MAN",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [
+      "LE",
+      "MA"
+    ],
+    "first_syllable_e2e_accuracy": 0.1797752808988764,
+    "n_test_samples": 89
+  },
+  "S10": {
+    "n_syllables_covered": 8,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "LE",
+      "MA",
+      "MAN",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [
+      "BO"
+    ],
+    "first_syllable_e2e_accuracy": 0.2222222222222222,
+    "n_test_samples": 126
+  },
+  "S11": {
+    "n_syllables_covered": 8,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "LE",
+      "MA",
+      "MAN",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [
+      "BO"
+    ],
+    "first_syllable_e2e_accuracy": 0.22857142857142856,
+    "n_test_samples": 105
+  },
+  "S12": {
+    "n_syllables_covered": 7,
+    "n_syllables_total": 9,
+    "syllables_covered": [
+      "BE",
+      "MA",
+      "MAN",
+      "MI",
+      "PI",
+      "SA",
+      "TI"
+    ],
+    "syllables_never_correct": [
+      "BO",
+      "LE"
+    ],
+    "first_syllable_e2e_accuracy": 0.11711711711711711,
+    "n_test_samples": 111
+  }
+}

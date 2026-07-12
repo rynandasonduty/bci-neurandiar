@@ -1,0 +1,79 @@
+{
+  "status": "OK",
+  "missing_dependencies": [],
+  "description": "MCDA scoring table, P3 champion vs P6 champion (S3 for both). Weights CONFIRMED by the researcher 2026-07-12 -- see PROPOSED_WEIGHTS and docstring. No champion decision is made here; that remains the researcher's call.",
+  "confirmed_weights": {
+    "tier2_first_syllable_accuracy": 30,
+    "tier3_full_word_accuracy": 30,
+    "class_coverage": 16,
+    "system_complexity": 8,
+    "latency": 12,
+    "calibration_quality": 4
+  },
+  "total_weight_used_pct_of_100": 100.0,
+  "criteria_table": [
+    {
+      "criterion": "tier2_first_syllable_accuracy",
+      "weight": 30,
+      "p3_raw_value": 20.0,
+      "p6_raw_value": 28.57142857142857,
+      "unit": "%",
+      "higher_is_better": true,
+      "p3_score_0_100": 70.0,
+      "p6_score_0_100": 100.0
+    },
+    {
+      "criterion": "tier3_full_word_accuracy",
+      "weight": 30,
+      "p3_raw_value": 11.11,
+      "p6_raw_value": 13.88888888888889,
+      "unit": "%",
+      "higher_is_better": true,
+      "p3_score_0_100": 79.99,
+      "p6_score_0_100": 100.0
+    },
+    {
+      "criterion": "class_coverage",
+      "weight": 16,
+      "p3_raw_value": 94.73684210526315,
+      "p6_raw_value": 100.0,
+      "unit": "% of own class space",
+      "higher_is_better": true,
+      "p3_score_0_100": 94.74,
+      "p6_score_0_100": 100.0
+    },
+    {
+      "criterion": "system_complexity",
+      "weight": 8,
+      "p3_raw_value": 1,
+      "p6_raw_value": 5,
+      "unit": "number of models in the inference path",
+      "higher_is_better": false,
+      "p3_score_0_100": 100.0,
+      "p6_score_0_100": 20.0
+    },
+    {
+      "criterion": "latency",
+      "weight": 12,
+      "p3_raw_value": 652.4814480019268,
+      "p6_raw_value": 1342.487399285504,
+      "unit": "ms (mean, same-basis w/ feature extraction)",
+      "higher_is_better": false,
+      "p3_score_0_100": 100.0,
+      "p6_score_0_100": 48.6
+    },
+    {
+      "criterion": "calibration_quality",
+      "weight": 4,
+      "p3_raw_value": 0.18975159411305542,
+      "p6_raw_value": 0.07708056345397322,
+      "unit": "ECE (top-label, n_bins=10)",
+      "higher_is_better": false,
+      "p3_score_0_100": 40.62,
+      "p6_score_0_100": 100.0
+    }
+  ],
+  "final_weighted_score_P3": 81.78,
+  "final_weighted_score_P6": 87.43,
+  "note": "final_weighted_score is provisional and only sums the criteria with complete data (total_weight_used_pct_of_100 shows how much of the 100pp weight budget was actually scored) -- if total_weight_used < 100, some criteria are missing upstream data and the two scores are not yet fully comparable."
+}

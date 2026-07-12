@@ -1,0 +1,169 @@
+{
+  "P1_Global": {
+    "status": "OK",
+    "mean_accuracy_pct": 9.871,
+    "max_accuracy_pct": 10.208,
+    "chance_level_pct": 5.263,
+    "class_coverage": 1,
+    "class_coverage_gate": 8,
+    "passes_coverage_gate": false,
+    "covered_syllables": [
+      "SA"
+    ],
+    "n_words_structurally_decodable_of_10": 0,
+    "structurally_decodable_words": [],
+    "n_words_structurally_impossible_of_10": 10,
+    "narrative": "P1 (pooled global model) covers only 1/19 syllable classes with any recall at all (gate: 8/19). Of the 10 target words, only 0 have BOTH syllables inside that covered set -- the remaining 10 are structurally guaranteed wrong at the word level regardless of luck, before any end-to-end pipeline is even built. This is why P1 was excluded from champion selection and never received an end-to-end evaluation."
+  },
+  "P2_SubjectDependent_EEGNet": {
+    "status": "OK",
+    "class_coverage_gate": 8,
+    "per_subject_class_coverage": {
+      "S1": 1,
+      "S2": 2,
+      "S3": 0,
+      "S4": 1,
+      "S5": 2,
+      "S6": 1,
+      "S7": 1,
+      "S8": 3,
+      "S9": 3,
+      "S10": 3,
+      "S11": 3,
+      "S12": 0
+    },
+    "n_subjects_fail_gate": 12,
+    "n_subjects_total": 12,
+    "pct_subjects_fail_gate": 100.0,
+    "narrative": "12/12 subjects' best P2 (Subject-Dependent EEGNet) configuration fails the same 8/19 class-coverage gate used by champion selection (this is exactly the mechanism that disqualified the P2/S6/E6 accuracy peak in the champion search). An end-to-end pipeline built on a per-subject model that only ever predicts a handful of classes would inherit that collapse directly -- there is no coarse/fine restructuring that fixes a Stage-1 model which never learned most of the class space."
+  },
+  "P4_NoWindowing": {
+    "status": "OK",
+    "n_subjects": 11,
+    "per_subject": {
+      "S1": {
+        "test_accuracy": 0.0,
+        "n_classes_covered": 0
+      },
+      "S2": {
+        "test_accuracy": 0.0,
+        "n_classes_covered": 0
+      },
+      "S3": {
+        "test_accuracy": 0.043478260869565216,
+        "n_classes_covered": 1
+      },
+      "S4": {
+        "test_accuracy": 0.07142857142857142,
+        "n_classes_covered": 1
+      },
+      "S5": {
+        "test_accuracy": 0.0,
+        "n_classes_covered": 0
+      },
+      "S7": {
+        "test_accuracy": 0.02564102564102564,
+        "n_classes_covered": 1
+      },
+      "S8": {
+        "test_accuracy": 0.08695652173913043,
+        "n_classes_covered": 2
+      },
+      "S9": {
+        "test_accuracy": 0.14285714285714285,
+        "n_classes_covered": 1
+      },
+      "S10": {
+        "test_accuracy": 0.12903225806451613,
+        "n_classes_covered": 3
+      },
+      "S11": {
+        "test_accuracy": 0.058823529411764705,
+        "n_classes_covered": 1
+      },
+      "S12": {
+        "test_accuracy": 0.1,
+        "n_classes_covered": 2
+      }
+    },
+    "mean_test_accuracy_pct": 5.983793727379239,
+    "chance_level_pct": 5.263157894736842,
+    "ratio_to_chance": 1.1369208082020554,
+    "p_both_syllables_correct_at_chance_pct": 0.27700831024930744,
+    "p_both_syllables_correct_at_observed_rate_pct": 0.35805787371823133,
+    "narrative": "P4 (No-Windowing, 5s full epoch) achieves a mean syllable accuracy of 5.98% across 11 subjects, essentially chance level (5.26% for 19 classes -- a ratio of 1.14x). Treating the two syllables of a word as independent draws at this rate gives P(whole word correct) ~ 0.358% -- effectively unusable for a 2-syllable end-to-end pipeline, and likely an OVER-estimate besides, since near-chance accuracy is often concentrated in a single collapsed class (as directly observed for P1) rather than spread with genuine per-class signal. Confirms sample-size scarcity (5s epoch = 1/5 the training windows of the standard 1s-windowed paradigms) as the bottleneck, not windowing structure itself."
+  },
+  "P5_ShiftedBandpass": {
+    "status": "OK",
+    "n_subjects_paired": 12,
+    "per_subject": {
+      "S1": {
+        "p3_e0_barlow_pct": 7.85714285714285,
+        "p5_e0_barlow_pct": 8.053691275167784,
+        "delta_pp": 0.19654841802493467
+      },
+      "S10": {
+        "p3_e0_barlow_pct": 13.16872427983539,
+        "p5_e0_barlow_pct": 11.881188118811881,
+        "delta_pp": -1.2875361610235085
+      },
+      "S11": {
+        "p3_e0_barlow_pct": 13.79310344827586,
+        "p5_e0_barlow_pct": 9.900990099009901,
+        "delta_pp": -3.8921133492659576
+      },
+      "S12": {
+        "p3_e0_barlow_pct": 5.80357142857142,
+        "p5_e0_barlow_pct": 6.622516556291391,
+        "delta_pp": 0.8189451277199715
+      },
+      "S2": {
+        "p3_e0_barlow_pct": 13.4453781512605,
+        "p5_e0_barlow_pct": 11.447811447811448,
+        "delta_pp": -1.9975667034490523
+      },
+      "S3": {
+        "p3_e0_barlow_pct": 17.61904761904762,
+        "p5_e0_barlow_pct": 15.562913907284766,
+        "delta_pp": -2.056133711762853
+      },
+      "S4": {
+        "p3_e0_barlow_pct": 11.22448979591836,
+        "p5_e0_barlow_pct": 15.181518151815181,
+        "delta_pp": 3.9570283558968216
+      },
+      "S5": {
+        "p3_e0_barlow_pct": 12.17391304347826,
+        "p5_e0_barlow_pct": 8.27814569536424,
+        "delta_pp": -3.895767348114021
+      },
+      "S6": {
+        "p3_e0_barlow_pct": 12.82051282051282,
+        "p5_e0_barlow_pct": 10.927152317880795,
+        "delta_pp": -1.8933605026320244
+      },
+      "S7": {
+        "p3_e0_barlow_pct": 7.575757575757571,
+        "p5_e0_barlow_pct": 10.264900662251655,
+        "delta_pp": 2.689143086494085
+      },
+      "S8": {
+        "p3_e0_barlow_pct": 8.796296296296289,
+        "p5_e0_barlow_pct": 9.427609427609427,
+        "delta_pp": 0.6313131313131382
+      },
+      "S9": {
+        "p3_e0_barlow_pct": 13.95348837209302,
+        "p5_e0_barlow_pct": 7.333333333333333,
+        "delta_pp": -6.620155038759687
+      }
+    },
+    "mean_delta_pp": -1.1124712246298458,
+    "n_subjects_negative_delta": 7,
+    "n_subjects_total": 12,
+    "wilcoxon_statistic": 25.0,
+    "wilcoxon_p_value": 0.30126953125,
+    "wilcoxon_error": null,
+    "narrative": "P5 (Shifted Bandpass 15-65Hz) vs P3's own E0_Baseline/barlow accuracy (same config, fair same-baseline comparison, NOT the E5 champion): mean delta -1.11pp across 12 subjects, 7/12 in the negative direction, Wilcoxon p=0.3013 (not statistically significant) -- this is a 'redundant confirmation' finding (the shifted band carries essentially the same, not more, signal than the standard band), structurally different from P1/P2/P4's 'compounding error from Stage-1 collapse' argument, so no end-to-end pipeline was built for P5 either: there is nothing for a hierarchical or word-assembly stage to add on top of a syllable-classification result that is already statistically indistinguishable from the existing baseline."
+  }
+}

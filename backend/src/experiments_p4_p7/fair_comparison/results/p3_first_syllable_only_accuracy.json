@@ -1,0 +1,75 @@
+{
+  "status": "OK",
+  "description": "P3 champion (S3/E5_Data_Augmentation/barlow) evaluated on ONLY the 9 first-syllable ground-truth classes, for apples-to-apples Tier 2 comparison with P6's first_syllable_e2e. Model itself is unchanged (still predicts over all 19 classes); only the evaluation subset (ground truth) is restricted.",
+  "subject_id": "S3",
+  "exp_id": "E5_Data_Augmentation",
+  "feature_group": "barlow",
+  "n_test_samples": 105,
+  "n_test_samples_full_19class": 210,
+  "accuracy_9way": 0.2,
+  "n_classes_covered": 9,
+  "n_classes_total": 9,
+  "per_class_recall": {
+    "MA": {
+      "label_int": 0,
+      "n": 12,
+      "correct": 4,
+      "recall": 0.3333333333333333
+    },
+    "MI": {
+      "label_int": 2,
+      "n": 11,
+      "correct": 4,
+      "recall": 0.36363636363636365
+    },
+    "BE": {
+      "label_int": 4,
+      "n": 11,
+      "correct": 1,
+      "recall": 0.09090909090909091
+    },
+    "PI": {
+      "label_int": 6,
+      "n": 11,
+      "correct": 2,
+      "recall": 0.18181818181818182
+    },
+    "MAN": {
+      "label_int": 8,
+      "n": 11,
+      "correct": 2,
+      "recall": 0.18181818181818182
+    },
+    "BO": {
+      "label_int": 10,
+      "n": 9,
+      "correct": 2,
+      "recall": 0.2222222222222222
+    },
+    "LE": {
+      "label_int": 12,
+      "n": 10,
+      "correct": 2,
+      "recall": 0.2
+    },
+    "SA": {
+      "label_int": 14,
+      "n": 20,
+      "correct": 2,
+      "recall": 0.1
+    },
+    "TI": {
+      "label_int": 16,
+      "n": 10,
+      "correct": 2,
+      "recall": 0.2
+    }
+  },
+  "error_breakdown": {
+    "n_wrong_total": 84,
+    "n_wrong_guessed_second_syllable_class": 47,
+    "n_wrong_guessed_other_first_syllable_class": 37,
+    "pct_wrong_guessed_second_syllable_class": 55.95,
+    "note": "The flat 19-class model has no structural constraint limiting it to the 9 first-syllable classes (unlike P6's coarse stage, which structurally has only 4 possible outputs). A meaningful fraction of P3's errors on this subset can therefore be 'impossible' guesses toward a second-syllable class -- this is expected behaviour, not a bug, and is itself an architectural point of comparison against P6."
+  }
+}

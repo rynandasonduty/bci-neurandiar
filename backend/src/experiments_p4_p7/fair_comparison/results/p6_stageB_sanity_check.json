@@ -1,0 +1,663 @@
+{
+  "part_a_submodel_accuracy": {
+    "description": "Replay of each sub-model's own test_accuracy from saved Xtest/ytest + model.predict().",
+    "n_checked": 60,
+    "n_matched": 60,
+    "all_match": true,
+    "per_subject": {
+      "S1": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.42857142857142855,
+            "reported_test_accuracy": 0.42857142857142855,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.4,
+            "reported_test_accuracy": 0.4,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.34782608695652173,
+            "reported_test_accuracy": 0.34782608695652173,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.7333333333333333,
+            "reported_test_accuracy": 0.7333333333333333,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.8125,
+            "reported_test_accuracy": 0.8125,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S2": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.4,
+            "reported_test_accuracy": 0.4,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.4782608695652174,
+            "reported_test_accuracy": 0.4782608695652174,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.7777777777777778,
+            "reported_test_accuracy": 0.7777777777777778,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5,
+            "reported_test_accuracy": 0.5,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.6923076923076923,
+            "reported_test_accuracy": 0.6923076923076923,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S3": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.41904761904761906,
+            "reported_test_accuracy": 0.41904761904761906,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.6511627906976745,
+            "reported_test_accuracy": 0.6511627906976745,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.65625,
+            "reported_test_accuracy": 0.65625,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.7619047619047619,
+            "reported_test_accuracy": 0.7619047619047619,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5416666666666666,
+            "reported_test_accuracy": 0.5416666666666666,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S4": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.41836734693877553,
+            "reported_test_accuracy": 0.41836734693877553,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5238095238095238,
+            "reported_test_accuracy": 0.5238095238095238,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.4666666666666667,
+            "reported_test_accuracy": 0.4666666666666667,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5555555555555556,
+            "reported_test_accuracy": 0.5555555555555556,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.8,
+            "reported_test_accuracy": 0.8,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S5": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.38596491228070173,
+            "reported_test_accuracy": 0.38596491228070173,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.44,
+            "reported_test_accuracy": 0.44,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.3125,
+            "reported_test_accuracy": 0.3125,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.6363636363636364,
+            "reported_test_accuracy": 0.6363636363636364,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.8,
+            "reported_test_accuracy": 0.8,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S6": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.2631578947368421,
+            "reported_test_accuracy": 0.2631578947368421,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.2857142857142857,
+            "reported_test_accuracy": 0.2857142857142857,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5714285714285714,
+            "reported_test_accuracy": 0.5714285714285714,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5,
+            "reported_test_accuracy": 0.5,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5,
+            "reported_test_accuracy": 0.5,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S7": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.4108527131782946,
+            "reported_test_accuracy": 0.4108527131782946,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5208333333333334,
+            "reported_test_accuracy": 0.5208333333333334,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.40476190476190477,
+            "reported_test_accuracy": 0.40476190476190477,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5,
+            "reported_test_accuracy": 0.5,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.3333333333333333,
+            "reported_test_accuracy": 0.3333333333333333,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S8": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.36363636363636365,
+            "reported_test_accuracy": 0.36363636363636365,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.4883720930232558,
+            "reported_test_accuracy": 0.4883720930232558,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.3235294117647059,
+            "reported_test_accuracy": 0.3235294117647059,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.38095238095238093,
+            "reported_test_accuracy": 0.38095238095238093,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5454545454545454,
+            "reported_test_accuracy": 0.5454545454545454,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S9": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.43820224719101125,
+            "reported_test_accuracy": 0.43820224719101125,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.37142857142857144,
+            "reported_test_accuracy": 0.37142857142857144,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5333333333333333,
+            "reported_test_accuracy": 0.5333333333333333,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.8235294117647058,
+            "reported_test_accuracy": 0.8235294117647058,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.6666666666666666,
+            "reported_test_accuracy": 0.6666666666666666,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S10": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.3888888888888889,
+            "reported_test_accuracy": 0.3888888888888889,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.6274509803921569,
+            "reported_test_accuracy": 0.6274509803921569,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.4473684210526316,
+            "reported_test_accuracy": 0.4473684210526316,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.75,
+            "reported_test_accuracy": 0.75,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.7037037037037037,
+            "reported_test_accuracy": 0.7037037037037037,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S11": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.42857142857142855,
+            "reported_test_accuracy": 0.42857142857142855,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5116279069767442,
+            "reported_test_accuracy": 0.5116279069767442,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5454545454545454,
+            "reported_test_accuracy": 0.5454545454545454,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.7,
+            "reported_test_accuracy": 0.7,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5454545454545454,
+            "reported_test_accuracy": 0.5454545454545454,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      },
+      "S12": {
+        "status": "OK",
+        "sub_models": {
+          "coarse": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.3333333333333333,
+            "reported_test_accuracy": 0.3333333333333333,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_A": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.3695652173913043,
+            "reported_test_accuracy": 0.3695652173913043,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_I": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5151515151515151,
+            "reported_test_accuracy": 0.5151515151515151,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "fine_E": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.5454545454545454,
+            "reported_test_accuracy": 0.5454545454545454,
+            "match": true,
+            "abs_diff": 0.0
+          },
+          "sa_branch": {
+            "status": "OK",
+            "replayed_test_accuracy": 0.782608695652174,
+            "reported_test_accuracy": 0.782608695652174,
+            "match": true,
+            "abs_diff": 0.0
+          }
+        }
+      }
+    }
+  },
+  "part_b_full_word_e2e": {
+    "S3": {
+      "replayed": {
+        "available": true,
+        "n_valid_trials_total": 178,
+        "n_skipped_unknown_word": 0,
+        "n_skipped_artifact_rejected": 22,
+        "n_test_trials": 36,
+        "accuracy": 0.1388888888888889,
+        "caveat": "Trial-level 80/20 holdout (test_size=0.2, random_state=42), mirroring train_word_assembler_s3.py's own methodology. Independent of the window-level three_way_split used to train the sub-models, so this is not a strictly leakage-free estimate -- same caveat already applies to the existing word assembler's reported accuracy. Use first_syllable_e2e for the leakage-free figure."
+      },
+      "reported": {
+        "available": true,
+        "n_valid_trials_total": 178,
+        "n_skipped_unknown_word": 0,
+        "n_skipped_artifact_rejected": 22,
+        "n_test_trials": 36,
+        "accuracy": 0.1388888888888889,
+        "caveat": "Trial-level 80/20 holdout (test_size=0.2, random_state=42), mirroring train_word_assembler_s3.py's own methodology. Independent of the window-level three_way_split used to train the sub-models, so this is not a strictly leakage-free estimate -- same caveat already applies to the existing word assembler's reported accuracy. Use first_syllable_e2e for the leakage-free figure."
+      },
+      "match": true
+    },
+    "S9": {
+      "replayed": {
+        "available": true,
+        "n_valid_trials_total": 182,
+        "n_skipped_unknown_word": 0,
+        "n_skipped_artifact_rejected": 18,
+        "n_test_trials": 37,
+        "accuracy": 0.1891891891891892,
+        "caveat": "Trial-level 80/20 holdout (test_size=0.2, random_state=42), mirroring train_word_assembler_s3.py's own methodology. Independent of the window-level three_way_split used to train the sub-models, so this is not a strictly leakage-free estimate -- same caveat already applies to the existing word assembler's reported accuracy. Use first_syllable_e2e for the leakage-free figure."
+      },
+      "reported": {
+        "available": true,
+        "n_valid_trials_total": 182,
+        "n_skipped_unknown_word": 0,
+        "n_skipped_artifact_rejected": 18,
+        "n_test_trials": 37,
+        "accuracy": 0.1891891891891892,
+        "caveat": "Trial-level 80/20 holdout (test_size=0.2, random_state=42), mirroring train_word_assembler_s3.py's own methodology. Independent of the window-level three_way_split used to train the sub-models, so this is not a strictly leakage-free estimate -- same caveat already applies to the existing word assembler's reported accuracy. Use first_syllable_e2e for the leakage-free figure."
+      },
+      "match": true
+    },
+    "S1": {
+      "replayed": {
+        "available": true,
+        "n_valid_trials_total": 139,
+        "n_skipped_unknown_word": 0,
+        "n_skipped_artifact_rejected": 61,
+        "n_test_trials": 28,
+        "accuracy": 0.14285714285714285,
+        "caveat": "Trial-level 80/20 holdout (test_size=0.2, random_state=42), mirroring train_word_assembler_s3.py's own methodology. Independent of the window-level three_way_split used to train the sub-models, so this is not a strictly leakage-free estimate -- same caveat already applies to the existing word assembler's reported accuracy. Use first_syllable_e2e for the leakage-free figure."
+      },
+      "reported": {
+        "available": true,
+        "n_valid_trials_total": 139,
+        "n_skipped_unknown_word": 0,
+        "n_skipped_artifact_rejected": 61,
+        "n_test_trials": 28,
+        "accuracy": 0.14285714285714285,
+        "caveat": "Trial-level 80/20 holdout (test_size=0.2, random_state=42), mirroring train_word_assembler_s3.py's own methodology. Independent of the window-level three_way_split used to train the sub-models, so this is not a strictly leakage-free estimate -- same caveat already applies to the existing word assembler's reported accuracy. Use first_syllable_e2e for the leakage-free figure."
+      },
+      "match": true
+    }
+  },
+  "part_c_first_syllable_e2e": {
+    "S3": {
+      "replayed": {
+        "n_test_samples": 105,
+        "accuracy": 0.2857142857142857,
+        "per_syllable_recall": {
+          "BE": {
+            "n": 11,
+            "correct": 2,
+            "recall": 0.18181818181818182
+          },
+          "BO": {
+            "n": 9,
+            "correct": 3,
+            "recall": 0.3333333333333333
+          },
+          "LE": {
+            "n": 10,
+            "correct": 3,
+            "recall": 0.3
+          },
+          "MA": {
+            "n": 12,
+            "correct": 9,
+            "recall": 0.75
+          },
+          "MAN": {
+            "n": 11,
+            "correct": 2,
+            "recall": 0.18181818181818182
+          },
+          "MI": {
+            "n": 11,
+            "correct": 2,
+            "recall": 0.18181818181818182
+          },
+          "PI": {
+            "n": 11,
+            "correct": 3,
+            "recall": 0.2727272727272727
+          },
+          "SA": {
+            "n": 20,
+            "correct": 5,
+            "recall": 0.25
+          },
+          "TI": {
+            "n": 10,
+            "correct": 1,
+            "recall": 0.1
+          }
+        },
+        "available": true
+      },
+      "reported": {
+        "n_test_samples": 105,
+        "accuracy": 0.2857142857142857,
+        "per_syllable_recall": {
+          "BE": {
+            "n": 11,
+            "correct": 2,
+            "recall": 0.18181818181818182
+          },
+          "BO": {
+            "n": 9,
+            "correct": 3,
+            "recall": 0.3333333333333333
+          },
+          "LE": {
+            "n": 10,
+            "correct": 3,
+            "recall": 0.3
+          },
+          "MA": {
+            "n": 12,
+            "correct": 9,
+            "recall": 0.75
+          },
+          "MAN": {
+            "n": 11,
+            "correct": 2,
+            "recall": 0.18181818181818182
+          },
+          "MI": {
+            "n": 11,
+            "correct": 2,
+            "recall": 0.18181818181818182
+          },
+          "PI": {
+            "n": 11,
+            "correct": 3,
+            "recall": 0.2727272727272727
+          },
+          "SA": {
+            "n": 20,
+            "correct": 5,
+            "recall": 0.25
+          },
+          "TI": {
+            "n": 10,
+            "correct": 1,
+            "recall": 0.1
+          }
+        }
+      },
+      "match": true
+    }
+  }
+}

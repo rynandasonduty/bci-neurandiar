@@ -1,0 +1,99 @@
+{
+  "description": "Correlation between P6's Stage-1 metric (first-syllable e2e accuracy) and its full-pipeline metric (full-word e2e accuracy) across the 12 subjects, from data already present in results_S{n}.json -- no recomputation.",
+  "n_subjects": 12,
+  "missing_subjects": [],
+  "pairs": [
+    {
+      "subject": "S1",
+      "first_syllable_e2e_pct": 17.142857142857142,
+      "full_word_e2e_pct": 14.285714285714285,
+      "full_word_n_test_trials": 28
+    },
+    {
+      "subject": "S2",
+      "first_syllable_e2e_pct": 25.0,
+      "full_word_e2e_pct": 7.142857142857142,
+      "full_word_n_test_trials": 28
+    },
+    {
+      "subject": "S3",
+      "first_syllable_e2e_pct": 28.57142857142857,
+      "full_word_e2e_pct": 13.88888888888889,
+      "full_word_n_test_trials": 36
+    },
+    {
+      "subject": "S4",
+      "first_syllable_e2e_pct": 22.448979591836736,
+      "full_word_e2e_pct": 2.7027027027027026,
+      "full_word_n_test_trials": 37
+    },
+    {
+      "subject": "S5",
+      "first_syllable_e2e_pct": 14.035087719298245,
+      "full_word_e2e_pct": 18.51851851851852,
+      "full_word_n_test_trials": 27
+    },
+    {
+      "subject": "S6",
+      "first_syllable_e2e_pct": 15.789473684210526,
+      "full_word_e2e_pct": 10.0,
+      "full_word_n_test_trials": 10
+    },
+    {
+      "subject": "S7",
+      "first_syllable_e2e_pct": 19.379844961240313,
+      "full_word_e2e_pct": 12.5,
+      "full_word_n_test_trials": 40
+    },
+    {
+      "subject": "S8",
+      "first_syllable_e2e_pct": 14.545454545454545,
+      "full_word_e2e_pct": 5.263157894736842,
+      "full_word_n_test_trials": 38
+    },
+    {
+      "subject": "S9",
+      "first_syllable_e2e_pct": 17.97752808988764,
+      "full_word_e2e_pct": 18.91891891891892,
+      "full_word_n_test_trials": 37
+    },
+    {
+      "subject": "S10",
+      "first_syllable_e2e_pct": 22.22222222222222,
+      "full_word_e2e_pct": 12.5,
+      "full_word_n_test_trials": 40
+    },
+    {
+      "subject": "S11",
+      "first_syllable_e2e_pct": 22.857142857142858,
+      "full_word_e2e_pct": 16.216216216216218,
+      "full_word_n_test_trials": 37
+    },
+    {
+      "subject": "S12",
+      "first_syllable_e2e_pct": 11.711711711711711,
+      "full_word_e2e_pct": 7.6923076923076925,
+      "full_word_n_test_trials": 39
+    }
+  ],
+  "pearson_r": 0.0014674827283624368,
+  "pearson_p": 0.9963886270926621,
+  "spearman_r": -0.01751316170845866,
+  "spearman_p": 0.9569188239005485,
+  "interpretation": "weak/non-significant correlation -- consistent with small per-subject full-word n_test_trials (10-40) producing high variance, not a contradiction between the two metrics",
+  "s3_vs_s9_note": {
+    "S3": {
+      "subject": "S3",
+      "first_syllable_e2e_pct": 28.57142857142857,
+      "full_word_e2e_pct": 13.88888888888889,
+      "full_word_n_test_trials": 36
+    },
+    "S9": {
+      "subject": "S9",
+      "first_syllable_e2e_pct": 17.97752808988764,
+      "full_word_e2e_pct": 18.91891891891892,
+      "full_word_n_test_trials": 37
+    },
+    "explanation": "S3 has the highest first-syllable e2e (Stage-1 selection criterion) but not the highest full-word e2e; S9 has the highest full-word e2e but not the highest first-syllable e2e. Given the weak/noisy correlation above and small full-word n_test_trials per subject, this is expected sampling variance, not an anomaly."
+  }
+}

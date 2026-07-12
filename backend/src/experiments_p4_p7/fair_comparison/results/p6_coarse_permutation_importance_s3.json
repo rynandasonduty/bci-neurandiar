@@ -1,0 +1,257 @@
+{
+  "status": "OK",
+  "description": "Permutation importance (n_repeats=30, random_state=42, scoring='accuracy') on the P6 coarse sub-model, same methodology as the existing P3 champion table (T6), for a cross-architecture comparison of which channels/features dominate.",
+  "subject_id": "S3",
+  "feature_group": "barlow",
+  "n_test_samples": 105,
+  "n_features": 28,
+  "full_table": [
+    {
+      "Feature": "F3_freq",
+      "Mean Importance": 0.046984,
+      "Std Importance": 0.018554,
+      "Rank": 1
+    },
+    {
+      "Feature": "O1_amp",
+      "Mean Importance": 0.044762,
+      "Std Importance": 0.024731,
+      "Rank": 2
+    },
+    {
+      "Feature": "AF4_amp",
+      "Mean Importance": 0.044762,
+      "Std Importance": 0.021175,
+      "Rank": 3
+    },
+    {
+      "Feature": "T7_amp",
+      "Mean Importance": 0.026667,
+      "Std Importance": 0.01958,
+      "Rank": 4
+    },
+    {
+      "Feature": "F8_freq",
+      "Mean Importance": 0.023492,
+      "Std Importance": 0.024924,
+      "Rank": 5
+    },
+    {
+      "Feature": "AF4_freq",
+      "Mean Importance": 0.022857,
+      "Std Importance": 0.024043,
+      "Rank": 6
+    },
+    {
+      "Feature": "AF3_amp",
+      "Mean Importance": 0.02,
+      "Std Importance": 0.020181,
+      "Rank": 7
+    },
+    {
+      "Feature": "T8_freq",
+      "Mean Importance": 0.015873,
+      "Std Importance": 0.021484,
+      "Rank": 8
+    },
+    {
+      "Feature": "AF3_freq",
+      "Mean Importance": 0.015873,
+      "Std Importance": 0.022582,
+      "Rank": 9
+    },
+    {
+      "Feature": "P8_amp",
+      "Mean Importance": 0.015238,
+      "Std Importance": 0.015669,
+      "Rank": 10
+    },
+    {
+      "Feature": "O2_freq",
+      "Mean Importance": 0.010159,
+      "Std Importance": 0.020268,
+      "Rank": 11
+    },
+    {
+      "Feature": "T8_amp",
+      "Mean Importance": 0.009206,
+      "Std Importance": 0.020936,
+      "Rank": 12
+    },
+    {
+      "Feature": "FC6_freq",
+      "Mean Importance": 0.007302,
+      "Std Importance": 0.022088,
+      "Rank": 13
+    },
+    {
+      "Feature": "FC6_amp",
+      "Mean Importance": 0.007302,
+      "Std Importance": 0.019469,
+      "Rank": 14
+    },
+    {
+      "Feature": "O2_amp",
+      "Mean Importance": 0.007302,
+      "Std Importance": 0.019313,
+      "Rank": 15
+    },
+    {
+      "Feature": "F4_freq",
+      "Mean Importance": 0.002857,
+      "Std Importance": 0.025216,
+      "Rank": 16
+    },
+    {
+      "Feature": "F7_freq",
+      "Mean Importance": 0.001905,
+      "Std Importance": 0.026416,
+      "Rank": 17
+    },
+    {
+      "Feature": "FC5_amp",
+      "Mean Importance": 0.001905,
+      "Std Importance": 0.014211,
+      "Rank": 18
+    },
+    {
+      "Feature": "F4_amp",
+      "Mean Importance": 0.000317,
+      "Std Importance": 0.016584,
+      "Rank": 19
+    },
+    {
+      "Feature": "P7_freq",
+      "Mean Importance": 0.0,
+      "Std Importance": 0.024094,
+      "Rank": 20
+    },
+    {
+      "Feature": "FC5_freq",
+      "Mean Importance": -0.000952,
+      "Std Importance": 0.027859,
+      "Rank": 21
+    },
+    {
+      "Feature": "F8_amp",
+      "Mean Importance": -0.001905,
+      "Std Importance": 0.015435,
+      "Rank": 22
+    },
+    {
+      "Feature": "T7_freq",
+      "Mean Importance": -0.004762,
+      "Std Importance": 0.025287,
+      "Rank": 23
+    },
+    {
+      "Feature": "F7_amp",
+      "Mean Importance": -0.004762,
+      "Std Importance": 0.024805,
+      "Rank": 24
+    },
+    {
+      "Feature": "O1_freq",
+      "Mean Importance": -0.005714,
+      "Std Importance": 0.017834,
+      "Rank": 25
+    },
+    {
+      "Feature": "P7_amp",
+      "Mean Importance": -0.005714,
+      "Std Importance": 0.020068,
+      "Rank": 26
+    },
+    {
+      "Feature": "F3_amp",
+      "Mean Importance": -0.006667,
+      "Std Importance": 0.022558,
+      "Rank": 27
+    },
+    {
+      "Feature": "P8_freq",
+      "Mean Importance": -0.028571,
+      "Std Importance": 0.026599,
+      "Rank": 28
+    }
+  ],
+  "comparison": {
+    "p6_coarse_top5": [
+      {
+        "Feature": "F3_freq",
+        "Mean Importance": 0.046984,
+        "Std Importance": 0.018554,
+        "Rank": 1
+      },
+      {
+        "Feature": "O1_amp",
+        "Mean Importance": 0.044762,
+        "Std Importance": 0.024731,
+        "Rank": 2
+      },
+      {
+        "Feature": "AF4_amp",
+        "Mean Importance": 0.044762,
+        "Std Importance": 0.021175,
+        "Rank": 3
+      },
+      {
+        "Feature": "T7_amp",
+        "Mean Importance": 0.026667,
+        "Std Importance": 0.01958,
+        "Rank": 4
+      },
+      {
+        "Feature": "F8_freq",
+        "Mean Importance": 0.023492,
+        "Std Importance": 0.024924,
+        "Rank": 5
+      }
+    ],
+    "p3_champion_top5": [
+      {
+        "Feature": "O1_freq",
+        "Mean Importance": 0.051746,
+        "Std Importance": 0.017593,
+        "Rank": 1
+      },
+      {
+        "Feature": "O1_amp",
+        "Mean Importance": 0.051746,
+        "Std Importance": 0.015095,
+        "Rank": 2
+      },
+      {
+        "Feature": "F3_freq",
+        "Mean Importance": 0.040476,
+        "Std Importance": 0.01469,
+        "Rank": 3
+      },
+      {
+        "Feature": "P7_amp",
+        "Mean Importance": 0.037619,
+        "Std Importance": 0.014462,
+        "Rank": 4
+      },
+      {
+        "Feature": "AF3_freq",
+        "Mean Importance": 0.036825,
+        "Std Importance": 0.015005,
+        "Rank": 5
+      }
+    ],
+    "overlapping_channels_top5": [
+      "F3",
+      "O1"
+    ],
+    "p3_only_channels_top5": [
+      "AF3",
+      "P7"
+    ],
+    "p6_only_channels_top5": [
+      "AF4",
+      "F8",
+      "T7"
+    ]
+  }
+}

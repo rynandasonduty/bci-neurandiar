@@ -1,0 +1,29 @@
+{
+  "description": "Brier score (multi-class, lower better) and top-label ECE (n_bins=10, lower better) for the P3 champion (19-class) and the P6 coarse BASELINE (4-class, S3) -- both use plain Platt-scaled SVC(probability=True), no CalibratedClassifierCV. Varian E (P6 ablation, WITH CalibratedClassifierCV) is cited for context only, not recomputed.",
+  "p3_champion": {
+    "subject": "S3",
+    "exp_id": "E5_Data_Augmentation",
+    "feature_group": "barlow",
+    "status": "OK",
+    "n_test_samples": 210,
+    "n_classes": 19,
+    "test_accuracy_from_proba_argmax": 0.1523809523809524,
+    "test_brier_score": 0.9838594032197542,
+    "test_ece": 0.18975159411305542
+  },
+  "p6_coarse_baseline": {
+    "subject": "S3",
+    "feature_group": "barlow",
+    "status": "OK",
+    "n_test_samples": 105,
+    "n_classes": 4,
+    "test_accuracy_from_proba_argmax": 0.4,
+    "test_brier_score": 0.6619064749648269,
+    "test_ece": 0.07708056345397322
+  },
+  "p6_variant_e_cited_for_context": {
+    "test_brier_score": 0.672,
+    "test_ece": 0.0844,
+    "source": "P7_CoarseAblation_Phase1_report.md, Varian E calibration quality table, S3 row"
+  }
+}

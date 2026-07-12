@@ -1,0 +1,941 @@
+{
+  "description": "Class coverage per P6 sub-model (coarse/fine_A/fine_I/fine_E/sa_branch) and first-syllable pipeline coverage, read directly from the existing Stage B results_S{n}.json files -- no model reload, no re-prediction.",
+  "champion_subject": "S3",
+  "missing_subjects": [],
+  "per_subject": {
+    "S1": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 4,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "test_accuracy": 0.42857142857142855,
+          "n_test": 70
+        },
+        "fine_A": {
+          "n_classes_covered": 2,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            14
+          ],
+          "test_accuracy": 0.4,
+          "n_test": 25
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.34782608695652173,
+          "n_test": 23
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.7333333333333333,
+          "n_test": 15
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.8125,
+          "n_test": 16
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 5,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "BO",
+          "MI",
+          "PI",
+          "SA"
+        ],
+        "syllables_never_correct": [
+          "LE",
+          "MA",
+          "MAN",
+          "TI"
+        ],
+        "first_syllable_e2e_accuracy": 0.17142857142857143,
+        "n_test_samples": 70
+      }
+    },
+    "S2": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 4,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "test_accuracy": 0.4,
+          "n_test": 60
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.4782608695652174,
+          "n_test": 23
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.7777777777777778,
+          "n_test": 18
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.5,
+          "n_test": 12
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.6923076923076923,
+          "n_test": 13
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 8,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "BO",
+          "LE",
+          "MA",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [
+          "MAN"
+        ],
+        "first_syllable_e2e_accuracy": 0.25,
+        "n_test_samples": 60
+      }
+    },
+    "S3": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 4,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "test_accuracy": 0.41904761904761906,
+          "n_test": 105
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.6511627906976745,
+          "n_test": 43
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.65625,
+          "n_test": 32
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.7619047619047619,
+          "n_test": 21
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.5416666666666666,
+          "n_test": 24
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 9,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "BO",
+          "LE",
+          "MA",
+          "MAN",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [],
+        "first_syllable_e2e_accuracy": 0.2857142857142857,
+        "n_test_samples": 105
+      }
+    },
+    "S4": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.41836734693877553,
+          "n_test": 98
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.5238095238095238,
+          "n_test": 42
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.4666666666666667,
+          "n_test": 30
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.5555555555555556,
+          "n_test": 18
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.8,
+          "n_test": 20
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 8,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "LE",
+          "MA",
+          "MAN",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [
+          "BO"
+        ],
+        "first_syllable_e2e_accuracy": 0.22448979591836735,
+        "n_test_samples": 98
+      }
+    },
+    "S5": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.38596491228070173,
+          "n_test": 57
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.44,
+          "n_test": 25
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.3125,
+          "n_test": 16
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.6363636363636364,
+          "n_test": 11
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.8,
+          "n_test": 10
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 4,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "MA",
+          "MAN",
+          "MI",
+          "SA"
+        ],
+        "syllables_never_correct": [
+          "BE",
+          "BO",
+          "LE",
+          "PI",
+          "TI"
+        ],
+        "first_syllable_e2e_accuracy": 0.14035087719298245,
+        "n_test_samples": 57
+      }
+    },
+    "S6": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.2631578947368421,
+          "n_test": 19
+        },
+        "fine_A": {
+          "n_classes_covered": 1,
+          "n_classes_total": 3,
+          "classes_covered": [
+            14
+          ],
+          "test_accuracy": 0.2857142857142857,
+          "n_test": 7
+        },
+        "fine_I": {
+          "n_classes_covered": 2,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6
+          ],
+          "test_accuracy": 0.5714285714285714,
+          "n_test": 7
+        },
+        "fine_E": {
+          "n_classes_covered": 1,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4
+          ],
+          "test_accuracy": 0.5,
+          "n_test": 4
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.5,
+          "n_test": 4
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 3,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "PI",
+          "SA"
+        ],
+        "syllables_never_correct": [
+          "BO",
+          "LE",
+          "MA",
+          "MAN",
+          "MI",
+          "TI"
+        ],
+        "first_syllable_e2e_accuracy": 0.15789473684210525,
+        "n_test_samples": 19
+      }
+    },
+    "S7": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.4108527131782946,
+          "n_test": 129
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.5208333333333334,
+          "n_test": 48
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.40476190476190477,
+          "n_test": 42
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.5,
+          "n_test": 26
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.3333333333333333,
+          "n_test": 27
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 8,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "LE",
+          "MA",
+          "MAN",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [
+          "BO"
+        ],
+        "first_syllable_e2e_accuracy": 0.1937984496124031,
+        "n_test_samples": 129
+      }
+    },
+    "S8": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.36363636363636365,
+          "n_test": 110
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.4883720930232558,
+          "n_test": 43
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.3235294117647059,
+          "n_test": 34
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.38095238095238093,
+          "n_test": 21
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.5454545454545454,
+          "n_test": 22
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 4,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "MA",
+          "MI",
+          "PI",
+          "SA"
+        ],
+        "syllables_never_correct": [
+          "BE",
+          "BO",
+          "LE",
+          "MAN",
+          "TI"
+        ],
+        "first_syllable_e2e_accuracy": 0.14545454545454545,
+        "n_test_samples": 110
+      }
+    },
+    "S9": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 4,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "test_accuracy": 0.43820224719101125,
+          "n_test": 89
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.37142857142857144,
+          "n_test": 35
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.5333333333333333,
+          "n_test": 30
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.8235294117647058,
+          "n_test": 17
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.6666666666666666,
+          "n_test": 18
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 7,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "BO",
+          "MAN",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [
+          "LE",
+          "MA"
+        ],
+        "first_syllable_e2e_accuracy": 0.1797752808988764,
+        "n_test_samples": 89
+      }
+    },
+    "S10": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.3888888888888889,
+          "n_test": 126
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.6274509803921569,
+          "n_test": 51
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.4473684210526316,
+          "n_test": 38
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.75,
+          "n_test": 24
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.7037037037037037,
+          "n_test": 27
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 8,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "LE",
+          "MA",
+          "MAN",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [
+          "BO"
+        ],
+        "first_syllable_e2e_accuracy": 0.2222222222222222,
+        "n_test_samples": 126
+      }
+    },
+    "S11": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.42857142857142855,
+          "n_test": 105
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.5116279069767442,
+          "n_test": 43
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.5454545454545454,
+          "n_test": 33
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.7,
+          "n_test": 20
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.5454545454545454,
+          "n_test": 22
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 8,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "LE",
+          "MA",
+          "MAN",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [
+          "BO"
+        ],
+        "first_syllable_e2e_accuracy": 0.22857142857142856,
+        "n_test_samples": 105
+      }
+    },
+    "S12": {
+      "status": "OK",
+      "winning_coarse_feature_group": "barlow",
+      "sub_models": {
+        "coarse": {
+          "n_classes_covered": 3,
+          "n_classes_total": 4,
+          "classes_covered": [
+            0,
+            1,
+            2
+          ],
+          "test_accuracy": 0.3333333333333333,
+          "n_test": 111
+        },
+        "fine_A": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            0,
+            8,
+            14
+          ],
+          "test_accuracy": 0.3695652173913043,
+          "n_test": 46
+        },
+        "fine_I": {
+          "n_classes_covered": 3,
+          "n_classes_total": 3,
+          "classes_covered": [
+            2,
+            6,
+            16
+          ],
+          "test_accuracy": 0.5151515151515151,
+          "n_test": 33
+        },
+        "fine_E": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            4,
+            12
+          ],
+          "test_accuracy": 0.5454545454545454,
+          "n_test": 22
+        },
+        "sa_branch": {
+          "n_classes_covered": 2,
+          "n_classes_total": 2,
+          "classes_covered": [
+            15,
+            18
+          ],
+          "test_accuracy": 0.782608695652174,
+          "n_test": 23
+        }
+      },
+      "first_syllable_pipeline_coverage": {
+        "n_syllables_covered": 7,
+        "n_syllables_total": 9,
+        "syllables_covered": [
+          "BE",
+          "MA",
+          "MAN",
+          "MI",
+          "PI",
+          "SA",
+          "TI"
+        ],
+        "syllables_never_correct": [
+          "BO",
+          "LE"
+        ],
+        "first_syllable_e2e_accuracy": 0.11711711711711711,
+        "n_test_samples": 111
+      }
+    }
+  }
+}

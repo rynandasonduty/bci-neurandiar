@@ -1,0 +1,347 @@
+{
+  "description": "Theoretical first-syllable e2e ceiling under a coarse/fine independence assumption, vs actual measured accuracy, per subject.",
+  "champion_subject": "S3",
+  "per_subject": {
+    "S1": {
+      "status": "OK",
+      "n_test_samples": 70,
+      "group_proportions": {
+        "A": 0.35714285714285715,
+        "I": 0.32857142857142857,
+        "E": 0.21428571428571427,
+        "O": 0.1
+      },
+      "p_coarse_correct": 0.42857142857142855,
+      "p_fine_correct_by_group": {
+        "A": 0.4,
+        "I": 0.34782608695652173,
+        "E": 0.7333333333333333,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.5142857142857142,
+      "theoretical_ceiling": 0.2204081632653061,
+      "actual_first_syllable_e2e": 0.17142857142857143,
+      "delta_actual_minus_ceiling": -0.04897959183673467,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S2": {
+      "status": "OK",
+      "n_test_samples": 60,
+      "group_proportions": {
+        "A": 0.38333333333333336,
+        "I": 0.3,
+        "E": 0.2,
+        "O": 0.11666666666666667
+      },
+      "p_coarse_correct": 0.4,
+      "p_fine_correct_by_group": {
+        "A": 0.4782608695652174,
+        "I": 0.7777777777777778,
+        "E": 0.5,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.6333333333333333,
+      "theoretical_ceiling": 0.25333333333333335,
+      "actual_first_syllable_e2e": 0.25,
+      "delta_actual_minus_ceiling": -0.003333333333333355,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S3": {
+      "status": "OK",
+      "n_test_samples": 105,
+      "group_proportions": {
+        "A": 0.4095238095238095,
+        "I": 0.3047619047619048,
+        "E": 0.2,
+        "O": 0.08571428571428572
+      },
+      "p_coarse_correct": 0.41904761904761906,
+      "p_fine_correct_by_group": {
+        "A": 0.6511627906976745,
+        "I": 0.65625,
+        "E": 0.7619047619047619,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.7047619047619048,
+      "theoretical_ceiling": 0.29532879818594104,
+      "actual_first_syllable_e2e": 0.2857142857142857,
+      "delta_actual_minus_ceiling": -0.009614512471655345,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S4": {
+      "status": "OK",
+      "n_test_samples": 98,
+      "group_proportions": {
+        "A": 0.42857142857142855,
+        "I": 0.30612244897959184,
+        "E": 0.1836734693877551,
+        "O": 0.08163265306122448
+      },
+      "p_coarse_correct": 0.41836734693877553,
+      "p_fine_correct_by_group": {
+        "A": 0.5238095238095238,
+        "I": 0.4666666666666667,
+        "E": 0.5555555555555556,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.5510204081632653,
+      "theoretical_ceiling": 0.2305289462723865,
+      "actual_first_syllable_e2e": 0.22448979591836735,
+      "delta_actual_minus_ceiling": -0.0060391503540191405,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S5": {
+      "status": "OK",
+      "n_test_samples": 57,
+      "group_proportions": {
+        "A": 0.43859649122807015,
+        "I": 0.2807017543859649,
+        "E": 0.19298245614035087,
+        "O": 0.08771929824561403
+      },
+      "p_coarse_correct": 0.38596491228070173,
+      "p_fine_correct_by_group": {
+        "A": 0.44,
+        "I": 0.3125,
+        "E": 0.6363636363636364,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.49122807017543857,
+      "theoretical_ceiling": 0.18959679901508153,
+      "actual_first_syllable_e2e": 0.14035087719298245,
+      "delta_actual_minus_ceiling": -0.04924592182209908,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S6": {
+      "status": "OK",
+      "n_test_samples": 19,
+      "group_proportions": {
+        "A": 0.3684210526315789,
+        "I": 0.3684210526315789,
+        "E": 0.21052631578947367,
+        "O": 0.05263157894736842
+      },
+      "p_coarse_correct": 0.2631578947368421,
+      "p_fine_correct_by_group": {
+        "A": 0.2857142857142857,
+        "I": 0.5714285714285714,
+        "E": 0.5,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.47368421052631576,
+      "theoretical_ceiling": 0.12465373961218836,
+      "actual_first_syllable_e2e": 0.15789473684210525,
+      "delta_actual_minus_ceiling": 0.0332409972299169,
+      "interpretation": "actual > ceiling: stage errors negatively correlated (independence assumption pessimistic here)"
+    },
+    "S7": {
+      "status": "OK",
+      "n_test_samples": 129,
+      "group_proportions": {
+        "A": 0.37209302325581395,
+        "I": 0.32558139534883723,
+        "E": 0.20155038759689922,
+        "O": 0.10077519379844961
+      },
+      "p_coarse_correct": 0.4108527131782946,
+      "p_fine_correct_by_group": {
+        "A": 0.5208333333333334,
+        "I": 0.40476190476190477,
+        "E": 0.5,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.5271317829457365,
+      "theoretical_ceiling": 0.2165735232257677,
+      "actual_first_syllable_e2e": 0.1937984496124031,
+      "delta_actual_minus_ceiling": -0.022775073613364588,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S8": {
+      "status": "OK",
+      "n_test_samples": 110,
+      "group_proportions": {
+        "A": 0.39090909090909093,
+        "I": 0.3090909090909091,
+        "E": 0.19090909090909092,
+        "O": 0.10909090909090909
+      },
+      "p_coarse_correct": 0.36363636363636365,
+      "p_fine_correct_by_group": {
+        "A": 0.4883720930232558,
+        "I": 0.3235294117647059,
+        "E": 0.38095238095238093,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.4727272727272727,
+      "theoretical_ceiling": 0.171900826446281,
+      "actual_first_syllable_e2e": 0.14545454545454545,
+      "delta_actual_minus_ceiling": -0.026446280991735543,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S9": {
+      "status": "OK",
+      "n_test_samples": 89,
+      "group_proportions": {
+        "A": 0.39325842696629215,
+        "I": 0.33707865168539325,
+        "E": 0.19101123595505617,
+        "O": 0.07865168539325842
+      },
+      "p_coarse_correct": 0.43820224719101125,
+      "p_fine_correct_by_group": {
+        "A": 0.37142857142857144,
+        "I": 0.5333333333333333,
+        "E": 0.8235294117647058,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.5617977528089888,
+      "theoretical_ceiling": 0.24618103774775915,
+      "actual_first_syllable_e2e": 0.1797752808988764,
+      "delta_actual_minus_ceiling": -0.06640575684888275,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S10": {
+      "status": "OK",
+      "n_test_samples": 126,
+      "group_proportions": {
+        "A": 0.40476190476190477,
+        "I": 0.30158730158730157,
+        "E": 0.19047619047619047,
+        "O": 0.10317460317460317
+      },
+      "p_coarse_correct": 0.3888888888888889,
+      "p_fine_correct_by_group": {
+        "A": 0.6274509803921569,
+        "I": 0.4473684210526316,
+        "E": 0.75,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.6349206349206349,
+      "theoretical_ceiling": 0.24691358024691357,
+      "actual_first_syllable_e2e": 0.2222222222222222,
+      "delta_actual_minus_ceiling": -0.024691358024691357,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S11": {
+      "status": "OK",
+      "n_test_samples": 105,
+      "group_proportions": {
+        "A": 0.4095238095238095,
+        "I": 0.3142857142857143,
+        "E": 0.19047619047619047,
+        "O": 0.08571428571428572
+      },
+      "p_coarse_correct": 0.42857142857142855,
+      "p_fine_correct_by_group": {
+        "A": 0.5116279069767442,
+        "I": 0.5454545454545454,
+        "E": 0.7,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.6,
+      "theoretical_ceiling": 0.2571428571428571,
+      "actual_first_syllable_e2e": 0.22857142857142856,
+      "delta_actual_minus_ceiling": -0.028571428571428553,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    },
+    "S12": {
+      "status": "OK",
+      "n_test_samples": 111,
+      "group_proportions": {
+        "A": 0.4144144144144144,
+        "I": 0.2972972972972973,
+        "E": 0.1981981981981982,
+        "O": 0.09009009009009009
+      },
+      "p_coarse_correct": 0.3333333333333333,
+      "p_fine_correct_by_group": {
+        "A": 0.3695652173913043,
+        "I": 0.5151515151515151,
+        "E": 0.5454545454545454,
+        "O": 1.0
+      },
+      "expected_fine_accuracy_weighted": 0.5045045045045045,
+      "theoretical_ceiling": 0.16816816816816815,
+      "actual_first_syllable_e2e": 0.11711711711711711,
+      "delta_actual_minus_ceiling": -0.05105105105105104,
+      "interpretation": "actual < ceiling: stage errors positively correlated (compounding -- cases hard for coarse tend to also be hard for fine)"
+    }
+  },
+  "summary_table": [
+    {
+      "subject": "S1",
+      "ceiling_pct": 22.04,
+      "actual_pct": 17.14,
+      "delta_pp": -4.9
+    },
+    {
+      "subject": "S2",
+      "ceiling_pct": 25.33,
+      "actual_pct": 25.0,
+      "delta_pp": -0.33
+    },
+    {
+      "subject": "S3",
+      "ceiling_pct": 29.53,
+      "actual_pct": 28.57,
+      "delta_pp": -0.96
+    },
+    {
+      "subject": "S4",
+      "ceiling_pct": 23.05,
+      "actual_pct": 22.45,
+      "delta_pp": -0.6
+    },
+    {
+      "subject": "S5",
+      "ceiling_pct": 18.96,
+      "actual_pct": 14.04,
+      "delta_pp": -4.92
+    },
+    {
+      "subject": "S6",
+      "ceiling_pct": 12.47,
+      "actual_pct": 15.79,
+      "delta_pp": 3.32
+    },
+    {
+      "subject": "S7",
+      "ceiling_pct": 21.66,
+      "actual_pct": 19.38,
+      "delta_pp": -2.28
+    },
+    {
+      "subject": "S8",
+      "ceiling_pct": 17.19,
+      "actual_pct": 14.55,
+      "delta_pp": -2.64
+    },
+    {
+      "subject": "S9",
+      "ceiling_pct": 24.62,
+      "actual_pct": 17.98,
+      "delta_pp": -6.64
+    },
+    {
+      "subject": "S10",
+      "ceiling_pct": 24.69,
+      "actual_pct": 22.22,
+      "delta_pp": -2.47
+    },
+    {
+      "subject": "S11",
+      "ceiling_pct": 25.71,
+      "actual_pct": 22.86,
+      "delta_pp": -2.86
+    },
+    {
+      "subject": "S12",
+      "ceiling_pct": 16.82,
+      "actual_pct": 11.71,
+      "delta_pp": -5.11
+    }
+  ],
+  "mean_delta_pp_across_subjects": -2.5326038474089874,
+  "n_subjects_actual_below_ceiling": 11,
+  "n_subjects_total": 12
+}

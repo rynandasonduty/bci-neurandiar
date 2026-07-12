@@ -1,0 +1,78 @@
+{
+  "p3_champion_latency_cited": {
+    "mean_ms": 0.447,
+    "p95_ms": 0.685,
+    "configuration": "P3/E5/S3/barlow",
+    "source": "T9_inference_latency.csv"
+  },
+  "p6_cascade_latency_measured": {
+    "subject_id": "S3",
+    "scenarios": {
+      "sa_branch_case": {
+        "available": true,
+        "word": "SAKIT",
+        "n_trials": 100,
+        "mean_ms": 1805.8957980008563,
+        "p95_ms": 1945.50062000053,
+        "std_ms": 78.01475606786812,
+        "real_time_feasible_lt_100ms": false
+      },
+      "non_sa_case": {
+        "available": true,
+        "word": "BOSAN",
+        "n_trials": 100,
+        "mean_ms": 1233.4501289995387,
+        "p95_ms": 1516.8369099701522,
+        "std_ms": 110.2370756108149,
+        "real_time_feasible_lt_100ms": false
+      }
+    },
+    "p3_fair_with_extraction": {
+      "available": true,
+      "reference_word": "BOSAN",
+      "n_trials": 100,
+      "mean_ms": 652.4814480019268,
+      "p95_ms": 872.6187600084813,
+      "std_ms": 90.33048830457638,
+      "real_time_feasible_lt_100ms": false
+    }
+  },
+  "weighted_expected_latency": {
+    "p_sa_branch": 0.19047619047619047,
+    "source": "SA-syllable proportion in S3's first_syllable_e2e test set (results_S3.json)",
+    "expected_mean_ms": 1342.487399285504,
+    "expected_p95_ms": 1598.487140452129
+  },
+  "theoretical_projection": {
+    "method": "First-order projection: P3 per-model-call latency (T9-cited) x number of P6 model calls.",
+    "non_sa_case_calls": 2,
+    "sa_case_calls": 3,
+    "non_sa_case_mean_ms": 0.894,
+    "non_sa_case_p95_ms": 1.37,
+    "sa_case_mean_ms": 1.341,
+    "sa_case_p95_ms": 2.055,
+    "caveat": "IMPORTANT -- this projection turned out to be a large underestimate (see real_vs_theoretical_non_sa_case): the T9-cited P3 mean (0.447ms) comes from _measure_p3_latency() in gen_nb_new.py, which times ONLY StandardScaler.transform + SVC.predict on a vector loaded straight from the already feature-extracted Xtest_*.npy -- it never includes Barlow feature extraction from a raw epoch. P6's real measurement (via SubModelBundle.predict_single) DOES extract features from a raw epoch on every call, so the two are not on the same basis. See p3_fair_with_extraction for a same-basis P3 number. Kept here only as a record of the naive projection and why it was wrong."
+  },
+  "real_vs_theoretical_non_sa_case": {
+    "real_mean_ms": 1233.4501289995387,
+    "theoretical_mean_ms": 0.894,
+    "ratio_real_over_theoretical": 1379.6981308719671
+  },
+  "p3_fair_with_extraction": {
+    "available": true,
+    "reference_word": "BOSAN",
+    "n_trials": 100,
+    "mean_ms": 652.4814480019268,
+    "p95_ms": 872.6187600084813,
+    "std_ms": 90.33048830457638,
+    "real_time_feasible_lt_100ms": false
+  },
+  "fair_comparison_same_basis": {
+    "description": "P3 and P6 both timed starting from a raw epoch through feature extraction + scaling + predict (SubModelBundle.predict_single for both) -- unlike p3_champion_latency_cited (T9), which excludes feature extraction entirely. This is the methodologically fair comparison; ratios below are call-count multiples, close to 2x/3x as the theoretical model predicts, confirming feature extraction -- not the cascade structure itself -- was almost the entire cost of the earlier 1300x-looking gap against the T9-cited figure.",
+    "p3_single_call_mean_ms": 652.4814480019268,
+    "p6_non_sa_case_mean_ms": 1233.4501289995387,
+    "p6_sa_branch_case_mean_ms": 1805.8957980008563,
+    "ratio_p6_non_sa_over_p3": 1.8903987734466534,
+    "ratio_p6_sa_over_p3": 2.7677350881484735
+  }
+}

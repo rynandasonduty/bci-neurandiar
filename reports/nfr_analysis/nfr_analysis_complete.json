@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "analysis_timestamp": "2026-07-13T03:32:48.274695",
+    "project": "NeurAndiAr AAC System",
+    "methodology": "All figures are measured from a real production build and real deployed-system logs. No synthetic/placeholder figures are included."
+  },
+  "frontend": {
+    "measured_against": "next build && next start (production server), not dev mode",
+    "timestamp": "2026-07-13T03:32:48.271804",
+    "url": "http://localhost:3000",
+    "scores": {
+      "performance": 73.0,
+      "accessibility": 88.0,
+      "best_practices": 93.0,
+      "seo": 100
+    },
+    "lab_metrics": {
+      "LCP_ms": 4995.5,
+      "CLS": 0,
+      "FCP_ms": 1098.9,
+      "TTI_ms": 4995.5,
+      "TBT_ms": 284,
+      "speed_index_ms": 4269.1,
+      "TTFB_ms": 14.3,
+      "max_potential_FID_ms": 239
+    },
+    "note": "FID is a real-user (field) metric and cannot be measured by Lighthouse; 'max_potential_FID_ms' is a lab proxy Lighthouse computes, not true FID/INP. No CI/Lighthouse pipeline previously existed in this repo -- this is a fresh, one-off measurement."
+  },
+  "backend": {
+    "measured_against": "live production /ws/inference endpoint, champion model P3_SVM (E5/S3/barlow), subject S3",
+    "source_file": "backend/logs/latency_history.csv",
+    "n_requests": 25,
+    "note": "The live API has no REST /inference endpoint, no client-selectable model, and no backend TTS step (TTS is client-side via the browser Web Speech API, fired after the response arrives). These are real per-request timings logged by the deployed system, not synthetic requests.",
+    "total_latency_ms": {
+      "mean": 1064.97,
+      "median": 1058.07,
+      "std_dev": 30.27,
+      "min": 1021.2,
+      "max": 1140.69,
+      "p25": 1045.18,
+      "p50": 1058.07,
+      "p75": 1097.25,
+      "p95": 1104.68,
+      "p99": 1132.05
+    },
+    "stage_breakdown": {
+      "signal_read_filter_ms": {
+        "label": "Signal read + filter",
+        "mean_ms": 0.318,
+        "median_ms": 0.23,
+        "min_ms": 0.19,
+        "max_ms": 1.1,
+        "std_ms": 0.225,
+        "pct_of_total_mean": 0.03
+      },
+      "svm_inference_slot1_ms": {
+        "label": "SVM inference (slot 1, incl. Barlow feature extraction)",
+        "mean_ms": 535.47,
+        "median_ms": 529.69,
+        "min_ms": 500.89,
+        "max_ms": 610.8,
+        "std_ms": 28.355,
+        "pct_of_total_mean": 50.28
+      },
+      "svm_inference_slot2_ms": {
+        "label": "SVM inference (slot 2, incl. Barlow feature extraction)",
+        "mean_ms": 528.632,
+        "median_ms": 523.82,
+        "min_ms": 494.41,
+        "max_ms": 597.87,
+        "std_ms": 25.729,
+        "pct_of_total_mean": 49.64
+      },
+      "word_assembly_ms": {
+        "label": "Word assembly",
+        "mean_ms": 0.195,
+        "median_ms": 0.18,
+        "min_ms": 0.16,
+        "max_ms": 0.37,
+        "std_ms": 0.046,
+        "pct_of_total_mean": 0.02
+      },
+      "refinement_ms": {
+        "label": "Rule-based sentence refinement",
+        "mean_ms": 0.0,
+        "median_ms": 0.0,
+        "min_ms": 0.0,
+        "max_ms": 0.0,
+        "std_ms": 0.0,
+        "pct_of_total_mean": 0.0
+      }
+    }
+  },
+  "supplementary_offline_p6_cascade_comparison": {
+    "p3_champion_latency_cited": {
+      "mean_ms": 0.447,
+      "p95_ms": 0.685,
+      "configuration": "P3/E5/S3/barlow",
+      "source": "T9_inference_latency.csv"
+    },
+    "p6_cascade_latency_measured": {
+      "subject_id": "S3",
+      "scenarios": {
+        "sa_branch_case": {
+          "available": true,
+          "word": "SAKIT",
+          "n_trials": 100,
+          "mean_ms": 1805.8957980008563,
+          "p95_ms": 1945.50062000053,
+          "std_ms": 78.01475606786812,
+          "real_time_feasible_lt_100ms": false
+        },
+        "non_sa_case": {
+          "available": true,
+          "word": "BOSAN",
+          "n_trials": 100,
+          "mean_ms": 1233.4501289995387,
+          "p95_ms": 1516.8369099701522,
+          "std_ms": 110.2370756108149,
+          "real_time_feasible_lt_100ms": false
+        }
+      },
+      "p3_fair_with_extraction": {
+        "available": true,
+        "reference_word": "BOSAN",
+        "n_trials": 100,
+        "mean_ms": 652.4814480019268,
+        "p95_ms": 872.6187600084813,
+        "std_ms": 90.33048830457638,
+        "real_time_feasible_lt_100ms": false
+      }
+    },
+    "weighted_expected_latency": {
+      "p_sa_branch": 0.19047619047619047,
+      "source": "SA-syllable proportion in S3's first_syllable_e2e test set (results_S3.json)",
+      "expected_mean_ms": 1342.487399285504,
+      "expected_p95_ms": 1598.487140452129
+    },
+    "theoretical_projection": {
+      "method": "First-order projection: P3 per-model-call latency (T9-cited) x number of P6 model calls.",
+      "non_sa_case_calls": 2,
+      "sa_case_calls": 3,
+      "non_sa_case_mean_ms": 0.894,
+      "non_sa_case_p95_ms": 1.37,
+      "sa_case_mean_ms": 1.341,
+      "sa_case_p95_ms": 2.055,
+      "caveat": "IMPORTANT -- this projection turned out to be a large underestimate (see real_vs_theoretical_non_sa_case): the T9-cited P3 mean (0.447ms) comes from _measure_p3_latency() in gen_nb_new.py, which times ONLY StandardScaler.transform + SVC.predict on a vector loaded straight from the already feature-extracted Xtest_*.npy -- it never includes Barlow feature extraction from a raw epoch. P6's real measurement (via SubModelBundle.predict_single) DOES extract features from a raw epoch on every call, so the two are not on the same basis. See p3_fair_with_extraction for a same-basis P3 number. Kept here only as a record of the naive projection and why it was wrong."
+    },
+    "real_vs_theoretical_non_sa_case": {
+      "real_mean_ms": 1233.4501289995387,
+      "theoretical_mean_ms": 0.894,
+      "ratio_real_over_theoretical": 1379.6981308719671
+    },
+    "p3_fair_with_extraction": {
+      "available": true,
+      "reference_word": "BOSAN",
+      "n_trials": 100,
+      "mean_ms": 652.4814480019268,
+      "p95_ms": 872.6187600084813,
+      "std_ms": 90.33048830457638,
+      "real_time_feasible_lt_100ms": false
+    },
+    "fair_comparison_same_basis": {
+      "description": "P3 and P6 both timed starting from a raw epoch through feature extraction + scaling + predict (SubModelBundle.predict_single for both) -- unlike p3_champion_latency_cited (T9), which excludes feature extraction entirely. This is the methodologically fair comparison; ratios below are call-count multiples, close to 2x/3x as the theoretical model predicts, confirming feature extraction -- not the cascade structure itself -- was almost the entire cost of the earlier 1300x-looking gap against the T9-cited figure.",
+      "p3_single_call_mean_ms": 652.4814480019268,
+      "p6_non_sa_case_mean_ms": 1233.4501289995387,
+      "p6_sa_branch_case_mean_ms": 1805.8957980008563,
+      "ratio_p6_non_sa_over_p3": 1.8903987734466534,
+      "ratio_p6_sa_over_p3": 2.7677350881484735
+    }
+  }
+}

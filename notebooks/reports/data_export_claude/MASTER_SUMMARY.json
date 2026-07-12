@@ -1,5 +1,5 @@
 {
-  "export_timestamp": "20260705_0432",
+  "export_timestamp": "20260713_0433",
   "export_directory": "e:\\ANDIARS-ARCHIVE\\TUGAS AKHIR\\NEURANDIAR\\Daftar Sidang Proposal\\SKRIPSI\\Source Code SKRIPSI\\neurandiar-bci\\notebooks\\reports\\data_export_claude",
   "n_classes": 19,
   "chance_level_pct": 5.263,
@@ -110,10 +110,10 @@
     "note": "permutation_importance (accuracy-drop); not numerically comparable to P2 SHAP"
   },
   "inference_latency": {
-    "p2_mean_ms": 70.351,
-    "p2_p95_ms": 106.654,
-    "p3_mean_ms": 0.447,
-    "p3_p95_ms": 0.685,
+    "p2_mean_ms": 75.021,
+    "p2_p95_ms": 92.934,
+    "p3_mean_ms": 0.42,
+    "p3_p95_ms": 0.597,
     "realtime_threshold_ms": 100.0
   },
   "figure_index": {
@@ -139,7 +139,68 @@
     "Figure 12": "P3 feature group ablation bar chart",
     "Figure 13": "Inference latency comparison",
     "Figure 14": "Bootstrap CI forest plot",
-    "Figure 15": "Cohen's d effect size bar chart"
+    "Figure 15": "Cohen's d effect size bar chart",
+    "MA7 before/after": "Preprocessing before/after time-domain and PSD comparison — NEW",
+    "MA8 P4 accuracy": "Paradigm 4 (No-Windowing) per-subject accuracy vs chance — NEW",
+    "MA9 P5 vs P3": "Paradigm 5 (Shifted Bandpass) vs P3 baseline, per-subject — NEW",
+    "MA10 P6 submodels": "P6 sub-model accuracy heatmap, all 12 subjects — NEW",
+    "MA10 P6 coverage": "P6 first-syllable pipeline class coverage per subject — NEW",
+    "MA10 P6 error decomposition": "P6 full-word error decomposition pie chart (S3) — NEW",
+    "MA10 P6 ceiling": "P6 theoretical ceiling vs actual, per subject — NEW",
+    "MA11 Tier2": "Tier 2 first-syllable accuracy, P3 vs P6 — NEW",
+    "MA11 feature importance": "Cross-architecture feature importance, P3 vs P6 — NEW",
+    "MA11 latency": "Fair same-basis latency comparison, P3 vs P6 — NEW",
+    "MA11 stage1 vs e2e": "P6 stage-1 vs full-word e2e consistency scatter — NEW",
+    "MA11 MCDA": "MCDA weighted score bar chart, P3 vs P6 — NEW"
+  },
+  "p4_p5_p6_summary": {
+    "p4_no_windowing": {
+      "mean_accuracy_pct": 5.984,
+      "n_subjects": 11,
+      "chance_level_pct": 5.263,
+      "conclusion": "near-chance; sample-size scarcity implicated, not window length"
+    },
+    "p5_shifted_bandpass": {
+      "mean_delta_pp_vs_p3_baseline": -1.112,
+      "wilcoxon_p": 0.3013,
+      "n_subjects_negative_direction": 7,
+      "n_subjects_total": 12,
+      "conclusion": "statistically indistinguishable from P3 E0/Barlow baseline (redundant confirmation)"
+    },
+    "p6_coarse_to_fine": {
+      "champion_subject": "S3",
+      "winning_coarse_feature_group": "barlow",
+      "mean_first_syllable_e2e_pct": 19.307,
+      "mean_full_word_e2e_pct": 11.636,
+      "n_subjects_full_pipeline_coverage_9of9": 1
+    }
+  },
+  "p3_vs_p6_fair_comparison": {
+    "tier1_flat19class_p3_only_pct": 18.095,
+    "tier2_first_syllable_9way": {
+      "p3_pct": 20.0,
+      "p6_pct": 28.571
+    },
+    "tier3_full_word": {
+      "p3_pct": 11.11,
+      "p6_pct": 13.889
+    },
+    "mcda_confirmed_weights": {
+      "tier2_first_syllable_accuracy": 30,
+      "tier3_full_word_accuracy": 30,
+      "class_coverage": 16,
+      "system_complexity": 8,
+      "latency": 12,
+      "calibration_quality": 4
+    },
+    "mcda_final_score_p3": 81.78,
+    "mcda_final_score_p6": 87.43,
+    "latency_fair_basis_ms": {
+      "p3": 652.48,
+      "p6_non_sa": 1233.45,
+      "p6_sa_branch": 1805.9
+    },
+    "stage1_vs_e2e_pearson_r": 0.0015
   },
   "exported_files": {
     "T0_pillar1_raw_fresh.csv": {
@@ -350,6 +411,132 @@
       "shape": [
         3,
         5
+      ]
+    },
+    "T21_preprocessing_before_after_features.csv": {
+      "description": "Barlow feature extraction output for one filtered 1-second epoch (before/after demo)",
+      "shape": [
+        28,
+        1
+      ]
+    },
+    "T22_p4_nowindowing_results.csv": {
+      "description": "Paradigm 4 (No-Windowing) per-subject test accuracy and class coverage",
+      "shape": [
+        11,
+        4
+      ]
+    },
+    "T23_p5_shifted_bandpass_vs_p3.csv": {
+      "description": "Paradigm 5 (Shifted Bandpass) vs P3 E0/Barlow baseline, per subject",
+      "shape": [
+        12,
+        4
+      ]
+    },
+    "T24_p6_stageA_spotcheck.csv": {
+      "description": "P6 Stage A coarse feature-group spot-check (subject S3)",
+      "shape": [
+        5,
+        2
+      ]
+    },
+    "T25_p6_stageB_results.csv": {
+      "description": "P6 Stage B sub-model and end-to-end accuracy, all 12 subjects",
+      "shape": [
+        12,
+        8
+      ]
+    },
+    "T26_p6_class_coverage.csv": {
+      "description": "P6 first-syllable pipeline class coverage per subject (of 9 first-syllable classes)",
+      "shape": [
+        12,
+        2
+      ]
+    },
+    "T27_p6_error_decomposition_s3.csv": {
+      "description": "P6 full-word error decomposition by pipeline stage (subject S3)",
+      "shape": [
+        3,
+        2
+      ]
+    },
+    "T28_p6_theoretical_ceiling.csv": {
+      "description": "P6 theoretical first-syllable e2e ceiling (coarse/fine independence) vs actual, all subjects",
+      "shape": [
+        12,
+        3
+      ]
+    },
+    "T29_p6_ablation_study_cited.csv": {
+      "description": "P6 coarse sub-model ablation study summary (cited from P7_CoarseAblation_Phase1_report.md, not recomputed)",
+      "shape": [
+        7,
+        3
+      ]
+    },
+    "T30_tier2_first_syllable_comparison.csv": {
+      "description": "Tier 2 fair comparison: first-syllable e2e accuracy, P3 (9-way scored) vs P6, subject S3",
+      "shape": [
+        3,
+        2
+      ]
+    },
+    "T31_tier3_full_word_comparison.csv": {
+      "description": "Tier 3 fair comparison: full-word e2e accuracy, P3 vs P6, subject S3",
+      "shape": [
+        2,
+        2
+      ]
+    },
+    "T32_feature_importance_p3_vs_p6.csv": {
+      "description": "Cross-architecture permutation importance top-5, P3 champion vs P6 coarse sub-model",
+      "shape": [
+        5,
+        4
+      ]
+    },
+    "T33_calibration_p3_vs_p6.csv": {
+      "description": "Calibration quality (Brier score, ECE) comparison, P3 champion vs P6 coarse baseline",
+      "shape": [
+        3,
+        2
+      ]
+    },
+    "T34_latency_p3_vs_p6_fair.csv": {
+      "description": "Fair same-basis inference latency comparison (raw epoch to prediction), P3 vs P6",
+      "shape": [
+        3,
+        2
+      ]
+    },
+    "T35_p6_stage1_vs_e2e_consistency.csv": {
+      "description": "P6 first-syllable e2e vs full-word e2e per subject, correlation analysis",
+      "shape": [
+        12,
+        3
+      ]
+    },
+    "T36_mcda_scoring_p3_vs_p6.csv": {
+      "description": "Multi-criteria decision analysis scoring table, P3 vs P6 (researcher-confirmed weights)",
+      "shape": [
+        6,
+        5
+      ]
+    },
+    "T37_skip_justification_p1_p2_p4_p5.csv": {
+      "description": "Quantitative justification for not computing end-to-end accuracy for P1/P2/P4/P5",
+      "shape": [
+        4,
+        2
+      ]
+    },
+    "T38_grand_synthesis_all_paradigms.csv": {
+      "description": "Grand synthesis summary table across all six paradigms (P1-P6)",
+      "shape": [
+        6,
+        3
       ]
     }
   }
